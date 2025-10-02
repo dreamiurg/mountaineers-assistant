@@ -13,5 +13,13 @@
   },
   "rules": {
     "no-console": "off"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["*.config.js", "postcss.config.js", "tailwind.config.js"],
+      "env": {
+        "node": true
+      }
+    }
+  ]
 }

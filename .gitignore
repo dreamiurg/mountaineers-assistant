@@ -19,3 +19,4 @@ Thumbs.db
 
 # Generated CSS
 src/chrome-ext/tailwind.css
+.venv/

@@ -3,6 +3,7 @@
 Mountaineers Assistant is a Chrome extension that keeps Mountaineers activity history a click away. It runs entirely in the browser: the background service worker reuses your authenticated `mountaineers.org` session, fetches activities plus roster details, and stores them in `chrome.storage.local` so you can inspect or refresh the data without leaving the site.
 
 ## Features
+
 - Refresh your personal activity catalog from any authenticated Mountaineers tab.
 - Cache activities, people, and roster entries locally for offline inspection.
 - Inspect raw JSON in the options page or jump straight to the stats dashboard.
@@ -25,11 +26,13 @@ Mountaineers Assistant is a Chrome extension that keeps Mountaineers activity hi
    - Click **Load unpacked** and choose `src/chrome-ext/` from this project.
 
 ## Development Workflow
+
 - `src/chrome-ext/collect.js` holds the injected content script that calls the Mountaineers JSON APIs and parses roster pages.
 - `src/chrome-ext/background.js` orchestrates refresh requests and caches results in `chrome.storage.local`.
 - `src/chrome-ext/popup.js` and `popup.html` power the quick-glance UI, while `options.html` and `stats.html` expose the full dataset and derived insights.
+- Use `uv run pre-commit run --all-files` to execute the pinned lint/format hooks without relying on a global Python install.
 - Run `npm run format` to apply Prettier to JS, HTML, and CSS files.
-- Pre-commit hooks (`pre-commit run --all-files`) execute formatting, ESLint, and secret scanning.
+- Pre-commit hooks (`uv run pre-commit run --all-files`) execute formatting, ESLint, and secret scanning.
 
 ```
 mountaineers-assistant/
@@ -50,8 +53,11 @@ mountaineers-assistant/
 ```
 
 ## Pre-commit Hooks
-Install `pre-commit` and register the hooks once:
+
+Install the pinned tooling environment and register hooks via `uv`:
+
 ```bash
-pre-commit install
+uv run pre-commit install
 ```
-The configured hooks run Prettier, ESLint (with `chrome` globals enabled), and gitleaks.
+
+Run hooks manually with `uv run pre-commit run --all-files`. The configured checks still cover Prettier, ESLint (with `chrome` globals enabled), and gitleaks.

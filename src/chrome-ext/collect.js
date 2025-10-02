@@ -107,7 +107,7 @@
     const doc = parser.parseFromString(html, 'text/html');
     const metaToken = doc.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
     const dataToken = doc.querySelector('[data-csrf-token]')?.getAttribute('data-csrf-token');
-    const scriptTokenMatch = html.match(/x-csrf-token\s*=\s*\"([^\"]+)\"/i);
+    const scriptTokenMatch = html.match(/x-csrf-token\s*=\s*"([^"]+)"/i);
     const csrfToken =
       metaToken || dataToken || (scriptTokenMatch ? decodeHtml(scriptTokenMatch[1]) : null);
     return { csrfToken, refererUrl: response.url };
@@ -386,7 +386,7 @@
     if (!value) {
       return null;
     }
-    const match = value.match(/\/members\/([^\/]+)/);
+    const match = value.match(/\/members\/([^/]+)/);
     return match ? match[1] : null;
   }
 
@@ -462,7 +462,7 @@
       const text = anchor.textContent?.trim().toLowerCase();
       if (text && text.includes('my profile')) {
         const href = anchor.getAttribute('href') || '';
-        const match = href.match(/\/members\/([^\/]+)/);
+        const match = href.match(/\/members\/([^/]+)/);
         if (match) {
           return match[1];
         }
