@@ -1,0 +1,21 @@
+# Node.js
+node_modules/
+dist/
+build/
+.temp/
+*.log
+
+# Tooling caches
+.npm/
+.yarn/
+.pnpm-store/
+.eslintcache
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Generated CSS
+src/chrome-ext/tailwind.css

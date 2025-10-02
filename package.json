@@ -1,0 +1,38 @@
+{
+  "name": "mountaineers-assistant",
+  "version": "0.1.0",
+  "description": "Chrome extension that surfaces Mountaineers activity insights directly in the browser.",
+  "main": "src/chrome-ext/background.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "build:css": "tailwindcss -i ./src/chrome-ext/styles/tailwind.input.css -o ./src/chrome-ext/tailwind.css --minify",
+    "format": "prettier --write \"src/**/*.js\" \"src/**/*.html\" \"src/**/*.css\"",
+    "lint": "prettier --check \"src/**/*.js\" \"src/**/*.html\" \"src/**/*.css\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dreamiurg/mountaineers-assistant.git"
+  },
+  "keywords": [
+    "chrome-extension",
+    "mountaineers",
+    "hiking",
+    "activities"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/dreamiurg/mountaineers-assistant/issues"
+  },
+  "homepage": "https://github.com/dreamiurg/mountaineers-assistant#readme",
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "prettier": "^3.6.2",
+    "tailwindcss": "^3.4.14"
+  },
+  "private": true
+}

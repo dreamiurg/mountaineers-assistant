@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Mountaineers Assistant Options</title>
+    <link rel="stylesheet" href="tailwind.css" />
+  </head>
+  <body class="min-h-screen bg-brand-surfaceLight text-gray-900">
+    <main class="mx-auto flex w-full max-w-3xl flex-col gap-6 p-6 md:p-10">
+      <header class="flex flex-col gap-2">
+        <h1 class="text-3xl font-semibold tracking-tight text-gray-900">
+          Mountaineers Assistant Options
+        </h1>
+        <p class="text-sm text-gray-500" id="options-status">Loading cached data…</p>
+        <div class="flex flex-wrap gap-2">
+          <button
+            id="refresh-cache"
+            type="button"
+            class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-primary px-3 py-2 text-sm font-medium text-white shadow transition hover:bg-indigo-500"
+          >
+            Refresh Cache View
+          </button>
+          <button
+            id="open-stats"
+            type="button"
+            class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-slate-50"
+          >
+            Open Insights Page
+          </button>
+        </div>
+      </header>
+
+      <section class="card">
+        <div class="border-b border-slate-200 px-6 py-4">
+          <h2 class="text-lg font-semibold text-gray-900">Display Preferences</h2>
+          <p class="text-sm text-gray-500">Control how Mountaineers Assistant renders insights.</p>
+        </div>
+        <div class="px-6 py-4">
+          <label class="flex items-start gap-3 text-sm text-gray-700">
+            <input
+              id="toggle-avatars"
+              type="checkbox"
+              class="mt-1 h-4 w-4 rounded border-slate-300 text-brand-primary focus:ring-brand-primary"
+            />
+            <span>Show partner avatar images on the insights page</span>
+          </label>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="border-b border-slate-200 px-6 py-4">
+          <h2 class="text-lg font-semibold text-gray-900">Cached Data</h2>
+          <p class="text-sm text-gray-500">This is the data stored locally by the extension.</p>
+        </div>
+        <div class="overflow-auto px-6 py-4">
+          <pre
+            id="cache-content"
+            class="max-h-[520px] overflow-auto whitespace-pre-wrap rounded-lg bg-slate-900 p-4 text-xs text-slate-100 shadow-inner"
+          ></pre>
+        </div>
+      </section>
+    </main>
+    <script src="options.js" type="module"></script>
+  </body>
+</html>

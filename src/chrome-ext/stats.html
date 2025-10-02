@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Mountaineers Assistant Insights</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="tailwind.css" />
+  </head>
+  <body class="min-h-screen bg-brand-surfaceLight text-gray-900">
+    <main class="mx-auto flex w-full max-w-4xl flex-col gap-8 p-6 md:p-10">
+      <header class="flex flex-col gap-2">
+        <h1 class="text-3xl font-semibold tracking-tight text-gray-900">
+          Mountaineers Assistant Insights
+        </h1>
+        <p class="text-sm text-gray-500" id="summary"></p>
+      </header>
+
+      <section class="card">
+        <div class="border-b border-slate-200 px-6 py-4">
+          <h2 class="text-lg font-semibold text-gray-900">Overview</h2>
+        </div>
+        <ul id="overview" class="grid gap-3 px-6 py-4 md:grid-cols-3"></ul>
+      </section>
+
+      <section class="card">
+        <div class="border-b border-slate-200 px-6 py-4">
+          <h2 class="text-lg font-semibold text-gray-900">Top Activity Partners</h2>
+          <p class="text-sm text-gray-500">Expand a name to revisit trips you shared together.</p>
+        </div>
+        <ol id="top-partners" class="grid gap-3 px-2 py-4"></ol>
+      </section>
+
+      <section class="card">
+        <div class="border-b border-slate-200 px-6 py-4">
+          <h2 class="text-lg font-semibold text-gray-900">Activity Categories</h2>
+        </div>
+        <ul id="category-breakdown" class="grid gap-2 px-6 py-4 md:grid-cols-2"></ul>
+      </section>
+
+      <section class="card">
+        <div class="border-b border-slate-200 px-6 py-4">
+          <h2 class="text-lg font-semibold text-gray-900">Monthly Participation</h2>
+        </div>
+        <ul id="monthly-breakdown" class="grid gap-2 px-6 py-4 md:grid-cols-2"></ul>
+      </section>
+
+      <section class="card">
+        <div class="border-b border-slate-200 px-6 py-4">
+          <h2 class="text-lg font-semibold text-gray-900">Recent Activities</h2>
+        </div>
+        <ul id="recent-activities" class="grid gap-2 px-6 py-4"></ul>
+      </section>
+    </main>
+    <script src="stats.js" type="module"></script>
+  </body>
+</html>

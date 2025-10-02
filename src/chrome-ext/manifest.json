@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Mountaineers Assistant",
+  "version": "0.1.0",
+  "description": "Enhance your Mountaineers browsing experience with personalized activity insights.",
+  "permissions": ["storage", "scripting", "tabs"],
+  "host_permissions": ["https://www.mountaineers.org/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Mountaineers Assistant",
+    "default_popup": "popup.html"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["stats.html", "stats.js", "tailwind.css"],
+      "matches": ["https://www.mountaineers.org/*"]
+    }
+  ]
+}
