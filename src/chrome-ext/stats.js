@@ -43,6 +43,11 @@ async function init() {
   renderCategories(stats.categories);
   renderMonthly(stats.monthly);
   renderRecent(stats.recentActivities);
+  if (!stats.activities.length) {
+    SUMMARY_EL.textContent =
+      'No cached activities yet. Open the extension popup to fetch your activity history.';
+    return;
+  }
   SUMMARY_EL.textContent = `Last refreshed ${formatRelative(stats.lastUpdated)} • ${
     stats.activities.length
   } activities, ${stats.people.length} unique activity partners.`;
