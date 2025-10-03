@@ -39,14 +39,18 @@
         >
           Fetch One Activity (debug)
         </button>
-        <button
-          id="clear-button"
-          type="button"
-          class="inline-flex items-center justify-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-60"
+        <div
+          id="status"
+          role="status"
+          class="flex min-h-[1.5rem] items-center gap-2 text-sm text-amber-600"
         >
-          Clear Cached Data
-        </button>
-        <p id="status" role="status" class="min-h-[1.25rem] text-sm text-amber-600"></p>
+          <span
+            id="status-spinner"
+            class="hidden h-3 w-3 animate-spin rounded-full border-2 border-amber-500 border-t-transparent"
+            aria-hidden="true"
+          ></span>
+          <span id="status-text"></span>
+        </div>
       </section>
     </main>
     <script src="popup.js" type="module"></script>

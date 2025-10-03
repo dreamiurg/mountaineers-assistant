@@ -18,7 +18,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["stats.html", "stats.js", "tailwind.css"],
+      "resources": ["insights.html", "insights.js", "tailwind.css"],
       "matches": ["https://www.mountaineers.org/*"]
     }
   ]

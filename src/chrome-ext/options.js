@@ -9,7 +9,7 @@ const defaultSettings = {
 };
 
 const refreshButton = document.getElementById('refresh-cache');
-const openStatsButton = document.getElementById('open-stats');
+const clearCacheButton = document.getElementById('clear-cache');
 
 init();
 
@@ -28,8 +28,30 @@ function init() {
       });
   });
 
-  openStatsButton.addEventListener('click', () => {
-    chrome.tabs.create({ url: chrome.runtime.getURL('stats.html') });
+  clearCacheButton.addEventListener('click', async () => {
+    const confirmed = window.confirm(
+      'Clearing the cache will remove all downloaded activities and related data. Do you want to continue?'
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    const originalLabel = clearCacheButton.textContent;
+    clearCacheButton.disabled = true;
+    clearCacheButton.textContent = 'Clearing…';
+
+    try {
+      await chrome.storage.local.remove(STORAGE_KEY);
+      await loadCache();
+      statusEl.textContent = 'Cached data cleared.';
+    } catch (error) {
+      console.error('Mountaineers Assistant options: failed to clear cache', error);
+      statusEl.textContent = error instanceof Error ? error.message : String(error);
+    } finally {
+      clearCacheButton.disabled = false;
+      clearCacheButton.textContent = originalLabel;
+    }
   });
 
   avatarToggle.addEventListener('change', async (event) => {
