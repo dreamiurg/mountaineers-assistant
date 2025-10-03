@@ -1,63 +1,64 @@
 # Mountaineers Assistant
 
-Mountaineers Assistant is a Chrome extension that keeps Mountaineers activity history a click away. It runs entirely in the browser: the background service worker reuses your authenticated `mountaineers.org` session, fetches activities plus roster details, and stores them in `chrome.storage.local` so you can inspect or refresh the data without leaving the site.
+Mountaineers Assistant is a Chrome extension (Manifest V3) that surfaces your Mountaineers.org activity history and quick insights directly within the site.
 
-## Features
+## Capabilities
 
-- Refresh your personal activity catalog from any authenticated Mountaineers tab.
-- Cache activities, people, and roster entries locally for offline inspection.
-- Inspect raw JSON in the options page or jump straight to the stats dashboard.
-- Tailwind-powered UI with popup summaries and a richer stats view.
+- Fetches the Mountaineers activity JSON and roster pages from the active tab using your signed-in browser session.
+- Persists fetched data in `chrome.storage.local` so insights remain available while offline.
 
-## Getting Started
+## Development Setup
 
-1. Install Node.js 18+.
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Build the Tailwind bundle (rerun after editing CSS classes):
-   ```bash
-   npm run build:css
-   ```
-4. Load the extension:
-   - Open `chrome://extensions`.
-   - Enable **Developer mode**.
-   - Click **Load unpacked** and choose `src/chrome-ext/` from this project.
+### Prerequisites
 
-## Development Workflow
+- Node.js 18 or newer
+- npm (comes with Node.js)
 
-- `src/chrome-ext/collect.js` holds the injected content script that calls the Mountaineers JSON APIs and parses roster pages.
-- `src/chrome-ext/background.js` orchestrates refresh requests and caches results in `chrome.storage.local`.
-- `src/chrome-ext/popup.js` and `popup.html` power the quick-glance UI, while `options.html` and `stats.html` expose the full dataset and derived insights.
-- Use `uv run pre-commit run --all-files` to execute the pinned lint/format hooks without relying on a global Python install.
-- Run `npm run format` to apply Prettier to JS, HTML, and CSS files.
-- Pre-commit hooks (`uv run pre-commit run --all-files`) execute formatting, ESLint, and secret scanning.
+### Install and Build
+
+```bash
+npm install
+npm run build:css
+```
+
+`npm run build:css` compiles Tailwind source from `src/chrome-ext/styles/` to `src/chrome-ext/tailwind.css`. Re-run it whenever you change CSS classes or Tailwind configuration.
+
+### Load the Extension in Chrome
+
+1. Open `chrome://extensions`.
+2. Enable **Developer mode**.
+3. Choose **Load unpacked** and select `src/chrome-ext/`.
+
+After each code or style update, rebuild CSS if needed and click **Reload** from the extensions page to pick up changes.
+
+## Project Layout
 
 ```
 mountaineers-assistant/
 ├─ src/
 │  └─ chrome-ext/
-│     ├─ background.js
-│     ├─ collect.js
-│     ├─ manifest.json
-│     ├─ popup.html / popup.js
-│     ├─ options.html / options.js
-│     ├─ stats.html / stats.js
-│     └─ styles/
-├─ package.json
+│     ├─ background.js        # Service worker: handles refresh requests, caches results in storage.
+│     ├─ collect.js           # Injected content script: calls Mountaineers APIs and parses roster pages.
+│     ├─ manifest.json        # Manifest V3 definition.
+│     ├─ options.html/js      # Options view for inspecting cached JSON.
+│     ├─ popup.html/js        # Popup UI with live counts and refresh controls.
+│     ├─ stats.html/js        # Derived statistics and insight views.
+│     └─ styles/              # Tailwind sources compiled into tailwind.css.
+├─ package.json               # npm scripts and extension metadata.
 ├─ package-lock.json
-├─ .prettierrc.json
-├─ .pre-commit-config.yaml
+├─ .pre-commit-config.yaml    # Pre-commit hook definitions (Prettier, ESLint, gitleaks).
 └─ README.md
 ```
 
-## Pre-commit Hooks
+## Tooling & Quality Gates
 
-Install the pinned tooling environment and register hooks via `uv`:
+- `npm run format` writes Prettier formatting for JS, HTML, and CSS under `src/`.
+- `npm run lint` runs Prettier in check mode (fails on formatting drift).
+- `uv run pre-commit install` installs the pinned hook environment; run `uv run pre-commit run --all-files` before submitting changes if hooks are not installed locally.
+- Keep the version in `src/chrome-ext/manifest.json` in sync with `package.json` when cutting releases.
 
-```bash
-uv run pre-commit install
-```
+## Workflow Tips
 
-Run hooks manually with `uv run pre-commit run --all-files`. The configured checks still cover Prettier, ESLint (with `chrome` globals enabled), and gitleaks.
+- Background scripts reload when you click **Reload** on the extensions page; content scripts require refreshing the Mountaineers tab as well.
+- Use the browser DevTools service worker and content script consoles for debugging network calls and storage updates.
+- When introducing new APIs, update `.eslintrc.json` (e.g., globals) so lint checks continue to pass.
