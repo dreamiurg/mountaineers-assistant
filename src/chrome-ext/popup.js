@@ -2,6 +2,7 @@ const REFRESH_MESSAGE = 'start-refresh';
 const REFRESH_STATUS_REQUEST_MESSAGE = 'get-refresh-status';
 const REFRESH_STATUS_CHANGE_MESSAGE = 'refresh-status-changed';
 const REFRESH_BUSY_MESSAGE = 'A refresh is already running. Please wait for it to finish.';
+const SETTINGS_KEY = 'mountaineersAssistantSettings';
 
 document.addEventListener('DOMContentLoaded', () => {
   const refreshButton = document.getElementById('refresh-button');
@@ -15,10 +16,12 @@ document.addEventListener('DOMContentLoaded', () => {
   let localBusy = false;
   let refreshInProgress = false;
   let globalBusyForcedMessage = false;
+  let configuredFetchLimit = null;
 
   updateStatsFromStorage();
   evaluateActiveTabContext();
   requestRefreshStatus();
+  loadFetchPreferences();
 
   chrome.runtime.onMessage.addListener((message) => {
     if (message?.type !== REFRESH_STATUS_CHANGE_MESSAGE) {
@@ -38,7 +41,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   refreshButton.addEventListener('click', () => {
     setBusy(true, 'Refreshing activities…');
-    chrome.runtime.sendMessage({ type: REFRESH_MESSAGE }, (response) => {
+    const payload = { type: REFRESH_MESSAGE };
+    if (configuredFetchLimit) {
+      payload.limit = configuredFetchLimit;
+    }
+    chrome.runtime.sendMessage(payload, (response) => {
       if (chrome.runtime.lastError) {
         setBusy(false, chrome.runtime.lastError.message || 'Unexpected error.');
         return;
@@ -198,4 +205,32 @@ document.addEventListener('DOMContentLoaded', () => {
       statusSpinner.classList.add('hidden');
     }
   }
+
+  function normalizeFetchLimit(value) {
+    if (value === null || value === undefined) {
+      return null;
+    }
+    const parsed = Number.parseInt(value, 10);
+    if (Number.isNaN(parsed) || parsed <= 0) {
+      return null;
+    }
+    return parsed;
+  }
+
+  async function loadFetchPreferences() {
+    try {
+      const stored = await chrome.storage.local.get(SETTINGS_KEY);
+      configuredFetchLimit = normalizeFetchLimit(stored?.[SETTINGS_KEY]?.fetchLimit);
+    } catch (error) {
+      console.error('Mountaineers Assistant popup: failed to load fetch preferences', error);
+      configuredFetchLimit = null;
+    }
+  }
+
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== 'local' || !changes[SETTINGS_KEY]) {
+      return;
+    }
+    configuredFetchLimit = normalizeFetchLimit(changes[SETTINGS_KEY].newValue?.fetchLimit);
+  });
 });

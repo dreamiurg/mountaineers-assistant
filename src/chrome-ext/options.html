@@ -16,24 +16,50 @@
 
       <section class="card">
         <div class="border-b border-slate-200 px-6 py-4">
-          <h2 class="text-lg font-semibold text-gray-900">Display Preferences</h2>
-          <p class="text-sm text-gray-500">Control how Mountaineers Assistant renders insights.</p>
+          <h2 class="text-lg font-semibold text-gray-900">Preferences</h2>
+          <p class="text-sm text-gray-500">Customize your preferences</p>
         </div>
-        <div class="px-6 py-4">
+        <div class="flex flex-col gap-4 px-6 py-4">
           <label class="flex items-start gap-3 text-sm text-gray-700">
             <input
               id="toggle-avatars"
               type="checkbox"
               class="mt-1 h-4 w-4 rounded border-slate-300 text-brand-primary focus:ring-brand-primary"
             />
-            <span>Show user profile images on the Insights page</span>
+            <span>Show user profile images on the insights page</span>
           </label>
+          <div class="flex flex-col gap-1 text-sm text-gray-700">
+            <label for="fetch-limit-setting" class="font-medium text-gray-700">
+              Temporary fetch limit for "Fetch New Activities"
+            </label>
+            <div class="flex flex-wrap items-center gap-3">
+              <input
+                id="fetch-limit-setting"
+                type="number"
+                min="1"
+                step="1"
+                inputmode="numeric"
+                class="w-24 rounded-md border border-slate-200 bg-white px-2 py-1 text-sm text-gray-900 shadow-sm focus:border-brand-primary focus:outline-none focus:ring-1 focus:ring-brand-primary"
+                placeholder="All"
+              />
+              <span class="text-xs text-gray-500">Leave blank to fetch everything.</span>
+            </div>
+          </div>
+          <div class="flex justify-end">
+            <button
+              id="save-preferences"
+              type="button"
+              class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-primary px-3 py-2 text-sm font-medium text-white shadow transition hover:bg-indigo-500"
+            >
+              Save Preferences
+            </button>
+          </div>
         </div>
       </section>
 
       <section class="card mt-6 md:mt-8">
         <div class="border-b border-slate-200 px-6 py-4">
-          <h2 class="text-lg font-semibold text-gray-900">Cached Data</h2>
+          <h2 class="text-lg font-semibold text-gray-900">Cached Activities Data</h2>
           <p class="text-sm text-gray-500">This is the data stored locally by the extension.</p>
         </div>
         <div class="overflow-auto px-6 py-4">
