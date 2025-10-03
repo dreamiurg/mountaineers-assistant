@@ -243,14 +243,30 @@
         console.warn(`Failed to collect roster for ${activity.uid}`, rosterResult.reason);
       }
 
-      enrichedActivities.push({ ...activity, activity_type: resolvedType });
+      const enrichedActivity = { ...activity, activity_type: resolvedType };
+      enrichedActivities.push(enrichedActivity);
       processed += 1;
+      const rosterDelta =
+        rosterResult.status === 'fulfilled'
+          ? {
+              people: rosterResult.value.people,
+              rosterEntries: rosterResult.value.entries,
+            }
+          : {
+              people: [],
+              rosterEntries: [],
+            };
       sendProgressUpdate({
         stage: 'processing',
         total,
         completed: processed,
         activityUid: activity.uid,
         activityTitle: activity.title || null,
+        delta: {
+          activities: [enrichedActivity],
+          people: rosterDelta.people,
+          rosterEntries: rosterDelta.rosterEntries,
+        },
       });
     }
 
@@ -284,6 +300,10 @@
     if (update.error) {
       payload.error = update.error;
     }
+    const delta = sanitizeDelta(update.delta);
+    if (delta) {
+      payload.delta = delta;
+    }
 
     try {
       chrome.runtime.sendMessage({
@@ -294,6 +314,23 @@
     } catch (error) {
       console.warn('Mountaineers Assistant: failed to send progress update', error);
     }
+  }
+
+  function sanitizeDelta(delta) {
+    if (!delta || typeof delta !== 'object') {
+      return null;
+    }
+    const activities = Array.isArray(delta.activities) ? delta.activities : [];
+    const people = Array.isArray(delta.people) ? delta.people : [];
+    const rosterEntries = Array.isArray(delta.rosterEntries) ? delta.rosterEntries : [];
+    if (!activities.length && !people.length && !rosterEntries.length) {
+      return null;
+    }
+    return {
+      activities: activities.map((activity) => ({ ...activity })),
+      people: people.map((person) => ({ ...person })),
+      rosterEntries: rosterEntries.map((entry) => ({ ...entry })),
+    };
   }
 
   async function loadActivityDetails(activity) {

@@ -23,6 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
   requestRefreshStatus();
   loadFetchPreferences();
 
+  chrome.storage.onChanged.addListener(handleStorageChange);
+
   chrome.runtime.onMessage.addListener((message) => {
     if (message?.type !== REFRESH_STATUS_CHANGE_MESSAGE) {
       return;
@@ -233,4 +235,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     configuredFetchLimit = normalizeFetchLimit(changes[SETTINGS_KEY].newValue?.fetchLimit);
   });
+
+  function handleStorageChange(changes, area) {
+    if (area !== 'local' || !changes.mountaineersAssistantData) {
+      return;
+    }
+
+    const { newValue } = changes.mountaineersAssistantData;
+    if (!newValue) {
+      renderStats({ activityCount: 0, lastUpdated: null });
+      return;
+    }
+
+    renderStats({
+      activityCount: Array.isArray(newValue.activities) ? newValue.activities.length : 0,
+      lastUpdated: newValue.lastUpdated,
+    });
+  }
 });

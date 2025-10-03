@@ -8,6 +8,7 @@
 
   let activeRefresh = null;
   let currentProgress = null;
+  let activeCacheContext = null;
 
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (!message?.type) {
@@ -87,64 +88,72 @@
   });
 
   async function handleRefreshRequest({ fetchLimit } = {}) {
-    const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    try {
+      const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
-    if (!activeTab?.id || !activeTab.url) {
-      throw new Error('Unable to locate the active tab.');
+      if (!activeTab?.id || !activeTab.url) {
+        throw new Error('Unable to locate the active tab.');
+      }
+
+      const url = new URL(activeTab.url);
+      if (url.hostname !== SUPPORTED_HOST) {
+        throw new Error(
+          'Open a Mountaineers.org page (for example My Activities) to fetch updates.'
+        );
+      }
+
+      const cachedData = await chrome.storage.local.get('mountaineersAssistantData');
+      const existingCache = cachedData?.mountaineersAssistantData || {
+        activities: [],
+        people: [],
+        rosterEntries: [],
+        lastUpdated: null,
+        currentUserUid: null,
+      };
+
+      initializeActiveCache(existingCache);
+
+      const existingActivityUids = existingCache.activities.map((activity) => activity.uid);
+
+      console.debug('Mountaineers Assistant: injecting collector into tab', activeTab.id);
+      const resultPromise = waitForRefreshResult(activeTab.id);
+
+      await chrome.scripting.executeScript({
+        target: { tabId: activeTab.id },
+        func: (uids, limit) => {
+          window.__mtgExistingActivityUids = uids;
+          window.__mtgFetchLimit = limit;
+        },
+        args: [existingActivityUids, fetchLimit ?? null],
+      });
+
+      await chrome.scripting.executeScript({
+        target: { tabId: activeTab.id },
+        files: ['collect.js'],
+      });
+
+      console.debug('Mountaineers Assistant: awaiting collector response');
+      const result = await resultPromise;
+
+      if (!result.success) {
+        throw new Error(result.error || 'Refresh failed');
+      }
+
+      const finalMerge = mergeWithExistingCache(existingCache, result.data);
+
+      await chrome.storage.local.set({ mountaineersAssistantData: finalMerge.updatedCache });
+
+      return {
+        success: true,
+        summary: {
+          activityCount: finalMerge.updatedCache.activities.length,
+          lastUpdated: finalMerge.updatedCache.lastUpdated,
+          newActivities: finalMerge.newActivities,
+        },
+      };
+    } finally {
+      activeCacheContext = null;
     }
-
-    const url = new URL(activeTab.url);
-    if (url.hostname !== SUPPORTED_HOST) {
-      throw new Error('Open a Mountaineers.org page (for example My Activities) to fetch updates.');
-    }
-
-    const cachedData = await chrome.storage.local.get('mountaineersAssistantData');
-    const existingCache = cachedData?.mountaineersAssistantData || {
-      activities: [],
-      people: [],
-      rosterEntries: [],
-      lastUpdated: null,
-      currentUserUid: null,
-    };
-
-    const existingActivityUids = existingCache.activities.map((activity) => activity.uid);
-
-    console.debug('Mountaineers Assistant: injecting collector into tab', activeTab.id);
-    const resultPromise = waitForRefreshResult(activeTab.id);
-
-    await chrome.scripting.executeScript({
-      target: { tabId: activeTab.id },
-      func: (uids, limit) => {
-        window.__mtgExistingActivityUids = uids;
-        window.__mtgFetchLimit = limit;
-      },
-      args: [existingActivityUids, fetchLimit ?? null],
-    });
-
-    await chrome.scripting.executeScript({
-      target: { tabId: activeTab.id },
-      files: ['collect.js'],
-    });
-
-    console.debug('Mountaineers Assistant: awaiting collector response');
-    const result = await resultPromise;
-
-    if (!result.success) {
-      throw new Error(result.error || 'Refresh failed');
-    }
-
-    const mergeResult = mergeWithExistingCache(existingCache, result.data);
-
-    await chrome.storage.local.set({ mountaineersAssistantData: mergeResult.updatedCache });
-
-    return {
-      success: true,
-      summary: {
-        activityCount: mergeResult.updatedCache.activities.length,
-        lastUpdated: mergeResult.updatedCache.lastUpdated,
-        newActivities: mergeResult.newActivities,
-      },
-    };
   }
 
   function waitForRefreshResult(tabId) {
@@ -277,6 +286,11 @@
     currentProgress = normalized;
     logProgress(normalized, previous);
     broadcastProgress(normalized);
+    if (message?.delta) {
+      applyDeltaToCache(message.delta).catch((error) => {
+        console.warn('Mountaineers Assistant: failed to apply incremental cache update', error);
+      });
+    }
   }
 
   function normalizeProgressPayload(update, previous = null) {
@@ -355,5 +369,51 @@
     if (!previous || previous.stage !== progress.stage) {
       console.info('Mountaineers Assistant: refresh stage -> %s', progress.stage);
     }
+  }
+
+  function initializeActiveCache(existingCache) {
+    if (!existingCache) {
+      activeCacheContext = null;
+      return;
+    }
+    const clone = (value) => {
+      if (typeof structuredClone === 'function') {
+        return structuredClone(value);
+      }
+      return JSON.parse(JSON.stringify(value));
+    };
+    activeCacheContext = {
+      workingCache: clone(existingCache),
+    };
+  }
+
+  async function applyDeltaToCache(delta) {
+    if (!activeCacheContext) {
+      return;
+    }
+    const sanitizedDelta = sanitizeDelta(delta);
+    if (!sanitizedDelta) {
+      return;
+    }
+    const mergeResult = mergeWithExistingCache(activeCacheContext.workingCache, sanitizedDelta);
+    activeCacheContext.workingCache = mergeResult.updatedCache;
+    await chrome.storage.local.set({ mountaineersAssistantData: activeCacheContext.workingCache });
+  }
+
+  function sanitizeDelta(delta) {
+    if (!delta || typeof delta !== 'object') {
+      return null;
+    }
+    const activities = Array.isArray(delta.activities) ? delta.activities : [];
+    const people = Array.isArray(delta.people) ? delta.people : [];
+    const rosterEntries = Array.isArray(delta.rosterEntries) ? delta.rosterEntries : [];
+    if (!activities.length && !people.length && !rosterEntries.length) {
+      return null;
+    }
+    return {
+      activities,
+      people,
+      rosterEntries,
+    };
   }
 })();
