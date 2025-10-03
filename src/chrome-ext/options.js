@@ -124,7 +124,9 @@ function buildSummary(payload) {
   const peopleCount = Array.isArray(payload.people) ? payload.people.length : 0;
   const rosterCount = Array.isArray(payload.rosterEntries) ? payload.rosterEntries.length : 0;
   const lastUpdated = payload.lastUpdated ? formatTimestamp(payload.lastUpdated) : 'never';
-  return `Cached ${activityCount} activities, ${peopleCount} people, ${rosterCount} roster entries — last refreshed ${lastUpdated}.`;
+  const timezone = payload.lastUpdated ? Intl.DateTimeFormat().resolvedOptions().timeZone : null;
+  const tzSuffix = timezone ? ` (${timezone})` : '';
+  return `Cached ${activityCount} activities, ${peopleCount} people, ${rosterCount} roster entries — last refreshed ${lastUpdated}${tzSuffix}.`;
 }
 
 function formatTimestamp(value) {
