@@ -42,7 +42,7 @@ mountaineers-assistant/
 │     ├─ manifest.json        # Manifest V3 definition.
 │     ├─ options.html/js      # Options view for inspecting cached JSON.
 │     ├─ popup.html/js        # Popup UI with live counts and refresh controls.
-│     ├─ stats.html/js        # Derived statistics and insight views.
+│     ├─ insights.html/js     # Derived statistics and insight views.
 │     └─ styles/              # Tailwind sources compiled into tailwind.css.
 ├─ package.json               # npm scripts and extension metadata.
 ├─ package-lock.json
