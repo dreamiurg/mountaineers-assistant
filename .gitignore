@@ -4,6 +4,7 @@ dist/
 build/
 .temp/
 *.log
+artifacts/
 
 # Tooling caches
 .npm/

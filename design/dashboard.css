@@ -1,0 +1,50 @@
+:root {
+  color-scheme: light;
+}
+
+body {
+  font-family:
+    'Inter',
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.18), transparent 38%),
+    radial-gradient(circle at 100% 0%, rgba(251, 191, 36, 0.15), transparent 46%), #f8fafc;
+}
+
+.glass-card {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.88));
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12);
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+}
+
+.subtle-border {
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.table-row:nth-child(even) {
+  background-color: rgba(226, 232, 240, 0.65);
+}
+
+.table-link {
+  color: #0369a1;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: rgba(14, 116, 144, 0.45);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition:
+    color 0.2s ease,
+    text-decoration-color 0.2s ease;
+}
+
+.table-link:hover,
+.table-link:focus {
+  color: #0f172a;
+  text-decoration-color: rgba(15, 23, 42, 0.5);
+  outline: none;
+}

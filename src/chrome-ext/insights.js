@@ -32,7 +32,7 @@ async function init() {
 
   const stats = computeStats(payload);
   window.__mtgPeopleByUid = new Map(stats.people.map((person) => [person.uid, person]));
-  console.info('Mountaineers Assistant stats: resolved datasets', {
+  console.info('Mountaineers Assistant insights: resolved datasets', {
     activities: stats.activities.length,
     people: stats.people.length,
     rosterEntries: stats.rosterEntries.length,
@@ -131,7 +131,7 @@ function computeStats(payload) {
 }
 
 function findCurrentUserUid(activities, roster) {
-  console.debug('Mountaineers Assistant stats: determining current user', {
+  console.debug('Mountaineers Assistant insights: determining current user', {
     rosterCount: roster.length,
   });
   if (!roster.length) {
@@ -155,7 +155,7 @@ function findCurrentUserUid(activities, roster) {
     ([, activitySet]) => activitySet.size === totalActivities
   );
 
-  console.debug('Mountaineers Assistant stats: participation candidates', candidates);
+  console.debug('Mountaineers Assistant insights: participation candidates', candidates);
 
   if (candidates.length === 1) {
     return candidates[0][0];
@@ -356,7 +356,7 @@ function toExternalHref(value) {
   try {
     return new URL(value, 'https://www.mountaineers.org/').toString();
   } catch (error) {
-    console.warn('Mountaineers Assistant stats: unable to normalize activity URL', value, error);
+    console.warn('Mountaineers Assistant insights: unable to normalize activity URL', value, error);
     return null;
   }
 }

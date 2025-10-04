@@ -32,6 +32,11 @@ Guidance for future contributors, automations, or agents working on **Mountainee
 ## Directory Layout
 
 ```
+design/
+├─ dashboard.html          # Primary design prototype powered by sample-data.json
+├─ sample-data.json        # Faker-generated dataset mirroring production schema
+└─ …                       # Additional experimental dashboards as needed
+
 src/
 └─ chrome-ext/
    ├─ background.js        # service worker entry point
@@ -48,6 +53,8 @@ src/
 - Install dependencies with `npm install` (Node 18+).
 - Rebuild Tailwind output when styles change: `npm run build:css`.
 - Load the unpacked extension from `src/chrome-ext/` during development.
+- Maintain the sanitized sample dataset at `design/sample-data.json`; keep its shape aligned with production payloads.
+- Serve `design/dashboard.html` via the local server (`npm run dev:design`) so the page can fetch `sample-data.json` during development.
 - Keep `manifest.json` version aligned with the extension version in `package.json`.
 - Install Python tooling with `uv run pre-commit install`; run hooks via `uv run pre-commit run --all-files`.
 
@@ -63,4 +70,5 @@ src/
 - Follow the architectural outline above when extending the extension.
 - Document breaking changes in `README.md`.
 - Update Tailwind build step if stylesheets or entry points move.
+- Always run `npm run test:dashboards` (wrapper over `scripts/snapshot-dashboards.js`) immediately after any design change, and verify the refreshed PNGs in `artifacts/dashboards/` before considering the work complete.
 - Keep instructions in this file synchronized with actual tooling to avoid confusing future automations.

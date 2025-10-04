@@ -6,53 +6,79 @@
     <link rel="stylesheet" href="tailwind.css" />
   </head>
   <body class="min-h-screen bg-brand-surfaceLight text-gray-900">
-    <main class="mx-auto flex w-full max-w-3xl flex-col gap-6 p-6 md:p-10">
+    <main class="mx-auto flex w-full max-w-3xl flex-col gap-8 p-6 md:gap-10 md:p-10">
       <header class="flex flex-col gap-2">
         <h1 class="text-3xl font-semibold tracking-tight text-gray-900">
           Mountaineers Assistant Options
         </h1>
         <p class="text-sm text-gray-500" id="options-status">Loading cached data…</p>
-        <div class="flex flex-wrap gap-2">
-          <button
-            id="refresh-cache"
-            type="button"
-            class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-primary px-3 py-2 text-sm font-medium text-white shadow transition hover:bg-indigo-500"
-          >
-            Refresh Cache View
-          </button>
-          <button
-            id="open-stats"
-            type="button"
-            class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-slate-50"
-          >
-            Open Insights Page
-          </button>
-        </div>
       </header>
 
       <section class="card">
         <div class="border-b border-slate-200 px-6 py-4">
-          <h2 class="text-lg font-semibold text-gray-900">Display Preferences</h2>
-          <p class="text-sm text-gray-500">Control how Mountaineers Assistant renders insights.</p>
+          <h2 class="text-lg font-semibold text-gray-900">Preferences</h2>
+          <p class="text-sm text-gray-500">Customize your preferences</p>
         </div>
-        <div class="px-6 py-4">
+        <div class="flex flex-col gap-4 px-6 py-4">
           <label class="flex items-start gap-3 text-sm text-gray-700">
             <input
               id="toggle-avatars"
               type="checkbox"
               class="mt-1 h-4 w-4 rounded border-slate-300 text-brand-primary focus:ring-brand-primary"
             />
-            <span>Show partner avatar images on the insights page</span>
+            <span>Show user profile images on the insights page</span>
           </label>
+          <div class="flex flex-col gap-1 text-sm text-gray-700">
+            <label for="fetch-limit-setting" class="font-medium text-gray-700">
+              Temporary fetch limit for "Fetch New Activities"
+            </label>
+            <div class="flex flex-wrap items-center gap-3">
+              <input
+                id="fetch-limit-setting"
+                type="number"
+                min="1"
+                step="1"
+                inputmode="numeric"
+                class="w-24 rounded-md border border-slate-200 bg-white px-2 py-1 text-sm text-gray-900 shadow-sm focus:border-brand-primary focus:outline-none focus:ring-1 focus:ring-brand-primary"
+                placeholder="All"
+              />
+              <span class="text-xs text-gray-500">Leave blank to fetch everything.</span>
+            </div>
+          </div>
+          <div class="flex justify-end">
+            <button
+              id="save-preferences"
+              type="button"
+              class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-primary px-3 py-2 text-sm font-medium text-white shadow transition hover:bg-indigo-500"
+            >
+              Save Preferences
+            </button>
+          </div>
         </div>
       </section>
 
-      <section class="card">
+      <section class="card mt-6 md:mt-8">
         <div class="border-b border-slate-200 px-6 py-4">
-          <h2 class="text-lg font-semibold text-gray-900">Cached Data</h2>
+          <h2 class="text-lg font-semibold text-gray-900">Cached Activities Data</h2>
           <p class="text-sm text-gray-500">This is the data stored locally by the extension.</p>
         </div>
         <div class="overflow-auto px-6 py-4">
+          <div class="flex flex-wrap gap-2 pb-4">
+            <button
+              id="refresh-cache"
+              type="button"
+              class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-primary px-3 py-2 text-sm font-medium text-white shadow transition hover:bg-indigo-500"
+            >
+              Refresh Cache View
+            </button>
+            <button
+              id="clear-cache"
+              type="button"
+              class="inline-flex items-center justify-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-100"
+            >
+              Clear Cached Data
+            </button>
+          </div>
           <pre
             id="cache-content"
             class="max-h-[520px] overflow-auto whitespace-pre-wrap rounded-lg bg-slate-900 p-4 text-xs text-slate-100 shadow-inner"

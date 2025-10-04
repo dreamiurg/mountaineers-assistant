@@ -9,7 +9,9 @@
   "scripts": {
     "build:css": "tailwindcss -i ./src/chrome-ext/styles/tailwind.input.css -o ./src/chrome-ext/tailwind.css --minify",
     "format": "prettier --write \"src/**/*.js\" \"src/**/*.html\" \"src/**/*.css\"",
-    "lint": "prettier --check \"src/**/*.js\" \"src/**/*.html\" \"src/**/*.css\""
+    "lint": "prettier --check \"src/**/*.js\" \"src/**/*.html\" \"src/**/*.css\"",
+    "test:dashboards": "node scripts/snapshot-dashboards.js",
+    "dev:design": "http-server design -p 5500 --cors"
   },
   "repository": {
     "type": "git",
@@ -30,6 +32,8 @@
   "homepage": "https://github.com/dreamiurg/mountaineers-assistant#readme",
   "devDependencies": {
     "autoprefixer": "^10.4.21",
+    "http-server": "^14.1.1",
+    "playwright": "^1.55.1",
     "postcss": "^8.5.6",
     "prettier": "^3.6.2",
     "tailwindcss": "^3.4.14"

@@ -13,20 +13,29 @@
   const HOME_URL = 'https://www.mountaineers.org/';
   const HISTORY_SUFFIX = '/member-activity-history.json';
   const ROSTER_SEGMENT = 'roster-tab';
+  const PROGRESS_MESSAGE = 'refresh-progress';
 
   try {
     console.info('Mountaineers Assistant: starting refresh workflow');
+    sendProgressUpdate({ stage: 'starting', total: 0, completed: 0 });
     const { activities, currentUserUid } = await collectMemberActivities(
       existingActivityUids,
       fetchLimit
     );
     console.info('Mountaineers Assistant: loaded %d activities', activities.length);
+    const totalActivities = activities.length;
+    if (totalActivities === 0) {
+      sendProgressUpdate({ stage: 'no-new-activities', total: 0, completed: 0 });
+    } else {
+      sendProgressUpdate({ stage: 'activities-collected', total: totalActivities, completed: 0 });
+    }
     const exportData = await loadRosters(activities);
     console.info(
       'Mountaineers Assistant: collected %d people and %d roster entries',
       exportData.people.length,
       exportData.rosterEntries.length
     );
+    sendProgressUpdate({ stage: 'finalizing', total: totalActivities, completed: totalActivities });
     chrome.runtime.sendMessage({
       type: RESULT_MESSAGE,
       success: true,
@@ -34,6 +43,12 @@
     });
   } catch (error) {
     console.error('Mountaineers Assistant: refresh failed', error);
+    sendProgressUpdate({
+      stage: 'error',
+      total: 0,
+      completed: 0,
+      error: error instanceof Error ? error.message : String(error),
+    });
     chrome.runtime.sendMessage({
       type: RESULT_MESSAGE,
       success: false,
@@ -171,6 +186,12 @@
     const peopleByUid = new Map();
     const rosterEntries = [];
     const enrichedActivities = [];
+    const total = activities.length;
+    let processed = 0;
+
+    if (total > 0) {
+      sendProgressUpdate({ stage: 'processing', total, completed: 0 });
+    }
 
     for (const activity of activities) {
       let resolvedType = activity.activity_type || null;
@@ -222,13 +243,93 @@
         console.warn(`Failed to collect roster for ${activity.uid}`, rosterResult.reason);
       }
 
-      enrichedActivities.push({ ...activity, activity_type: resolvedType });
+      const enrichedActivity = { ...activity, activity_type: resolvedType };
+      enrichedActivities.push(enrichedActivity);
+      processed += 1;
+      const rosterDelta =
+        rosterResult.status === 'fulfilled'
+          ? {
+              people: rosterResult.value.people,
+              rosterEntries: rosterResult.value.entries,
+            }
+          : {
+              people: [],
+              rosterEntries: [],
+            };
+      sendProgressUpdate({
+        stage: 'processing',
+        total,
+        completed: processed,
+        activityUid: activity.uid,
+        activityTitle: activity.title || null,
+        delta: {
+          activities: [enrichedActivity],
+          people: rosterDelta.people,
+          rosterEntries: rosterDelta.rosterEntries,
+        },
+      });
     }
 
     return {
       activities: enrichedActivities,
       people: Array.from(peopleByUid.values()),
       rosterEntries,
+    };
+  }
+
+  function sendProgressUpdate(update) {
+    if (!update || typeof chrome?.runtime?.sendMessage !== 'function') {
+      return;
+    }
+    const payload = {
+      stage: typeof update.stage === 'string' ? update.stage : 'unknown',
+      timestamp: Date.now(),
+    };
+    if (Number.isFinite(update.total)) {
+      payload.total = Math.max(0, Math.floor(update.total));
+    }
+    if (Number.isFinite(update.completed)) {
+      payload.completed = Math.max(0, Math.floor(update.completed));
+    }
+    if (typeof update.activityUid === 'string') {
+      payload.activityUid = update.activityUid;
+    }
+    if (typeof update.activityTitle === 'string') {
+      payload.activityTitle = update.activityTitle;
+    }
+    if (update.error) {
+      payload.error = update.error;
+    }
+    const delta = sanitizeDelta(update.delta);
+    if (delta) {
+      payload.delta = delta;
+    }
+
+    try {
+      chrome.runtime.sendMessage({
+        type: PROGRESS_MESSAGE,
+        origin: 'collector',
+        ...payload,
+      });
+    } catch (error) {
+      console.warn('Mountaineers Assistant: failed to send progress update', error);
+    }
+  }
+
+  function sanitizeDelta(delta) {
+    if (!delta || typeof delta !== 'object') {
+      return null;
+    }
+    const activities = Array.isArray(delta.activities) ? delta.activities : [];
+    const people = Array.isArray(delta.people) ? delta.people : [];
+    const rosterEntries = Array.isArray(delta.rosterEntries) ? delta.rosterEntries : [];
+    if (!activities.length && !people.length && !rosterEntries.length) {
+      return null;
+    }
+    return {
+      activities: activities.map((activity) => ({ ...activity })),
+      people: people.map((person) => ({ ...person })),
+      rosterEntries: rosterEntries.map((entry) => ({ ...entry })),
     };
   }
 

@@ -1,25 +1,66 @@
 const REFRESH_MESSAGE = 'start-refresh';
+const REFRESH_STATUS_REQUEST_MESSAGE = 'get-refresh-status';
+const REFRESH_STATUS_CHANGE_MESSAGE = 'refresh-status-changed';
+const REFRESH_BUSY_MESSAGE = 'A refresh is already running. Please wait for it to finish.';
+const SETTINGS_KEY = 'mountaineersAssistantSettings';
 
 document.addEventListener('DOMContentLoaded', () => {
   const refreshButton = document.getElementById('refresh-button');
-  const clearButton = document.getElementById('clear-button');
   const statsButton = document.getElementById('open-stats-button');
   const fetchOneButton = document.getElementById('fetch-one-button');
-  const statusEl = document.getElementById('status');
+  const statusContainer = document.getElementById('status');
+  const statusText = document.getElementById('status-text');
+  const statusSpinner = document.getElementById('status-spinner');
 
   let contextAllowsFetching = false;
+  let localBusy = false;
+  let refreshInProgress = false;
+  let globalBusyForcedMessage = false;
+  let configuredFetchLimit = null;
 
   updateStatsFromStorage();
   evaluateActiveTabContext();
+  requestRefreshStatus();
+  loadFetchPreferences();
+
+  chrome.storage.onChanged.addListener(handleStorageChange);
+
+  chrome.runtime.onMessage.addListener((message) => {
+    if (message?.type !== REFRESH_STATUS_CHANGE_MESSAGE) {
+      return;
+    }
+    refreshInProgress = Boolean(message.inProgress);
+    updateButtons();
+    updateIndicator();
+    if (refreshInProgress && !localBusy) {
+      setStatusText(REFRESH_BUSY_MESSAGE);
+      globalBusyForcedMessage = true;
+    } else if (!refreshInProgress && globalBusyForcedMessage && !localBusy) {
+      setStatusText('');
+      globalBusyForcedMessage = false;
+    }
+  });
 
   refreshButton.addEventListener('click', () => {
     setBusy(true, 'Refreshing activities…');
-    chrome.runtime.sendMessage({ type: REFRESH_MESSAGE }, (response) => {
+    const payload = { type: REFRESH_MESSAGE };
+    if (configuredFetchLimit) {
+      payload.limit = configuredFetchLimit;
+    }
+    chrome.runtime.sendMessage(payload, (response) => {
       if (chrome.runtime.lastError) {
         setBusy(false, chrome.runtime.lastError.message || 'Unexpected error.');
         return;
       }
       if (!response?.success) {
+        if (response?.inProgress) {
+          refreshInProgress = true;
+          setBusy(false, response.error || REFRESH_BUSY_MESSAGE);
+          globalBusyForcedMessage = true;
+          updateButtons();
+          updateIndicator();
+          return;
+        }
         setBusy(false, response?.error || 'Refresh failed.');
         return;
       }
@@ -33,14 +74,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  clearButton.addEventListener('click', async () => {
-    await chrome.storage.local.remove('mountaineersAssistantData');
-    renderStats({ activityCount: 0, lastUpdated: null });
-    statusEl.textContent = 'Cached data cleared.';
-  });
-
   statsButton.addEventListener('click', () => {
-    chrome.tabs.create({ url: chrome.runtime.getURL('stats.html') });
+    chrome.tabs.create({ url: chrome.runtime.getURL('insights.html') });
   });
 
   fetchOneButton.addEventListener('click', () => {
@@ -51,6 +86,14 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       if (!response?.success) {
+        if (response?.inProgress) {
+          refreshInProgress = true;
+          setBusy(false, response.error || REFRESH_BUSY_MESSAGE);
+          globalBusyForcedMessage = true;
+          updateButtons();
+          updateIndicator();
+          return;
+        }
         setBusy(false, response?.error || 'Refresh failed.');
         return;
       }
@@ -76,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
       activityCount: payload.activities?.length ?? 0,
       lastUpdated: payload.lastUpdated,
     });
-    statusEl.textContent = 'Cached snapshot loaded.';
+    setStatusText('Cached snapshot loaded.');
   }
 
   function renderStats(summary) {
@@ -87,11 +130,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function setBusy(isBusy, message) {
-    refreshButton.disabled = isBusy || !contextAllowsFetching;
-    statusEl.textContent = message || '';
-    clearButton.disabled = isBusy;
-    statsButton.disabled = isBusy;
-    fetchOneButton.disabled = isBusy || !contextAllowsFetching;
+    localBusy = isBusy;
+    if (typeof message === 'string') {
+      setStatusText(message);
+      globalBusyForcedMessage = message === REFRESH_BUSY_MESSAGE;
+    }
+    updateButtons();
+    updateIndicator();
   }
 
   function formatRelative(isoString) {
@@ -112,14 +157,99 @@ document.addEventListener('DOMContentLoaded', () => {
       const url = activeTab?.url || '';
       const isAllowed = /^https?:\/\/(www\.)?mountaineers\.org\//i.test(url);
       contextAllowsFetching = isAllowed;
-      refreshButton.disabled = !contextAllowsFetching;
-      fetchOneButton.disabled = !contextAllowsFetching;
+      updateButtons();
 
       if (!isAllowed) {
-        statusEl.textContent = 'Open a Mountaineers.org page to fetch new activities.';
-      } else if (!statusEl.textContent) {
-        statusEl.textContent = '';
+        setStatusText('Open a Mountaineers.org page to fetch new activities.');
+      } else if (!statusText.textContent) {
+        setStatusText('');
       }
+    });
+  }
+
+  function requestRefreshStatus() {
+    chrome.runtime.sendMessage({ type: REFRESH_STATUS_REQUEST_MESSAGE }, (response) => {
+      if (chrome.runtime.lastError) {
+        return;
+      }
+      refreshInProgress = Boolean(response?.inProgress);
+      updateButtons();
+      updateIndicator();
+      if (refreshInProgress && !localBusy) {
+        setStatusText(REFRESH_BUSY_MESSAGE);
+        globalBusyForcedMessage = true;
+      }
+    });
+  }
+
+  function updateButtons() {
+    const disableFetchActions = localBusy || refreshInProgress || !contextAllowsFetching;
+    refreshButton.disabled = disableFetchActions;
+    fetchOneButton.disabled = disableFetchActions;
+    statsButton.disabled = localBusy;
+  }
+
+  function setStatusText(message) {
+    if (!statusText) {
+      return;
+    }
+    statusText.textContent = message || '';
+  }
+
+  function updateIndicator() {
+    if (!statusSpinner || !statusContainer) {
+      return;
+    }
+    const showSpinner = localBusy || refreshInProgress;
+    if (showSpinner) {
+      statusSpinner.classList.remove('hidden');
+    } else {
+      statusSpinner.classList.add('hidden');
+    }
+  }
+
+  function normalizeFetchLimit(value) {
+    if (value === null || value === undefined) {
+      return null;
+    }
+    const parsed = Number.parseInt(value, 10);
+    if (Number.isNaN(parsed) || parsed <= 0) {
+      return null;
+    }
+    return parsed;
+  }
+
+  async function loadFetchPreferences() {
+    try {
+      const stored = await chrome.storage.local.get(SETTINGS_KEY);
+      configuredFetchLimit = normalizeFetchLimit(stored?.[SETTINGS_KEY]?.fetchLimit);
+    } catch (error) {
+      console.error('Mountaineers Assistant popup: failed to load fetch preferences', error);
+      configuredFetchLimit = null;
+    }
+  }
+
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== 'local' || !changes[SETTINGS_KEY]) {
+      return;
+    }
+    configuredFetchLimit = normalizeFetchLimit(changes[SETTINGS_KEY].newValue?.fetchLimit);
+  });
+
+  function handleStorageChange(changes, area) {
+    if (area !== 'local' || !changes.mountaineersAssistantData) {
+      return;
+    }
+
+    const { newValue } = changes.mountaineersAssistantData;
+    if (!newValue) {
+      renderStats({ activityCount: 0, lastUpdated: null });
+      return;
+    }
+
+    renderStats({
+      activityCount: Array.isArray(newValue.activities) ? newValue.activities.length : 0,
+      lastUpdated: newValue.lastUpdated,
     });
   }
 });

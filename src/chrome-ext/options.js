@@ -3,13 +3,16 @@ const statusEl = document.getElementById('options-status');
 const cacheEl = document.getElementById('cache-content');
 const SETTINGS_KEY = 'mountaineersAssistantSettings';
 const avatarToggle = document.getElementById('toggle-avatars');
+const fetchLimitInput = document.getElementById('fetch-limit-setting');
+const savePreferencesButton = document.getElementById('save-preferences');
 
 const defaultSettings = {
   showAvatars: true,
+  fetchLimit: null,
 };
 
 const refreshButton = document.getElementById('refresh-cache');
-const openStatsButton = document.getElementById('open-stats');
+const clearCacheButton = document.getElementById('clear-cache');
 
 init();
 
@@ -28,14 +31,70 @@ function init() {
       });
   });
 
-  openStatsButton.addEventListener('click', () => {
-    chrome.tabs.create({ url: chrome.runtime.getURL('stats.html') });
+  clearCacheButton.addEventListener('click', async () => {
+    const confirmed = window.confirm(
+      'Clearing the cache will remove all downloaded activities and related data. Do you want to continue?'
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    const originalLabel = clearCacheButton.textContent;
+    clearCacheButton.disabled = true;
+    clearCacheButton.textContent = 'Clearing…';
+
+    try {
+      await chrome.storage.local.remove(STORAGE_KEY);
+      await loadCache();
+      statusEl.textContent = 'Cached data cleared.';
+    } catch (error) {
+      console.error('Mountaineers Assistant options: failed to clear cache', error);
+      statusEl.textContent = error instanceof Error ? error.message : String(error);
+    } finally {
+      clearCacheButton.disabled = false;
+      clearCacheButton.textContent = originalLabel;
+    }
   });
 
-  avatarToggle.addEventListener('change', async (event) => {
-    const checked = event.target.checked;
-    await saveSettings({ showAvatars: checked });
-    statusEl.textContent = 'Saved display preferences.';
+  fetchLimitInput.addEventListener('blur', () => {
+    const parsed = parseLimit(fetchLimitInput.value);
+    if (parsed) {
+      fetchLimitInput.value = String(parsed);
+    } else if (!fetchLimitInput.value.trim()) {
+      fetchLimitInput.value = '';
+    }
+  });
+
+  savePreferencesButton.addEventListener('click', async () => {
+    const fetchLimitRaw = fetchLimitInput.value.trim();
+    const parsedLimit = parseLimit(fetchLimitRaw);
+
+    if (fetchLimitRaw && parsedLimit === null) {
+      statusEl.textContent =
+        'Enter a positive number or leave fetch limit blank to fetch everything.';
+      fetchLimitInput.focus();
+      return;
+    }
+
+    const originalLabel = savePreferencesButton.textContent;
+    savePreferencesButton.disabled = true;
+    savePreferencesButton.textContent = 'Saving…';
+
+    try {
+      await saveSettings({
+        showAvatars: avatarToggle.checked,
+        fetchLimit: parsedLimit,
+      });
+      statusEl.textContent = 'Preferences saved.';
+      fetchLimitInput.value = parsedLimit ? String(parsedLimit) : '';
+    } catch (error) {
+      console.error('Mountaineers Assistant options: failed to save preferences', error);
+      statusEl.textContent = error instanceof Error ? error.message : String(error);
+    } finally {
+      savePreferencesButton.disabled = false;
+      savePreferencesButton.textContent = originalLabel;
+    }
   });
 
   chrome.storage.onChanged.addListener((changes, area) => {
@@ -67,6 +126,7 @@ async function loadSettings() {
   const stored = await chrome.storage.local.get(SETTINGS_KEY);
   const settings = { ...defaultSettings, ...(stored?.[SETTINGS_KEY] || {}) };
   avatarToggle.checked = Boolean(settings.showAvatars);
+  fetchLimitInput.value = settings.fetchLimit ? String(settings.fetchLimit) : '';
   return settings;
 }
 
@@ -102,7 +162,9 @@ function buildSummary(payload) {
   const peopleCount = Array.isArray(payload.people) ? payload.people.length : 0;
   const rosterCount = Array.isArray(payload.rosterEntries) ? payload.rosterEntries.length : 0;
   const lastUpdated = payload.lastUpdated ? formatTimestamp(payload.lastUpdated) : 'never';
-  return `Cached ${activityCount} activities, ${peopleCount} people, ${rosterCount} roster entries — last refreshed ${lastUpdated}.`;
+  const timezone = payload.lastUpdated ? Intl.DateTimeFormat().resolvedOptions().timeZone : null;
+  const tzSuffix = timezone ? ` (${timezone})` : '';
+  return `Cached ${activityCount} activities, ${peopleCount} people, ${rosterCount} roster entries — last refreshed ${lastUpdated}${tzSuffix}.`;
 }
 
 function formatTimestamp(value) {
@@ -115,4 +177,15 @@ function formatTimestamp(value) {
   } catch (error) {
     return value;
   }
+}
+
+function parseLimit(rawValue) {
+  if (!rawValue) {
+    return null;
+  }
+  const parsed = Number.parseInt(String(rawValue).trim(), 10);
+  if (Number.isNaN(parsed) || parsed <= 0) {
+    return null;
+  }
+  return parsed;
 }
