@@ -78,6 +78,7 @@ mountaineers-assistant/
 
 ## Workflow Tips
 
+- Run hooks manually with `uv run pre-commit run --all-files`. The configured checks still cover Prettier, ESLint (with `chrome` globals enabled), and gitleaks.
 - Background scripts reload when you click **Reload** on the extensions page; content scripts require refreshing the Mountaineers tab as well.
 - Use the browser DevTools service worker and content script consoles for debugging network calls and storage updates.
 - When introducing new APIs, update `.eslintrc.json` (e.g., globals) so lint checks continue to pass.
