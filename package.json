@@ -11,8 +11,8 @@
     "build": "npm run build:css && vite build",
     "preview": "vite preview",
     "build:css": "tailwindcss -i ./src/chrome-ext/styles/tailwind.input.css -o ./src/chrome-ext/tailwind.css --minify",
-    "format": "prettier --write \"src/**/*.js\" \"src/**/*.ts\" \"src/**/*.html\" \"src/**/*.css\"",
-    "lint": "prettier --check \"src/**/*.js\" \"src/**/*.ts\" \"src/**/*.html\" \"src/**/*.css\"",
+    "format": "prettier --write \"src/**/*.js\" \"src/**/*.ts\" \"src/**/*.tsx\" \"src/**/*.html\" \"src/**/*.css\"",
+    "lint": "prettier --check \"src/**/*.js\" \"src/**/*.ts\" \"src/**/*.tsx\" \"src/**/*.html\" \"src/**/*.css\"",
     "typecheck": "tsc --noEmit",
     "test:dashboards": "node scripts/snapshot-dashboards.js",
     "dev:design": "http-server design -p 5500 --cors"
@@ -39,8 +39,11 @@
     "@eslint/js": "^9.37.0",
     "@types/chrome": "^0.1.22",
     "@types/node": "^24.7.0",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.1",
     "@typescript-eslint/eslint-plugin": "^8.46.0",
     "@typescript-eslint/parser": "^8.46.0",
+    "@vitejs/plugin-react": "^5.0.4",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.37.0",
     "globals": "^16.4.0",
@@ -57,6 +60,8 @@
   "private": true,
   "dependencies": {
     "choices.js": "^11.1.0",
-    "highcharts": "^12.4.0"
+    "highcharts": "^12.4.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
   }
 }

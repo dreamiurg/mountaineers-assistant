@@ -1,6 +1,7 @@
 const { resolve } = require('node:path');
 const { defineConfig } = require('vite');
 const { viteStaticCopy } = require('vite-plugin-static-copy');
+const reactPlugin = require('@vitejs/plugin-react');
 
 const chromeExtensionRoot = resolve(__dirname, 'src/chrome-ext');
 
@@ -8,6 +9,7 @@ module.exports = defineConfig({
   root: chromeExtensionRoot,
   publicDir: false,
   plugins: [
+    reactPlugin(),
     viteStaticCopy({
       targets: [
         {

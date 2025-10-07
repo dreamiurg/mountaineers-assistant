@@ -51,8 +51,11 @@ mountaineers-assistant/
 │     ├─ collect.ts           # Injected content script: calls Mountaineers APIs and parses roster pages.
 │     ├─ manifest.json        # Manifest V3 definition.
 │     ├─ options.html/js      # Options view for inspecting cached JSON.
+│     ├─ options-react-root.tsx # React bootstrap (placeholder; no DOM changes yet).
 │     ├─ popup.html/js        # Popup UI with live counts and refresh controls.
+│     ├─ popup-react-root.tsx  # React bootstrap (placeholder; no DOM changes yet).
 │     ├─ insights.html/js     # Derived statistics and insight views.
+│     ├─ insights-react-root.tsx # React bootstrap (placeholder; no DOM changes yet).
 │     ├─ shared/              # Reusable TypeScript models shared across scripts.
 │     ├─ types/               # Ambient type declarations consumed by content scripts.
 │     └─ styles/              # Tailwind sources compiled into tailwind.css.

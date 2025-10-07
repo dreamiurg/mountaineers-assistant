@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="insights.css" />
   </head>
   <body class="min-h-screen text-slate-900">
+    <div id="insights-react-root" style="display: contents"></div>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
       <header class="space-y-3">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -258,6 +259,7 @@
     </div>
     <script src="vendor/highcharts.js" defer></script>
     <script src="vendor/choices.min.js" defer></script>
+    <script type="module" src="./insights-react-root.tsx"></script>
     <script src="insights.js" type="module"></script>
   </body>
 </html>

@@ -16,7 +16,7 @@ Guidance for future contributors, automations, or agents working on **Mountainee
 
 - **Platform:** Chrome Extension Manifest V3
 - **Language:** TypeScript targeting modern Chrome (ES2021)
-- **UI:** Tailwind CSS, HTML templates rendered via DOM APIs
+- **UI:** Tailwind CSS, HTML templates rendered via DOM APIs (React root shims exist but render no UI yet)
 - **Storage:** `chrome.storage.local`
 - **Build tooling:** Vite for bundling, Tailwind CLI (via `tailwindcss` npm package), Prettier for formatting, ESLint for linting
 - **Package manager:** npm
@@ -43,8 +43,11 @@ src/
    ├─ collect.ts           # content script injected on demand
    ├─ manifest.json        # extension manifest
    ├─ options.html/js      # detailed JSON viewer
+   ├─ options-react-root.tsx # React bootstrap (currently placeholder)
    ├─ popup.html/js        # quick status and refresh button
+   ├─ popup-react-root.tsx  # React bootstrap (currently placeholder)
    ├─ stats.html/js        # derived statistics view
+   ├─ insights-react-root.tsx # React bootstrap for stats view (currently placeholder)
    ├─ shared/              # TypeScript models shared across scripts
    ├─ types/               # Ambient declarations for MV3 globals
    └─ styles/              # Tailwind source (compiled to tailwind.css)
@@ -56,6 +59,7 @@ dist/                      # Bundled extension output produced by Vite (gitignor
 - Install dependencies with `npm install` (Node 18+).
 - Build the extension bundle with `npm run build` (runs Tailwind CLI then Vite into `dist/`).
 - When iterating, re-run `npm run build:css` for Tailwind edits and start Vite with `npm run dev`.
+- React entry shims (`*-react-root.tsx`) currently render placeholders; migrate UI components gradually without breaking existing markup.
 - Run `npm run typecheck` to validate TypeScript changes before packaging.
 - Load the unpacked extension from `dist/` during development; rebuild before reloading in Chrome.
 - Maintain the sanitized sample dataset at `design/sample-data.json`; keep its shape aligned with production payloads.

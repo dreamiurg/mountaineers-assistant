@@ -11,14 +11,16 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,
+    "jsx": "react-jsx",
     "noEmit": true,
     "skipLibCheck": true,
-    "types": ["chrome", "node"],
+    "types": ["chrome", "node", "vite/client"],
     "strict": true
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.js",
+    "src/**/*.tsx",
     "src/**/*.d.ts",
     "scripts/**/*.js",
     "vite.config.js",
