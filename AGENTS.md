@@ -74,6 +74,7 @@ dist/                      # Bundled extension output produced by Vite (gitignor
 - `pre-commit` hooks enforce Prettier, ESLint (with `chrome` globals), and gitleaks secret scanning.
 - Use `uv run pre-commit run --all-files` before submitting if hooks are not configured locally.
 - ESLint config lives in `eslint.config.mjs`; update globals or environment settings there when introducing new APIs.
+- When committing, prefer descriptive, sentence-style subjects (e.g., “Introduced a Vite-powered build so the extension bundles to dist/”).
 
 ## Agent Checklist
 
