@@ -182,22 +182,115 @@ async function main() {
       await page.goto(fileUrl, { waitUntil: 'networkidle' });
       await page.waitForTimeout(1500);
 
-      const hasVisibleContent = await page.evaluate(() => {
-        const body = document.body;
-        if (!body) return false;
-        const rect = body.getBoundingClientRect();
-        return rect.height > 0 && rect.width > 0 && body.innerText.trim().length > 0;
-      });
+      const scenarios = [
+        {
+          label: 'default view',
+          suffix: '',
+          settleMs: 800,
+          async apply() {
+            await page.evaluate(async () => {
+              if (!window.mountaineersDashboard || !window.mountaineersDashboard.ready) {
+                return;
+              }
+              await window.mountaineersDashboard.ready;
+              window.mountaineersDashboard.clearFilters?.();
+            });
+            return true;
+          },
+        },
+        {
+          label: 'role filter view',
+          suffix: 'role-instructor',
+          settleMs: 1000,
+          async apply() {
+            return page.evaluate(async () => {
+              if (!window.mountaineersDashboard || !window.mountaineersDashboard.ready) {
+                return false;
+              }
+              const context = await window.mountaineersDashboard.ready;
+              const options = window.mountaineersDashboard.getFilterOptions
+                ? window.mountaineersDashboard.getFilterOptions()
+                : context?.filterOptions;
+              if (!options || !Array.isArray(options.roles) || !options.roles.length) return false;
 
-      const screenshotPath = path.join(ARTIFACT_DIR, `${file.baseName}.png`);
-      await page.screenshot({ path: screenshotPath, fullPage: true });
-      console.log(
-        `Saved screenshot for ${file.name} -> ${path.relative(ROOT_DIR, screenshotPath)}`
-      );
+              const targetRole = options.roles.includes('Instructor')
+                ? 'Instructor'
+                : options.roles[0];
 
-      if (!hasVisibleContent) {
-        hadFailures = true;
-        console.error(`Validation failed: ${file.name} rendered without visible content.`);
+              window.mountaineersDashboard.setFilters?.({
+                activityType: [],
+                category: [],
+                role: [targetRole],
+              });
+              return true;
+            });
+          },
+        },
+        {
+          label: 'no results view',
+          suffix: 'filtered-empty',
+          settleMs: 1200,
+          async apply() {
+            return page.evaluate(async () => {
+              if (!window.mountaineersDashboard || !window.mountaineersDashboard.ready) {
+                return false;
+              }
+              const context = await window.mountaineersDashboard.ready;
+              const options = window.mountaineersDashboard.getFilterOptions
+                ? window.mountaineersDashboard.getFilterOptions()
+                : context?.filterOptions;
+              if (!options) return false;
+
+              const pick = (arr, count) =>
+                Array.isArray(arr) ? arr.slice(0, Math.max(0, count)) : [];
+
+              const filters = {
+                activityType: pick(options.activityTypes, 2),
+                category: pick(options.categories, 2),
+                role: pick(options.roles, 2),
+              };
+
+              window.mountaineersDashboard.setFilters?.(filters);
+              return true;
+            });
+          },
+        },
+      ];
+
+      for (const scenario of scenarios) {
+        const applied = await scenario.apply();
+        await page.waitForTimeout(scenario.settleMs);
+
+        const hasVisibleContent = await page.evaluate(() => {
+          const body = document.body;
+          if (!body) return false;
+          const rect = body.getBoundingClientRect();
+          return rect.height > 0 && rect.width > 0 && body.innerText.trim().length > 0;
+        });
+
+        const suffixPart = scenario.suffix ? `-${scenario.suffix}` : '';
+        const screenshotPath = path.join(ARTIFACT_DIR, `${file.baseName}${suffixPart}.png`);
+        await page.screenshot({ path: screenshotPath, fullPage: true });
+        console.log(
+          `Saved screenshot (${scenario.label}) for ${file.name} -> ${path.relative(
+            ROOT_DIR,
+            screenshotPath
+          )}`
+        );
+
+        if (!hasVisibleContent) {
+          hadFailures = true;
+          console.error(
+            `Validation failed: ${file.name} (${scenario.label}) rendered without visible content.`
+          );
+        }
+
+        if (scenario.suffix && applied === false) {
+          hadFailures = true;
+          console.error(
+            `Filtered scenario skipped for ${file.name}; filter data unavailable in page.`
+          );
+        }
       }
 
       if (consoleErrors.length) {

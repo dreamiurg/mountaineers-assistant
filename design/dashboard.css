@@ -1,5 +1,7 @@
 :root {
   color-scheme: light;
+  --choices-primary-color: #0369a1;
+  --choices-item-color: #f8fafc;
 }
 
 body {
@@ -20,6 +22,12 @@ body {
   box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12);
   overflow: hidden;
   backdrop-filter: blur(12px);
+}
+
+.glass-card.filter-card {
+  position: relative;
+  z-index: 20;
+  overflow: visible;
 }
 
 .subtle-border {
