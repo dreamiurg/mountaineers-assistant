@@ -23,7 +23,11 @@ repos:
     hooks:
       - id: eslint
         files: "\\.(js|jsx)$"
-        args: ["--max-warnings=0"]
+        args:
+          - "--max-warnings=0"
+          - "--no-warn-ignored"
+          - "--ignore-pattern"
+          - "src/chrome-ext/vendor/**"
 
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.28.0

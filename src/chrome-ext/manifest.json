@@ -18,7 +18,15 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["insights.html", "insights.js", "tailwind.css"],
+      "resources": [
+        "insights.html",
+        "insights.js",
+        "insights.css",
+        "tailwind.css",
+        "vendor/highcharts.js",
+        "vendor/choices.min.js",
+        "vendor/choices.min.css"
+      ],
       "matches": ["https://www.mountaineers.org/*"]
     }
   ]

@@ -46,4 +46,8 @@ export default defineConfig([{
         },
         sourceType: "commonjs",
     },
+}, {
+    ignores: [
+        "src/chrome-ext/vendor/**",
+    ],
 }]);
