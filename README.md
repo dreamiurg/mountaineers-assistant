@@ -18,18 +18,27 @@ Mountaineers Assistant is a Chrome extension (Manifest V3) that surfaces your Mo
 
 ```bash
 npm install
-npm run build:css
+npm run build
 ```
 
-`npm run build:css` compiles Tailwind source from `src/chrome-ext/styles/` to `src/chrome-ext/tailwind.css`. Re-run it whenever you change CSS classes or Tailwind configuration.
+`npm run build` runs the Tailwind CLI and bundles the extension into `dist/` via Vite. If you need to regenerate styles without producing a new bundle, `npm run build:css` is still available and writes `src/chrome-ext/tailwind.css`.
+
+### Start the Vite Dev Server
+
+```bash
+npm run build:css   # run again whenever Tailwind sources change
+npm run dev
+```
+
+Vite serves the extension surfaces on `http://localhost:5173/`. Open `/popup.html`, `/options.html`, or `/insights.html` to iterate quickly. Re-run `npm run build:css` in another terminal whenever you touch Tailwind source files until the styling pipeline is replaced.
 
 ### Load the Extension in Chrome
 
 1. Open `chrome://extensions`.
 2. Enable **Developer mode**.
-3. Choose **Load unpacked** and select `src/chrome-ext/`.
+3. Choose **Load unpacked** and select the freshly built `dist/` directory.
 
-After each code or style update, rebuild CSS if needed and click **Reload** from the extensions page to pick up changes.
+Run `npm run build` before each reload so Chrome picks up the latest bundle output.
 
 ## Project Layout
 
@@ -45,6 +54,7 @@ mountaineers-assistant/
 │     ├─ popup.html/js        # Popup UI with live counts and refresh controls.
 │     ├─ insights.html/js     # Derived statistics and insight views.
 │     └─ styles/              # Tailwind sources compiled into tailwind.css.
+├─ dist/                   # Generated MV3 bundle emitted by Vite (not checked in).
 ├─ package.json               # npm scripts and extension metadata.
 ├─ package-lock.json
 ├─ .pre-commit-config.yaml    # Pre-commit hook definitions (Prettier, ESLint, gitleaks).

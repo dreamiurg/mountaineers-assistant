@@ -18,7 +18,7 @@ Guidance for future contributors, automations, or agents working on **Mountainee
 - **Language:** Vanilla JavaScript (ES2021)
 - **UI:** Tailwind CSS, HTML templates rendered via DOM APIs
 - **Storage:** `chrome.storage.local`
-- **Build tooling:** Tailwind CLI (via `tailwindcss` npm package), Prettier for formatting, ESLint for linting
+- **Build tooling:** Vite for bundling, Tailwind CLI (via `tailwindcss` npm package), Prettier for formatting, ESLint for linting
 - **Package manager:** npm
 
 ## Architecture Overview
@@ -46,13 +46,15 @@ src/
    ├─ popup.html/js        # quick status and refresh button
    ├─ stats.html/js        # derived statistics view
    └─ styles/              # Tailwind source (compiled to tailwind.css)
+dist/                      # Bundled extension output produced by Vite (gitignored)
 ```
 
 ## Developer Workflow
 
 - Install dependencies with `npm install` (Node 18+).
-- Rebuild Tailwind output when styles change: `npm run build:css`.
-- Load the unpacked extension from `src/chrome-ext/` during development.
+- Build the extension bundle with `npm run build` (runs Tailwind CLI then Vite into `dist/`).
+- When iterating, re-run `npm run build:css` for Tailwind edits and start Vite with `npm run dev`.
+- Load the unpacked extension from `dist/` during development; rebuild before reloading in Chrome.
 - Maintain the sanitized sample dataset at `design/sample-data.json`; keep its shape aligned with production payloads.
 - Serve `design/dashboard.html` via the local server (`npm run dev:design`) so the page can fetch `sample-data.json` during development.
 - Keep `manifest.json` version aligned with the extension version in `package.json`.
