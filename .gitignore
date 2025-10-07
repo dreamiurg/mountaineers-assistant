@@ -1,23 +1,34 @@
-# Node.js
+# Build outputs
 node_modules/
 dist/
 build/
+src/chrome-ext/tailwind.css
+
+# Local artifacts & reports
+artifacts/
+playwright-report/
+test-results/
+blob-report/
+
+# Temporary files & logs
 .temp/
 *.log
-artifacts/
 
-# Tooling caches
+# Package manager caches
 .npm/
 .yarn/
 .pnpm-store/
+
+# Tooling caches
 .eslintcache
 
-# OS / Editor
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+
+# OS & editors
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
-
-# Generated CSS
-src/chrome-ext/tailwind.css
-.venv/
