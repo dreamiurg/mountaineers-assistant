@@ -11,8 +11,9 @@
     "build": "npm run build:css && vite build",
     "preview": "vite preview",
     "build:css": "tailwindcss -i ./src/chrome-ext/styles/tailwind.input.css -o ./src/chrome-ext/tailwind.css --minify",
-    "format": "prettier --write \"src/**/*.js\" \"src/**/*.html\" \"src/**/*.css\"",
-    "lint": "prettier --check \"src/**/*.js\" \"src/**/*.html\" \"src/**/*.css\"",
+    "format": "prettier --write \"src/**/*.js\" \"src/**/*.ts\" \"src/**/*.html\" \"src/**/*.css\"",
+    "lint": "prettier --check \"src/**/*.js\" \"src/**/*.ts\" \"src/**/*.html\" \"src/**/*.css\"",
+    "typecheck": "tsc --noEmit",
     "test:dashboards": "node scripts/snapshot-dashboards.js",
     "dev:design": "http-server design -p 5500 --cors"
   },
@@ -36,6 +37,10 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.37.0",
+    "@types/chrome": "^0.1.22",
+    "@types/node": "^24.7.0",
+    "@typescript-eslint/eslint-plugin": "^8.46.0",
+    "@typescript-eslint/parser": "^8.46.0",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.37.0",
     "globals": "^16.4.0",
@@ -44,6 +49,8 @@
     "postcss": "^8.5.6",
     "prettier": "^3.6.2",
     "tailwindcss": "^3.4.14",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.0",
     "vite": "^7.1.9",
     "vite-plugin-static-copy": "^3.1.3"
   },

@@ -47,12 +47,14 @@ mountaineers-assistant/
 ├─ design/                 # Standalone design prototypes and sanitized data snapshots.
 ├─ src/
 │  └─ chrome-ext/
-│     ├─ background.js        # Service worker: handles refresh requests, caches results in storage.
-│     ├─ collect.js           # Injected content script: calls Mountaineers APIs and parses roster pages.
+│     ├─ background.ts        # Service worker: handles refresh requests, caches results in storage.
+│     ├─ collect.ts           # Injected content script: calls Mountaineers APIs and parses roster pages.
 │     ├─ manifest.json        # Manifest V3 definition.
 │     ├─ options.html/js      # Options view for inspecting cached JSON.
 │     ├─ popup.html/js        # Popup UI with live counts and refresh controls.
 │     ├─ insights.html/js     # Derived statistics and insight views.
+│     ├─ shared/              # Reusable TypeScript models shared across scripts.
+│     ├─ types/               # Ambient type declarations consumed by content scripts.
 │     └─ styles/              # Tailwind sources compiled into tailwind.css.
 ├─ dist/                   # Generated MV3 bundle emitted by Vite (not checked in).
 ├─ package.json               # npm scripts and extension metadata.
@@ -63,8 +65,9 @@ mountaineers-assistant/
 
 ## Tooling & Quality Gates
 
-- `npm run format` writes Prettier formatting for JS, HTML, and CSS under `src/`.
+- `npm run format` writes Prettier formatting for JS/TS, HTML, and CSS under `src/`.
 - `npm run lint` runs Prettier in check mode (fails on formatting drift).
+- `npm run typecheck` validates the TypeScript sources with the project `tsconfig`.
 - `uv run pre-commit install` installs the pinned hook environment; run `uv run pre-commit run --all-files` before submitting changes if hooks are not installed locally.
 - Keep the version in `src/chrome-ext/manifest.json` in sync with `package.json` when cutting releases.
 

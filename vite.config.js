@@ -27,8 +27,8 @@ module.exports = defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       input: {
-        background: resolve(chromeExtensionRoot, 'background.js'),
-        collect: resolve(chromeExtensionRoot, 'collect.js'),
+        background: resolve(chromeExtensionRoot, 'background.ts'),
+        collect: resolve(chromeExtensionRoot, 'collect.ts'),
         popup: resolve(chromeExtensionRoot, 'popup.html'),
         options: resolve(chromeExtensionRoot, 'options.html'),
         insights: resolve(chromeExtensionRoot, 'insights.html'),
