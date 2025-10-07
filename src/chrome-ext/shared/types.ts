@@ -33,6 +33,11 @@ export interface ExtensionCache {
   currentUserUid: string | null;
 }
 
+export interface ExtensionSettings {
+  showAvatars: boolean;
+  fetchLimit: number | null;
+}
+
 export interface CollectorDelta {
   activities?: ActivityRecord[];
   people?: PersonRecord[];

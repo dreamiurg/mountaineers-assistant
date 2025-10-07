@@ -50,8 +50,9 @@ mountaineers-assistant/
 │     ├─ background.ts        # Service worker: handles refresh requests, caches results in storage.
 │     ├─ collect.ts           # Injected content script: calls Mountaineers APIs and parses roster pages.
 │     ├─ manifest.json        # Manifest V3 definition.
-│     ├─ options.html/js      # Options view for inspecting cached JSON.
-│     ├─ options-react-root.tsx # React bootstrap (placeholder; no DOM changes yet).
+│     ├─ options.html         # Options shell loaded by Chrome.
+│     ├─ options-react-root.tsx # Entry point that mounts the React options experience.
+│     ├─ options/             # React options application (components, hooks, services).
 │     ├─ popup.html           # Popup shell loaded by Chrome.
 │     ├─ popup-react-root.tsx  # Entry point that mounts the React popup experience.
 │     ├─ popup/               # React popup application (components, hooks, services).

@@ -16,7 +16,7 @@ Guidance for future contributors, automations, or agents working on **Mountainee
 
 - **Platform:** Chrome Extension Manifest V3
 - **Language:** TypeScript targeting modern Chrome (ES2021)
-- **UI:** Tailwind CSS with a React-powered popup (options and stats currently render via vanilla DOM APIs)
+- **UI:** Tailwind CSS with React powering popup and options (stats currently render via vanilla DOM APIs)
 - **Storage:** `chrome.storage.local`
 - **Build tooling:** Vite for bundling, Tailwind CLI (via `tailwindcss` npm package), Prettier for formatting, ESLint for linting
 - **Package manager:** npm
@@ -26,7 +26,7 @@ Guidance for future contributors, automations, or agents working on **Mountainee
 - `background.ts` listens for popup messages and injects `collect.ts` into the active mountaineers.org tab.
 - `collect.ts` fetches the JSON activities endpoint, walks roster pages, and returns normalized payloads.
 - The React popup (under `popup/`) surfaces counts and kicks off refreshes.
-- `options.js` and `stats.js` render cached JSON and derived metrics for deeper inspection.
+- The React options experience (under `options/`) exposes cache controls and preferences, while `stats.js` renders derived metrics for deeper inspection.
 - Data never leaves the browser; network calls target mountaineers.org using the current session.
 
 ## Directory Layout
@@ -42,8 +42,9 @@ src/
    ├─ background.ts        # service worker entry point
    ├─ collect.ts           # content script injected on demand
    ├─ manifest.json        # extension manifest
-   ├─ options.html/js      # detailed JSON viewer
-   ├─ options-react-root.tsx # React bootstrap (currently placeholder)
+   ├─ options.html         # options shell loaded by Chrome
+   ├─ options-react-root.tsx # Entry point that mounts the React options app
+   ├─ options/             # React options UI (components, hooks, services)
    ├─ popup.html           # quick status shell for the popup
    ├─ popup-react-root.tsx  # Entry point that mounts the React popup
    ├─ popup/               # React popup UI (components, hooks, services)
@@ -60,7 +61,7 @@ dist/                      # Bundled extension output produced by Vite (gitignor
 - Install dependencies with `npm install` (Node 18+).
 - Build the extension bundle with `npm run build` (runs Tailwind CLI then Vite into `dist/`).
 - When iterating, re-run `npm run build:css` for Tailwind edits and start Vite with `npm run dev`.
-- React entry shims (`*-react-root.tsx`) currently render placeholders; migrate UI components gradually without breaking existing markup.
+- React entry shims (`*-react-root.tsx`) bootstrap React surfaces; popup and options are already migrated, while insights remains a placeholder.
 - Run `npm run typecheck` to validate TypeScript changes before packaging.
 - Load the unpacked extension from `dist/` during development; rebuild before reloading in Chrome.
 - Maintain the sanitized sample dataset at `design/sample-data.json`; keep its shape aligned with production payloads.
