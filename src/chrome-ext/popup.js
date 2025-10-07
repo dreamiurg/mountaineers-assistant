@@ -140,15 +140,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function formatRelative(isoString) {
-    try {
-      const date = new Date(isoString);
-      if (Number.isNaN(date.getTime())) {
-        return isoString;
-      }
-      return `${date.toLocaleString()}`;
-    } catch (error) {
+    const date = new Date(isoString);
+    if (Number.isNaN(date.getTime())) {
       return isoString;
     }
+    return `${date.toLocaleString()}`;
   }
 
   function evaluateActiveTabContext() {

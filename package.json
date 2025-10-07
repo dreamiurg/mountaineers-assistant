@@ -31,7 +31,11 @@
   },
   "homepage": "https://github.com/dreamiurg/mountaineers-assistant#readme",
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.37.0",
     "autoprefixer": "^10.4.21",
+    "eslint": "^9.37.0",
+    "globals": "^16.4.0",
     "http-server": "^14.1.1",
     "playwright": "^1.55.1",
     "postcss": "^8.5.6",
