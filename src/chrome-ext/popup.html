@@ -6,55 +6,7 @@
     <link rel="stylesheet" href="tailwind.css" />
   </head>
   <body class="min-w-[280px] bg-brand-surfaceLight text-gray-900">
-    <div id="popup-react-root" style="display: contents"></div>
-    <main class="flex flex-col gap-4 p-4">
-      <header class="flex flex-col gap-1">
-        <h1 class="text-lg font-semibold tracking-tight">Mountaineers Assistant</h1>
-        <p class="text-sm text-gray-500" id="last-updated">Never refreshed</p>
-      </header>
-      <section class="card p-4" aria-live="polite">
-        <div class="flex items-center justify-between">
-          <span class="text-sm text-gray-500">Activities cached</span>
-          <span class="text-3xl font-semibold text-gray-900" id="activity-count">0</span>
-        </div>
-      </section>
-      <section class="flex flex-col gap-2">
-        <button
-          id="open-stats-button"
-          type="button"
-          class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-primary px-3 py-2 text-sm font-medium text-white shadow transition hover:bg-indigo-500"
-        >
-          Open My Insights
-        </button>
-        <button
-          id="refresh-button"
-          type="button"
-          class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-slate-50 disabled:pointer-events-none disabled:opacity-40"
-        >
-          Fetch New Activities
-        </button>
-        <button
-          id="fetch-one-button"
-          type="button"
-          class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-gray-500 transition hover:bg-slate-50 disabled:pointer-events-none disabled:opacity-40"
-        >
-          Fetch One Activity (debug)
-        </button>
-        <div
-          id="status"
-          role="status"
-          class="flex min-h-[1.5rem] items-center gap-2 text-sm text-amber-600"
-        >
-          <span
-            id="status-spinner"
-            class="hidden h-3 w-3 animate-spin rounded-full border-2 border-amber-500 border-t-transparent"
-            aria-hidden="true"
-          ></span>
-          <span id="status-text"></span>
-        </div>
-      </section>
-    </main>
+    <div id="popup-react-root"></div>
     <script type="module" src="./popup-react-root.tsx"></script>
-    <script src="popup.js" type="module"></script>
   </body>
 </html>

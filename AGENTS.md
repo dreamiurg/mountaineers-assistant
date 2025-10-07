@@ -16,7 +16,7 @@ Guidance for future contributors, automations, or agents working on **Mountainee
 
 - **Platform:** Chrome Extension Manifest V3
 - **Language:** TypeScript targeting modern Chrome (ES2021)
-- **UI:** Tailwind CSS, HTML templates rendered via DOM APIs (React root shims exist but render no UI yet)
+- **UI:** Tailwind CSS with a React-powered popup (options and stats currently render via vanilla DOM APIs)
 - **Storage:** `chrome.storage.local`
 - **Build tooling:** Vite for bundling, Tailwind CLI (via `tailwindcss` npm package), Prettier for formatting, ESLint for linting
 - **Package manager:** npm
@@ -25,7 +25,7 @@ Guidance for future contributors, automations, or agents working on **Mountainee
 
 - `background.ts` listens for popup messages and injects `collect.ts` into the active mountaineers.org tab.
 - `collect.ts` fetches the JSON activities endpoint, walks roster pages, and returns normalized payloads.
-- `popup.js` surfaces counts and kicks off refreshes.
+- The React popup (under `popup/`) surfaces counts and kicks off refreshes.
 - `options.js` and `stats.js` render cached JSON and derived metrics for deeper inspection.
 - Data never leaves the browser; network calls target mountaineers.org using the current session.
 
@@ -44,8 +44,9 @@ src/
    ├─ manifest.json        # extension manifest
    ├─ options.html/js      # detailed JSON viewer
    ├─ options-react-root.tsx # React bootstrap (currently placeholder)
-   ├─ popup.html/js        # quick status and refresh button
-   ├─ popup-react-root.tsx  # React bootstrap (currently placeholder)
+   ├─ popup.html           # quick status shell for the popup
+   ├─ popup-react-root.tsx  # Entry point that mounts the React popup
+   ├─ popup/               # React popup UI (components, hooks, services)
    ├─ stats.html/js        # derived statistics view
    ├─ insights-react-root.tsx # React bootstrap for stats view (currently placeholder)
    ├─ shared/              # TypeScript models shared across scripts
