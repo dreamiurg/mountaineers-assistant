@@ -48,7 +48,8 @@ Reload the unpacked extension in `chrome://extensions` after every rebuild so Ch
 ### Iterate quickly
 
 - `npm run dev` starts the Vite development server and rebuilds bundles as you save (served at `http://localhost:5173/`).
-- `npm run build:css` regenerates Tailwind output; run `npm run build` afterward to copy the CSS into `dist/`.
+- `npm run build:css` quickly refreshes `src/chrome-ext/tailwind.css` without touching the rest of the bundle
+- `npm run build` does a full extension rebuild into `dist/` (Tailwind CSS compilation included)
 - `npx vite build --watch` writes incremental bundles to `dist/` if you prefer a watch-only workflow.
 
 ## Storybook
