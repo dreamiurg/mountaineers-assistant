@@ -16,7 +16,7 @@ Guidance for future contributors, automations, or agents working on **Mountainee
 
 - **Platform:** Chrome Extension Manifest V3
 - **Language:** TypeScript targeting modern Chrome (ES2021)
-- **UI:** Tailwind CSS with React powering popup and options (stats currently render via vanilla DOM APIs)
+- **UI:** Tailwind CSS with React powering popup, options, and insights dashboards
 - **Storage:** `chrome.storage.local`
 - **Build tooling:** Vite for bundling, Tailwind CLI (via `tailwindcss` npm package), Prettier for formatting, ESLint for linting
 - **Package manager:** npm
@@ -26,7 +26,7 @@ Guidance for future contributors, automations, or agents working on **Mountainee
 - `background.ts` listens for popup messages and injects `collect.ts` into the active mountaineers.org tab.
 - `collect.ts` fetches the JSON activities endpoint, walks roster pages, and returns normalized payloads.
 - The React popup (under `popup/`) surfaces counts and kicks off refreshes.
-- The React options experience (under `options/`) exposes cache controls and preferences, while `stats.js` renders derived metrics for deeper inspection.
+- The React options experience (under `options/`) exposes cache controls and preferences, while the React insights dashboard (under `insights/`) renders derived metrics for deeper inspection.
 - Data never leaves the browser; network calls target mountaineers.org using the current session.
 
 ## Directory Layout
@@ -48,8 +48,9 @@ src/
    ├─ popup.html           # quick status shell for the popup
    ├─ popup-react-root.tsx  # Entry point that mounts the React popup
    ├─ popup/               # React popup UI (components, hooks, services)
-   ├─ stats.html/js        # derived statistics view
-   ├─ insights-react-root.tsx # React bootstrap for stats view (currently placeholder)
+   ├─ insights.html        # insights shell loaded by Chrome
+   ├─ insights-react-root.tsx # Entry point that mounts the React insights dashboard
+   ├─ insights/            # React insights UI (components, hooks, utilities)
    ├─ shared/              # TypeScript models shared across scripts
    ├─ types/               # Ambient declarations for MV3 globals
    └─ styles/              # Tailwind source (compiled to tailwind.css)

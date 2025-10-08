@@ -57,6 +57,41 @@ body {
   outline: none;
 }
 
+.choices {
+  overflow: visible;
+}
+
+.choices__list--dropdown {
+  overflow: visible !important;
+  z-index: 50 !important;
+}
+
+.choices__inner {
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  border-radius: 0.75rem;
+  background: #ffffff;
+  padding: 0.35rem 0.75rem;
+  min-height: 2.75rem;
+  box-shadow: 0 4px 8px rgba(15, 23, 42, 0.08);
+}
+
+.choices__list--dropdown {
+  z-index: 40;
+  border-radius: 0 0 0.75rem 0.75rem;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: 0 16px 30px rgba(15, 23, 42, 0.12);
+}
+
+.choices__item {
+  font-size: 0.875rem;
+  color: #475569;
+}
+
+.choices__item--selectable.is-highlighted {
+  background-color: rgba(125, 211, 252, 0.15);
+  color: #0369a1;
+}
+
 @media (min-width: 1024px) {
   #activityTimeline {
     min-height: 19rem;

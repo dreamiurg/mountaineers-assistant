@@ -1,9 +1,8 @@
 import { StrictMode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
+import InsightsApp from './insights/InsightsApp';
 
 const MOUNT_NODE_ID = 'insights-react-root';
-
-const Placeholder = () => null;
 
 function mountReactRoot(): void {
   const container = document.getElementById(MOUNT_NODE_ID);
@@ -12,24 +11,25 @@ function mountReactRoot(): void {
     return;
   }
 
-  if ((container as unknown as { __reactRoot?: Root }).__reactRoot) {
+  const typedContainer = container as typeof container & { __reactRoot?: Root };
+  if (typedContainer.__reactRoot) {
     return;
   }
 
   const root = createRoot(container);
   root.render(
     <StrictMode>
-      <Placeholder />
+      <InsightsApp />
     </StrictMode>
   );
 
-  (container as unknown as { __reactRoot?: Root }).__reactRoot = root;
+  typedContainer.__reactRoot = root;
 
   if (import.meta.hot) {
     import.meta.hot.accept();
     import.meta.hot.dispose(() => {
       root.unmount();
-      delete (container as unknown as { __reactRoot?: Root }).__reactRoot;
+      delete typedContainer.__reactRoot;
     });
   }
 }

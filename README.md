@@ -56,8 +56,9 @@ mountaineers-assistant/
 │     ├─ popup.html           # Popup shell loaded by Chrome.
 │     ├─ popup-react-root.tsx  # Entry point that mounts the React popup experience.
 │     ├─ popup/               # React popup application (components, hooks, services).
-│     ├─ insights.html/js     # Derived statistics and insight views.
-│     ├─ insights-react-root.tsx # React bootstrap (placeholder; no DOM changes yet).
+│     ├─ insights.html        # Activity insights shell loaded by Chrome.
+│     ├─ insights-react-root.tsx # Entry point that mounts the React insights experience.
+│     ├─ insights/            # React insights dashboard (components, hooks, utilities).
 │     ├─ shared/              # Reusable TypeScript models shared across scripts.
 │     ├─ types/               # Ambient type declarations consumed by content scripts.
 │     └─ styles/              # Tailwind sources compiled into tailwind.css.
