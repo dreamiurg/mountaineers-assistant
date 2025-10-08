@@ -22,6 +22,7 @@
     "src/**/*.js",
     "src/**/*.tsx",
     "src/**/*.d.ts",
+    "tests/**/*.ts",
     "scripts/**/*.js",
     "vite.config.js",
     "eslint.config.mjs"

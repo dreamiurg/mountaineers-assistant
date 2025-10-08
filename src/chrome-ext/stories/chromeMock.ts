@@ -179,8 +179,8 @@ export const createChromeMock = ({
   const chromeMock: Partial<typeof chrome> = {
     storage: storage as typeof chrome.storage,
     runtime: runtime as typeof chrome.runtime,
-    tabs: tabs as typeof chrome.tabs,
-    scripting: scripting as typeof chrome.scripting,
+    tabs: tabs as unknown as typeof chrome.tabs,
+    scripting: scripting as unknown as typeof chrome.scripting,
   };
 
   (window as typeof window & { chrome?: typeof chrome }).chrome = chromeMock as typeof chrome;

@@ -16,7 +16,9 @@
     "typecheck": "tsc --noEmit",
     "storybook": "storybook dev -p 6006",
     "storybook:build": "storybook build",
-    "test:dashboards": "node scripts/snapshot-dashboards.js"
+    "test:dashboards": "node scripts/snapshot-dashboards.js",
+    "test:extension": "playwright test --project=chromium-extension",
+    "test:extension:update": "playwright test --project=chromium-extension --update-snapshots"
   },
   "repository": {
     "type": "git",
@@ -41,6 +43,7 @@
     "@babel/preset-typescript": "^7.27.1",
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.37.0",
+    "@playwright/test": "^1.56.0",
     "@storybook/addon-essentials": "^8.6.14",
     "@storybook/addon-interactions": "^8.6.14",
     "@storybook/react": "^8.6.14",
@@ -58,7 +61,7 @@
     "eslint": "^9.37.0",
     "globals": "^16.4.0",
     "http-server": "^14.1.1",
-    "playwright": "^1.55.1",
+    "playwright": "^1.56.0",
     "postcss": "^8.5.6",
     "prettier": "^3.6.2",
     "storybook": "^8.6.14",

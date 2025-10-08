@@ -59,11 +59,12 @@ npm run storybook
 
 Storybook reuses the Vite/Tailwind pipeline and provides Chrome API mocks so you can refine React components without loading the full extension. Use `npm run storybook:build` to generate a static bundle in `storybook-static/` for documentation or design review.
 
-## UI Snapshot Pipeline (WIP)
+## Extension UI Snapshots
 
-- Run `npx playwright install` once to download the bundled Chromium required for automated checks.
-- `npm run test:dashboards` is being migrated to capture Storybook-rendered UI states; treat it as experimental until the migration completes.
-- Screenshots, console logs, and HTML dumps will land under `artifacts/` so automated reviews (including LLM-based checks) can inspect the rendered UI without launching Chrome manually.
+- Run `npx playwright install` once to download the Chromium build Playwright uses to exercise the extension.
+- `npm run test:extension` seeds `chrome.storage.local` with `src/data/sample-activities.json`, launches Chromium with the MV3 bundle from `dist/`, blocks all outbound network traffic, and captures deterministic screenshots of the popup (`popup.html`), options (`options.html`), and insights dashboard (`insights.html`).
+- Regenerate baselines after intentional UI updates with `npm run test:extension:update`.
+- Snapshot artifacts live under `tests/extension-snapshots.spec.ts-snapshots/`; Playwright drops comparison diffs and traces under `test-results/` when assertions fail (ignored by git via `.gitignore`).
 
 ## Sample Data Fixtures
 
@@ -104,6 +105,7 @@ mountaineers-assistant/
 - `npm run format` applies Prettier to JS/TS, HTML, and CSS under `src/`.
 - `npm run lint` runs Prettier in check mode and fails on formatting drift.
 - `npm run typecheck` validates the TypeScript sources with the project `tsconfig`.
+- `npm run test:extension` runs the Playwright-driven MV3 snapshot suite against the built bundle.
 - `npm run test:dashboards` is currently experimental while the snapshot pipeline transitions to Storybook-driven checks.
 - `uv run pre-commit install` installs the pinned hook environment; run `uv run pre-commit run --all-files` if hooks are not installed locally.
 - Keep the version in `src/chrome-ext/manifest.json` in sync with `package.json` when cutting releases.

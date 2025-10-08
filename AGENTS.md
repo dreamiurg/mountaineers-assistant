@@ -81,5 +81,5 @@ dist/                      # Bundled extension output produced by Vite (gitignor
 - Follow the architectural outline above when extending the extension.
 - Document breaking changes in `README.md`.
 - Update Tailwind build step if stylesheets or entry points move.
-- The Playwright UI snapshot script (`npm run test:dashboards`) is being migrated to Storybook-driven checks; treat its output as experimental until the migration is complete.
+- Use `npm run test:extension` to regenerate Playwright-backed MV3 snapshots (they seed the extension with `src/data/sample-activities.json` and block external network calls).
 - Keep instructions in this file synchronized with actual tooling to avoid confusing future automations.
