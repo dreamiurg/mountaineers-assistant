@@ -1,53 +1,82 @@
 # Mountaineers Assistant
 
-Mountaineers Assistant is a Chrome extension (Manifest V3) that surfaces your Mountaineers.org activity history and quick insights directly within the site.
+Mountaineers Assistant is a Chrome extension (Manifest V3) that brings your Mountaineers.org activity history and quick insights directly into the site.
 
 ## Capabilities
 
-- Fetches the Mountaineers activity JSON and roster pages from the active tab using your signed-in browser session.
-- Persists fetched data in `chrome.storage.local` so insights remain available while offline.
+- Fetches Mountaineers activity JSON and roster pages from the active tab using your signed-in browser session.
+- Persists normalized data in `chrome.storage.local` so insights remain available offline.
 
 ## Development Setup
+
+## Tech Stack
+
+- TypeScript + React
+- [Tailwind CSS](https://tailwindcss.com/) for styling
+- [Vite](https://vitejs.dev/) for bundling and local development
+- [Storybook](https://storybook.js.org/) for isolated component work
 
 ### Prerequisites
 
 - Node.js 18 or newer
-- npm (comes with Node.js)
+- `npm`
 
-### Install and Build
+Install the pinned Node version with Homebrew if needed:
+
+```bash
+brew install node@18
+npm --version
+```
+
+### Install & build
 
 ```bash
 npm install
 npm run build
 ```
 
-`npm run build` runs the Tailwind CLI and bundles the extension into `dist/` via Vite. If you need to regenerate styles without producing a new bundle, `npm run build:css` is still available and writes `src/chrome-ext/tailwind.css`.
+`npm run build` runs Tailwind CSS and bundles the extension into `dist/` via Vite. Run it after any change to TypeScript/JavaScript, Tailwind sources, or static assets so Chrome loads the latest bundle.
 
-### Start the Vite Dev Server
-
-```bash
-npm run build:css   # run again whenever Tailwind sources change
-npm run dev
-```
-
-Vite serves the extension surfaces on `http://localhost:5173/`. Open `/popup.html`, `/options.html`, or `/insights.html` to iterate quickly. Re-run `npm run build:css` in another terminal whenever you touch Tailwind source files until the styling pipeline is replaced.
-
-### Load the Extension in Chrome
+### Load the extension
 
 1. Open `chrome://extensions`.
 2. Enable **Developer mode**.
-3. Choose **Load unpacked** and select the freshly built `dist/` directory.
+3. Click **Load unpacked** and choose the freshly built `dist/` directory.
 
-Run `npm run build` before each reload so Chrome picks up the latest bundle output.
+Reload the unpacked extension in `chrome://extensions` after every rebuild so Chrome’s service worker, popup, and options pages pick up the latest bundle.
+
+### Iterate quickly
+
+- `npm run dev` starts the Vite development server and rebuilds bundles as you save (served at `http://localhost:5173/`).
+- `npm run build:css` regenerates Tailwind output; run `npm run build` afterward to copy the CSS into `dist/`.
+- `npx vite build --watch` writes incremental bundles to `dist/` if you prefer a watch-only workflow.
+
+## Storybook
+
+```bash
+npm run storybook
+```
+
+Storybook reuses the Vite/Tailwind pipeline and provides Chrome API mocks so you can refine React components without loading the full extension. Use `npm run storybook:build` to generate a static bundle in `storybook-static/` for documentation or design review.
+
+## UI Snapshot Pipeline (WIP)
+
+- Run `npx playwright install` once to download the bundled Chromium required for automated checks.
+- `npm run test:dashboards` is being migrated to capture Storybook-rendered UI states; treat it as experimental until the migration completes.
+- Screenshots, console logs, and HTML dumps will land under `artifacts/` so automated reviews (including LLM-based checks) can inspect the rendered UI without launching Chrome manually.
+
+## Sample Data Fixtures
+
+- Sanitized fixtures now live at `src/data/sample-activities.json` and mirror the structure returned by Mountaineers APIs.
+- Storybook stories and Playwright tests import this file directly; update it whenever you need to cover new scenarios or edge cases.
 
 ## Project Layout
 
 ```
 mountaineers-assistant/
-├─ design/                 # Standalone design prototypes and sanitized data snapshots.
 ├─ src/
 │  └─ chrome-ext/
-│     ├─ background.ts        # Service worker: handles refresh requests, caches results in storage.
+│     ├─ background.ts        # Service worker: handles refresh requests and caches results in storage.
 │     ├─ collect.ts           # Injected content script: calls Mountaineers APIs and parses roster pages.
 │     ├─ manifest.json        # Manifest V3 definition.
 │     ├─ options.html         # Options shell loaded by Chrome.
@@ -62,6 +91,7 @@ mountaineers-assistant/
 │     ├─ shared/              # Reusable TypeScript models shared across scripts.
 │     ├─ types/               # Ambient type declarations consumed by content scripts.
 │     └─ styles/              # Tailwind sources compiled into tailwind.css.
+├─ src/data/               # Sanitized Storybook/Playwright fixtures.
 ├─ dist/                   # Generated MV3 bundle emitted by Vite (not checked in).
 ├─ package.json               # npm scripts and extension metadata.
 ├─ package-lock.json
@@ -69,35 +99,11 @@ mountaineers-assistant/
 └─ README.md
 ```
 
-## Tooling & Quality Gates
+## Quality Gates & Tooling
 
-- `npm run format` writes Prettier formatting for JS/TS, HTML, and CSS under `src/`.
-- `npm run lint` runs Prettier in check mode (fails on formatting drift).
+- `npm run format` applies Prettier to JS/TS, HTML, and CSS under `src/`.
+- `npm run lint` runs Prettier in check mode and fails on formatting drift.
 - `npm run typecheck` validates the TypeScript sources with the project `tsconfig`.
-- `uv run pre-commit install` installs the pinned hook environment; run `uv run pre-commit run --all-files` before submitting changes if hooks are not installed locally.
+- `npm run test:dashboards` is currently experimental while the snapshot pipeline transitions to Storybook-driven checks.
+- `uv run pre-commit install` installs the pinned hook environment; run `uv run pre-commit run --all-files` if hooks are not installed locally.
 - Keep the version in `src/chrome-ext/manifest.json` in sync with `package.json` when cutting releases.
-
-## Dashboard Snapshot Pipeline
-
-- Run `npx playwright install` once to download the bundled Chromium that powers the dashboard snapshots.
-- `npm run test:dashboards` opens every HTML dashboard in `design/`, injects cached Highcharts assets, and fails if the page logs console errors or renders empty content.
-- Screenshots land in `artifacts/dashboards/`; share the PNGs directly or ask Codex to `view_image` a specific file for quick review.
-- Remote dependencies are cached into `artifacts/cache/` the first time the pipeline runs so subsequent executions work offline.
-
-## Design Sandbox
-
-- The `design/` directory houses standalone HTML experiments (e.g., `dashboard.html`) plus the sanitized dataset `sample-data.json` for safe iteration.
-- Start a lightweight server so fetch requests succeed:
-  ```bash
-  npm run dev:design
-  ```
-  Then open `http://localhost:5500/dashboard.html`. Reload after editing HTML, CSS, or `sample-data.json`; the server supports live reload as soon as you refresh the browser.
-- Update `design/sample-data.json` to prototype new data states; keep the schema aligned with production responses.
-- Capture before/after comparisons with `npm run test:dashboards`, which now scans `design/` for HTML files and saves PNGs in `artifacts/dashboards/`.
-
-## Workflow Tips
-
-- Run hooks manually with `uv run pre-commit run --all-files`. The configured checks still cover Prettier, ESLint (with `chrome` globals enabled), and gitleaks.
-- Background scripts reload when you click **Reload** on the extensions page; content scripts require refreshing the Mountaineers tab as well.
-- Use the browser DevTools service worker and content script consoles for debugging network calls and storage updates.
-- When introducing new APIs, update `.eslintrc.json` (e.g., globals) so lint checks continue to pass.

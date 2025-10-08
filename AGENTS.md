@@ -16,7 +16,7 @@ Guidance for future contributors, automations, or agents working on **Mountainee
 
 - **Platform:** Chrome Extension Manifest V3
 - **Language:** TypeScript targeting modern Chrome (ES2021)
-- **UI:** Tailwind CSS with React powering popup, options, and insights dashboards
+- **UI:** Tailwind CSS with React powering popup, options, and insights dashboards (Storybook mirrors these surfaces)
 - **Storage:** `chrome.storage.local`
 - **Build tooling:** Vite for bundling, Tailwind CLI (via `tailwindcss` npm package), Prettier for formatting, ESLint for linting
 - **Package manager:** npm
@@ -32,11 +32,6 @@ Guidance for future contributors, automations, or agents working on **Mountainee
 ## Directory Layout
 
 ```
-design/
-├─ dashboard.html          # Primary design prototype powered by sample-data.json
-├─ sample-data.json        # Faker-generated dataset mirroring production schema
-└─ …                       # Additional experimental dashboards as needed
-
 src/
 └─ chrome-ext/
    ├─ background.ts        # service worker entry point
@@ -51,9 +46,11 @@ src/
    ├─ insights.html        # insights shell loaded by Chrome
    ├─ insights-react-root.tsx # Entry point that mounts the React insights dashboard
    ├─ insights/            # React insights UI (components, hooks, utilities)
+   ├─ stories/             # Shared Storybook helpers and mocks
    ├─ shared/              # TypeScript models shared across scripts
    ├─ types/               # Ambient declarations for MV3 globals
    └─ styles/              # Tailwind source (compiled to tailwind.css)
+src/data/                 # Sanitized JSON fixtures consumed by Storybook/tests
 dist/                      # Bundled extension output produced by Vite (gitignored)
 ```
 
@@ -62,11 +59,11 @@ dist/                      # Bundled extension output produced by Vite (gitignor
 - Install dependencies with `npm install` (Node 18+).
 - Build the extension bundle with `npm run build` (runs Tailwind CLI then Vite into `dist/`).
 - When iterating, re-run `npm run build:css` for Tailwind edits and start Vite with `npm run dev`.
-- React entry shims (`*-react-root.tsx`) bootstrap React surfaces; popup and options are already migrated, while insights remains a placeholder.
+- Use Storybook (`npm run storybook`) for component development; it shares the same Vite/Tailwind pipeline as the extension.
 - Run `npm run typecheck` to validate TypeScript changes before packaging.
+- Run `npm run storybook:build` before shipping Storybook-facing component changes.
 - Load the unpacked extension from `dist/` during development; rebuild before reloading in Chrome.
-- Maintain the sanitized sample dataset at `design/sample-data.json`; keep its shape aligned with production payloads.
-- Serve `design/dashboard.html` via the local server (`npm run dev:design`) so the page can fetch `sample-data.json` during development.
+- Maintain the sanitized fixtures at `src/data/sample-activities.json`; keep their shape aligned with production payloads.
 - Keep `manifest.json` version aligned with the extension version in `package.json`.
 - Install Python tooling with `uv run pre-commit install`; run hooks via `uv run pre-commit run --all-files`.
 
@@ -84,5 +81,5 @@ dist/                      # Bundled extension output produced by Vite (gitignor
 - Follow the architectural outline above when extending the extension.
 - Document breaking changes in `README.md`.
 - Update Tailwind build step if stylesheets or entry points move.
-- Always run `npm run test:dashboards` (wrapper over `scripts/snapshot-dashboards.js`) immediately after any design change, and verify the refreshed PNGs in `artifacts/dashboards/` before considering the work complete.
+- The Playwright UI snapshot script (`npm run test:dashboards`) is being migrated to Storybook-driven checks; treat its output as experimental until the migration is complete.
 - Keep instructions in this file synchronized with actual tooling to avoid confusing future automations.

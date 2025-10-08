@@ -10,7 +10,7 @@ const ROOT_DIR = path.resolve(__dirname, '..');
 const DASHBOARD_DIR = path.join(ROOT_DIR, 'design');
 const ARTIFACT_DIR = path.join(ROOT_DIR, 'artifacts', 'dashboards');
 const CACHE_DIR = path.join(ROOT_DIR, 'artifacts', 'cache');
-const SAMPLE_DATA_PATH = path.join(DASHBOARD_DIR, 'sample-data.json');
+const SAMPLE_DATA_PATH = path.join(ROOT_DIR, 'src', 'data', 'sample-activities.json');
 
 const CDN_OVERRIDES = [
   {
@@ -21,14 +21,21 @@ const CDN_OVERRIDES = [
 ];
 
 async function getDashboardFiles() {
-  const entries = await fs.readdir(DASHBOARD_DIR, { withFileTypes: true });
-  return entries
-    .filter((entry) => entry.isFile() && entry.name.toLowerCase().endsWith('.html'))
-    .map((entry) => ({
-      name: entry.name,
-      path: path.join(DASHBOARD_DIR, entry.name),
-      baseName: path.basename(entry.name, path.extname(entry.name)),
-    }));
+  try {
+    const entries = await fs.readdir(DASHBOARD_DIR, { withFileTypes: true });
+    return entries
+      .filter((entry) => entry.isFile() && entry.name.toLowerCase().endsWith('.html'))
+      .map((entry) => ({
+        name: entry.name,
+        path: path.join(DASHBOARD_DIR, entry.name),
+        baseName: path.basename(entry.name, path.extname(entry.name)),
+      }));
+  } catch (error) {
+    if (error && error.code === 'ENOENT') {
+      return [];
+    }
+    throw error;
+  }
 }
 
 async function ensureArtifactsDir() {
@@ -87,7 +94,9 @@ async function prepareCdnAssets() {
 async function main() {
   const dashboards = await getDashboardFiles();
   if (!dashboards.length) {
-    console.warn('No dashboard HTML files found in design/.');
+    console.warn(
+      'No legacy dashboard HTML files found. The snapshot pipeline is being migrated to Storybook-rendered stories.'
+    );
     return;
   }
 
@@ -105,7 +114,7 @@ async function main() {
       sampleDataBuffer = null;
     } else if (error && error.name === 'SyntaxError') {
       console.warn(
-        'Failed to parse design/sample-data.json; falling back to network fetch within the page.'
+        'Failed to parse src/data/sample-activities.json; falling back to network fetch within the page.'
       );
       sampleDataBuffer = null;
     } else if (error) {

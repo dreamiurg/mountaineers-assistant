@@ -3,6 +3,7 @@ node_modules/
 dist/
 build/
 src/chrome-ext/tailwind.css
+storybook-static/
 
 # Local artifacts & reports
 artifacts/
