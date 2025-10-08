@@ -1,6 +1,6 @@
 import type { Preview } from '@storybook/react';
 
-import '../src/chrome-ext/styles/tailwind.input.css';
+import '../src/chrome-ext/tailwind.css';
 import '../src/chrome-ext/insights.css';
 
 const preview: Preview = {

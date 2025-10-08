@@ -57,7 +57,7 @@ Reload the unpacked extension in `chrome://extensions` after every rebuild so Ch
 npm run storybook
 ```
 
-Storybook reuses the Vite/Tailwind pipeline and provides Chrome API mocks so you can refine React components without loading the full extension. Use `npm run storybook:build` to generate a static bundle in `storybook-static/` for documentation or design review.
+Storybook consumes the compiled stylesheet at `src/chrome-ext/tailwind.css`. Run `npm run build:css` before launching Storybook (and whenever you change Tailwind tokens) so the utilities are up to date. Use `npm run storybook:build` to generate a static bundle in `storybook-static/` for documentation or design review.
 
 ## Extension UI Snapshots
 
