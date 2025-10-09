@@ -496,13 +496,13 @@ test.describe('Mountaineers Assistant extension snapshots', () => {
     await page.close();
   });
 
-  test('options renders seeded cache view', async ({ context, extensionId }) => {
+  test('preferences render seeded cache view', async ({ context, extensionId }) => {
     const page = await context.newPage();
     await page.setViewportSize({ width: 1280, height: 720 });
-    await page.goto(`chrome-extension://${extensionId}/options.html`);
-    await page.waitForSelector('text=Mountaineers Assistant Options', { state: 'visible' });
+    await page.goto(`chrome-extension://${extensionId}/preferences.html`);
+    await page.waitForSelector('text=Preferences', { state: 'visible' });
     await page.waitForSelector('text=Cached Activities Data', { state: 'visible' });
-    await expect(page).toHaveScreenshot('options.png', { fullPage: true });
+    await expect(page).toHaveScreenshot('preferences.png', { fullPage: true });
     await page.close();
   });
 

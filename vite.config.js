@@ -32,7 +32,7 @@ module.exports = defineConfig({
         background: resolve(chromeExtensionRoot, 'background.ts'),
         collect: resolve(chromeExtensionRoot, 'collect.ts'),
         popup: resolve(chromeExtensionRoot, 'popup.html'),
-        options: resolve(chromeExtensionRoot, 'options.html'),
+        preferences: resolve(chromeExtensionRoot, 'preferences.html'),
         insights: resolve(chromeExtensionRoot, 'insights.html'),
       },
       output: {

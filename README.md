@@ -43,7 +43,7 @@ npm run build
 2. Enable **Developer mode**.
 3. Click **Load unpacked** and choose the freshly built `dist/` directory.
 
-Reload the unpacked extension in `chrome://extensions` after every rebuild so Chrome’s service worker, popup, and options pages pick up the latest bundle.
+Reload the unpacked extension in `chrome://extensions` after every rebuild so Chrome’s service worker, popup, and preferences page pick up the latest bundle.
 
 ### Iterate quickly
 
@@ -63,7 +63,7 @@ Storybook consumes the compiled stylesheet at `src/chrome-ext/tailwind.css`. Run
 ## Extension UI Snapshots
 
 - Run `npx playwright install` once to download the Chromium build Playwright uses to exercise the extension.
-- `npm run test:extension` seeds `chrome.storage.local` with `src/data/sample-activities.json`, launches Chromium with the MV3 bundle from `dist/`, blocks all outbound network traffic, and captures deterministic screenshots of the popup (`popup.html`), options (`options.html`), and insights dashboard (`insights.html`).
+- `npm run test:extension` seeds `chrome.storage.local` with `src/data/sample-activities.json`, launches Chromium with the MV3 bundle from `dist/`, blocks all outbound network traffic, and captures deterministic screenshots of the popup (`popup.html`), preferences (`preferences.html`), and insights dashboard (`insights.html`).
 - Regenerate baselines after intentional UI updates with `npm run test:extension:update`.
 - Snapshot artifacts live under `tests/extension-snapshots.spec.ts-snapshots/`; Playwright drops comparison diffs and traces under `test-results/` when assertions fail (ignored by git via `.gitignore`).
 
@@ -81,9 +81,9 @@ mountaineers-assistant/
 │     ├─ background.ts        # Service worker: handles refresh requests and caches results in storage.
 │     ├─ collect.ts           # Injected content script: calls Mountaineers APIs and parses roster pages.
 │     ├─ manifest.json        # Manifest V3 definition.
-│     ├─ options.html         # Options shell loaded by Chrome.
-│     ├─ options-react-root.tsx # Entry point that mounts the React options experience.
-│     ├─ options/             # React options application (components, hooks, services).
+│     ├─ preferences.html     # Preferences shell loaded by Chrome.
+│     ├─ preferences-react-root.tsx # Entry point that mounts the React preferences experience.
+│     ├─ preferences/         # React preferences application (components, hooks, services).
 │     ├─ popup.html           # Popup shell loaded by Chrome.
 │     ├─ popup-react-root.tsx  # Entry point that mounts the React popup experience.
 │     ├─ popup/               # React popup application (components, hooks, services).

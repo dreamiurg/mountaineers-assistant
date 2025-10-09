@@ -1,8 +1,8 @@
 import { StrictMode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import OptionsApp from './options/OptionsApp';
+import PreferencesApp from './preferences/PreferencesApp';
 
-const MOUNT_NODE_ID = 'options-react-root';
+const MOUNT_NODE_ID = 'preferences-react-root';
 
 function mountReactRoot(): void {
   const container = document.getElementById(MOUNT_NODE_ID);
@@ -19,7 +19,7 @@ function mountReactRoot(): void {
   const root = createRoot(container);
   root.render(
     <StrictMode>
-      <OptionsApp />
+      <PreferencesApp />
     </StrictMode>
   );
 

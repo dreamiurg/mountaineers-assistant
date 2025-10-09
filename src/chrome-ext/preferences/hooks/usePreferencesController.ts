@@ -9,7 +9,7 @@ const defaultSettings: ExtensionSettings = {
   fetchLimit: null,
 };
 
-interface OptionsControllerState {
+interface PreferencesControllerState {
   statusMessage: string;
   cacheContent: string;
   showAvatars: boolean;
@@ -19,7 +19,7 @@ interface OptionsControllerState {
   isSaving: boolean;
 }
 
-interface OptionsControllerActions {
+interface PreferencesControllerActions {
   setShowAvatars: (value: boolean) => void;
   setFetchLimitInput: (value: string) => void;
   normalizeFetchLimitInput: () => void;
@@ -28,7 +28,8 @@ interface OptionsControllerActions {
   savePreferences: () => Promise<void>;
 }
 
-export const useOptionsController = (): OptionsControllerState & OptionsControllerActions => {
+export const usePreferencesController = (): PreferencesControllerState &
+  PreferencesControllerActions => {
   const [statusMessage, setStatusMessage] = useState<string>('Loading cached data…');
   const [cacheContent, setCacheContent] = useState<string>('// loading…');
   const [showAvatars, setShowAvatarsState] = useState<boolean>(defaultSettings.showAvatars);
@@ -66,7 +67,7 @@ export const useOptionsController = (): OptionsControllerState & OptionsControll
       setFetchLimitInputState(settings.fetchLimit ? String(settings.fetchLimit) : '');
       return settings;
     } catch (error) {
-      console.error('Mountaineers Assistant options: failed to load settings', error);
+      console.error('Mountaineers Assistant preferences: failed to load settings', error);
       setStatusMessage(
         error instanceof Error ? error.message : 'Unable to read saved preferences.'
       );
@@ -95,7 +96,7 @@ export const useOptionsController = (): OptionsControllerState & OptionsControll
       setCacheContent(JSON.stringify(payload, null, 2));
       return payload;
     } catch (error) {
-      console.error('Mountaineers Assistant options: failed to load cache', error);
+      console.error('Mountaineers Assistant preferences: failed to load cache', error);
       setStatusMessage(
         error instanceof Error ? error.message : 'Unable to read cached activity data.'
       );
@@ -131,7 +132,7 @@ export const useOptionsController = (): OptionsControllerState & OptionsControll
       await loadCache();
       setStatusMessage('Cached data cleared.');
     } catch (error) {
-      console.error('Mountaineers Assistant options: failed to clear cache', error);
+      console.error('Mountaineers Assistant preferences: failed to clear cache', error);
       setStatusMessage(
         error instanceof Error ? error.message : 'Unable to clear cached activity data.'
       );
@@ -162,7 +163,7 @@ export const useOptionsController = (): OptionsControllerState & OptionsControll
       setStatusMessage('Preferences saved.');
       setFetchLimitInputState(parsedLimit ? String(parsedLimit) : '');
     } catch (error) {
-      console.error('Mountaineers Assistant options: failed to save preferences', error);
+      console.error('Mountaineers Assistant preferences: failed to save preferences', error);
       setStatusMessage(
         error instanceof Error ? error.message : 'Unable to save preferences right now.'
       );
@@ -269,9 +270,7 @@ function buildSummary(cache: ExtensionCache): string {
   const peopleCount = Array.isArray(cache.people) ? cache.people.length : 0;
   const rosterCount = Array.isArray(cache.rosterEntries) ? cache.rosterEntries.length : 0;
   const lastUpdated = cache.lastUpdated ? formatTimestamp(cache.lastUpdated) : 'never';
-  const timezone = cache.lastUpdated ? Intl.DateTimeFormat().resolvedOptions().timeZone : null;
-  const tzSuffix = timezone ? ` (${timezone})` : '';
-  return `Cached ${activityCount} activities, ${peopleCount} people, ${rosterCount} roster entries — last refreshed ${lastUpdated}${tzSuffix}.`;
+  return `Cached ${activityCount} activities, ${peopleCount} people, ${rosterCount} roster entries — last refreshed ${lastUpdated}.`;
 }
 
 function formatTimestamp(value: string): string {

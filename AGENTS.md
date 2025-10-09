@@ -16,7 +16,7 @@ Guidance for future contributors, automations, or agents working on **Mountainee
 
 - **Platform:** Chrome Extension Manifest V3
 - **Language:** TypeScript targeting modern Chrome (ES2021)
-- **UI:** Tailwind CSS with React powering popup, options, and insights dashboards (Storybook mirrors these surfaces)
+- **UI:** Tailwind CSS with React powering popup, preferences, and insights dashboards (Storybook mirrors these surfaces)
 - **Storage:** `chrome.storage.local`
 - **Build tooling:** Vite for bundling, Tailwind CLI (via `tailwindcss` npm package), Prettier for formatting, ESLint for linting
 - **Package manager:** npm
@@ -26,7 +26,7 @@ Guidance for future contributors, automations, or agents working on **Mountainee
 - `background.ts` listens for popup messages and injects `collect.ts` into the active mountaineers.org tab.
 - `collect.ts` fetches the JSON activities endpoint, walks roster pages, and returns normalized payloads.
 - The React popup (under `popup/`) surfaces counts and kicks off refreshes.
-- The React options experience (under `options/`) exposes cache controls and preferences, while the React insights dashboard (under `insights/`) renders derived metrics for deeper inspection.
+- The React preferences experience (under `preferences/`) exposes cache controls and preferences, while the React insights dashboard (under `insights/`) renders derived metrics for deeper inspection.
 - Data never leaves the browser; network calls target mountaineers.org using the current session.
 
 ## Directory Layout
@@ -37,9 +37,9 @@ src/
    ├─ background.ts        # service worker entry point
    ├─ collect.ts           # content script injected on demand
    ├─ manifest.json        # extension manifest
-   ├─ options.html         # options shell loaded by Chrome
-   ├─ options-react-root.tsx # Entry point that mounts the React options app
-   ├─ options/             # React options UI (components, hooks, services)
+   ├─ preferences.html     # preferences shell loaded by Chrome
+   ├─ preferences-react-root.tsx # Entry point that mounts the React preferences app
+   ├─ preferences/         # React preferences UI (components, hooks, services)
    ├─ popup.html           # quick status shell for the popup
    ├─ popup-react-root.tsx  # Entry point that mounts the React popup
    ├─ popup/               # React popup UI (components, hooks, services)

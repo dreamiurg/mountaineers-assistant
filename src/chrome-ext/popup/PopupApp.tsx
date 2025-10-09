@@ -20,6 +20,7 @@ export const PopupApp = () => {
     insightsDisabled,
     refreshAll,
     openInsights,
+    openPreferences,
   } = usePopupController();
 
   return (
@@ -52,6 +53,13 @@ export const PopupApp = () => {
           className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-slate-50 disabled:pointer-events-none disabled:opacity-40"
         >
           Fetch New Activities
+        </button>
+        <button
+          type="button"
+          onClick={openPreferences}
+          className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent px-3 py-2 text-sm font-medium text-gray-600 transition hover:text-gray-900"
+        >
+          Preferences
         </button>
         <div
           role="status"

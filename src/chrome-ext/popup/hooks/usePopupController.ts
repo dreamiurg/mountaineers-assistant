@@ -36,6 +36,7 @@ interface PopupControllerState {
 interface PopupControllerActions {
   refreshAll: () => Promise<void>;
   openInsights: () => void;
+  openPreferences: () => void;
 }
 
 export const usePopupController = (): PopupControllerState & PopupControllerActions => {
@@ -283,6 +284,15 @@ export const usePopupController = (): PopupControllerState & PopupControllerActi
     chrome.tabs.create({ url });
   }, []);
 
+  const openPreferences = useCallback(() => {
+    if (typeof chrome.runtime.openOptionsPage === 'function') {
+      chrome.runtime.openOptionsPage();
+      return;
+    }
+    const url = chrome.runtime.getURL('preferences.html');
+    chrome.tabs.create({ url });
+  }, []);
+
   const showSpinner = useMemo(() => localBusy || refreshInProgress, [localBusy, refreshInProgress]);
   const actionsDisabled = useMemo(
     () => localBusy || refreshInProgress || !contextAllowsFetching,
@@ -297,6 +307,7 @@ export const usePopupController = (): PopupControllerState & PopupControllerActi
     insightsDisabled: localBusy,
     refreshAll,
     openInsights,
+    openPreferences,
   };
 };
 
