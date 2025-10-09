@@ -35,8 +35,9 @@ const test = base.extend<ExtensionHarness>({
     const userDataDir = await fs.mkdtemp(path.join(tempRoot, 'chromium-'));
     const context = await chromium.launchPersistentContext(userDataDir, {
       channel: 'chromium',
-      headless: false,
+      headless: true,
       args: [
+        '--headless=new',
         `--disable-extensions-except=${distDir}`,
         `--load-extension=${distDir}`,
         '--disable-sync',

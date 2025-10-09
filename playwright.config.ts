@@ -16,7 +16,7 @@ export default defineConfig({
       name: 'chromium-extension',
       use: {
         channel: 'chromium',
-        headless: false,
+        headless: true,
         viewport: { width: 1280, height: 720 },
       },
     },
