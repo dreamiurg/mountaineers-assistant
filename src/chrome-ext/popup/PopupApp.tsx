@@ -19,7 +19,6 @@ export const PopupApp = () => {
     actionsDisabled,
     insightsDisabled,
     refreshAll,
-    refreshSingle,
     openInsights,
   } = usePopupController();
 
@@ -53,14 +52,6 @@ export const PopupApp = () => {
           className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-slate-50 disabled:pointer-events-none disabled:opacity-40"
         >
           Fetch New Activities
-        </button>
-        <button
-          type="button"
-          onClick={refreshSingle}
-          disabled={actionsDisabled}
-          className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-gray-500 transition hover:bg-slate-50 disabled:pointer-events-none disabled:opacity-40"
-        >
-          Fetch One Activity (debug)
         </button>
         <div
           role="status"

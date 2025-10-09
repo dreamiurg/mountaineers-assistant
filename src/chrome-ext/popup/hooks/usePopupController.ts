@@ -35,7 +35,6 @@ interface PopupControllerState {
 
 interface PopupControllerActions {
   refreshAll: () => Promise<void>;
-  refreshSingle: () => Promise<void>;
   openInsights: () => void;
 }
 
@@ -279,10 +278,6 @@ export const usePopupController = (): PopupControllerState & PopupControllerActi
     await sendRefreshRequest(limit, 'Refreshing activities…');
   }, [configuredFetchLimit, sendRefreshRequest]);
 
-  const refreshSingle = useCallback(async () => {
-    await sendRefreshRequest(1, 'Fetching a single activity…');
-  }, [sendRefreshRequest]);
-
   const openInsights = useCallback(() => {
     const url = chrome.runtime.getURL('insights.html');
     chrome.tabs.create({ url });
@@ -301,7 +296,6 @@ export const usePopupController = (): PopupControllerState & PopupControllerActi
     actionsDisabled,
     insightsDisabled: localBusy,
     refreshAll,
-    refreshSingle,
     openInsights,
   };
 };
