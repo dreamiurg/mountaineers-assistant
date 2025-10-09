@@ -356,7 +356,7 @@ const InsightsApp = () => {
           <p className="max-w-3xl text-sm text-slate-600">{summary}</p>
         </header>
 
-        <section className="glass-card rounded-2xl p-5">
+        <section className="glass-card filter-card rounded-2xl p-5">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-sm font-semibold uppercase tracking-widest text-slate-500">
               Filters
