@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "vite",
     "build": "npm run build:css && vite build",
+    "release": "node scripts/release.js",
     "preview": "vite preview",
     "build:css": "tailwindcss -i ./src/chrome-ext/styles/tailwind.input.css -o ./src/chrome-ext/tailwind.css --minify",
     "format": "prettier --write \"src/**/*.js\" \"src/**/*.ts\" \"src/**/*.tsx\" \"src/**/*.html\" \"src/**/*.css\"",

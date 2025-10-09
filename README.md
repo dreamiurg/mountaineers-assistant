@@ -16,6 +16,7 @@ Mountaineers Assistant is a Chrome extension that improves your Mountaineers.org
 - [Automated Testing](#automated-testing)
 - [Sample Data Fixtures](#sample-data-fixtures)
 - [Project Layout](#project-layout)
+- [Release Workflow](#release-workflow)
 - [Cheatsheet](#cheatsheet)
 
 ## Features
@@ -137,3 +138,10 @@ mountaineers-assistant/
 - `npm run test:extension` runs the Playwright-driven MV3 snapshot suite against the built bundle.
 - `uv run pre-commit install` installs the pinned hook environment; run `uv run pre-commit run --all-files` if hooks are not installed locally.
 - Keep the version in `src/chrome-ext/manifest.json` in sync with `package.json` when cutting releases.
+
+## Release Workflow
+
+1. Start from a clean working tree (no staged or unstaged changes).
+2. Run `npm run release` and enter the next semantic version when prompted. The script runs `npm run typecheck`, updates `package.json`, `package-lock.json`, and `src/chrome-ext/manifest.json`, then stages those files for you.
+3. Review the staged diff, commit with your release message, and tag the commit (for example, `git tag v0.2.0`).
+4. Build the distributable bundle with `npm run build` before packaging it for upload to the Chrome Web Store.
