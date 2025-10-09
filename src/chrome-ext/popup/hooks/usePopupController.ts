@@ -4,6 +4,7 @@ import type { RefreshProgress, RefreshSummary } from '../../shared/types';
 const REFRESH_MESSAGE = 'start-refresh';
 const REFRESH_STATUS_REQUEST_MESSAGE = 'get-refresh-status';
 const REFRESH_STATUS_CHANGE_MESSAGE = 'refresh-status-changed';
+const REFRESH_PROGRESS_MESSAGE = 'refresh-progress';
 const REFRESH_BUSY_MESSAGE = 'A refresh is already running. Please wait for it to finish.';
 const SETTINGS_KEY = 'mountaineersAssistantSettings';
 const CONTEXT_WARNING_MESSAGE = 'Open a Mountaineers.org page to fetch new activities.';
@@ -48,6 +49,7 @@ export const usePopupController = (): PopupControllerState & PopupControllerActi
   const [statusMessage, setStatusMessage] = useState<string>('Loading cached data…');
   const [localBusy, setLocalBusy] = useState<boolean>(false);
   const [refreshInProgress, setRefreshInProgress] = useState<boolean>(false);
+  const [refreshProgress, setRefreshProgress] = useState<RefreshProgress | null>(null);
   const [contextAllowsFetching, setContextAllowsFetching] = useState<boolean>(false);
   const [configuredFetchLimit, setConfiguredFetchLimit] = useState<number | null>(null);
   const [globalBusyForced, setGlobalBusyForced] = useState<boolean>(false);
@@ -55,6 +57,8 @@ export const usePopupController = (): PopupControllerState & PopupControllerActi
   const localBusyRef = useRef(localBusy);
   const globalBusyForcedRef = useRef(globalBusyForced);
   const statusMessageRef = useRef(statusMessage);
+  const refreshProgressRef = useRef<RefreshProgress | null>(refreshProgress);
+  const refreshInProgressRef = useRef(refreshInProgress);
 
   useEffect(() => {
     localBusyRef.current = localBusy;
@@ -68,6 +72,14 @@ export const usePopupController = (): PopupControllerState & PopupControllerActi
     statusMessageRef.current = statusMessage;
   }, [statusMessage]);
 
+  useEffect(() => {
+    refreshProgressRef.current = refreshProgress;
+  }, [refreshProgress]);
+
+  useEffect(() => {
+    refreshInProgressRef.current = refreshInProgress;
+  }, [refreshInProgress]);
+
   const updateStatusMessage = useCallback((message: string) => {
     setStatusMessage(message);
     const forced = message === REFRESH_BUSY_MESSAGE;
@@ -79,11 +91,69 @@ export const usePopupController = (): PopupControllerState & PopupControllerActi
     (isBusy: boolean, message?: string) => {
       setLocalBusy(isBusy);
       localBusyRef.current = isBusy;
+      if (!isBusy) {
+        setRefreshProgress(null);
+        refreshProgressRef.current = null;
+      }
       if (typeof message === 'string') {
         updateStatusMessage(message);
       }
     },
     [updateStatusMessage]
+  );
+
+  const deriveProgressMessage = useCallback((progress: RefreshProgress | null): string | null => {
+    if (!progress) {
+      return null;
+    }
+    const total = Number.isFinite(progress.total) && progress.total > 0 ? progress.total : 0;
+    const completed =
+      Number.isFinite(progress.completed) && progress.completed >= 0 ? progress.completed : 0;
+    const currentIndex = total > 0 ? Math.min(completed + 1, total) : completed + 1;
+
+    switch (progress.stage) {
+      case 'fetching-activities':
+      case 'starting':
+        return 'Refreshing list of activities…';
+      case 'activities-collected':
+        if (total > 0) {
+          return `Caching activity 1 of ${total}…`;
+        }
+        return 'Refreshing list of activities…';
+      case 'loading-details':
+        if (total > 0) {
+          return `Caching activity ${currentIndex} of ${total}…`;
+        }
+        return 'Caching activity details…';
+      case 'loading-roster':
+        if (total > 0) {
+          return `Caching roster for activity ${currentIndex} of ${total}…`;
+        }
+        return 'Caching roster for activity…';
+      case 'finalizing':
+        return 'Wrapping up and updating your dashboard…';
+      case 'no-new-activities':
+        return 'Cached 0 new activities.';
+      case 'error':
+        return 'Refresh encountered an error.';
+      default:
+        return null;
+    }
+  }, []);
+
+  const applyProgressUpdate = useCallback(
+    (progress: RefreshProgress | null | undefined) => {
+      const normalized = progress ?? null;
+      setRefreshProgress(normalized);
+      refreshProgressRef.current = normalized;
+      if (normalized) {
+        const message = deriveProgressMessage(normalized);
+        if (message && message !== statusMessageRef.current) {
+          updateStatusMessage(message);
+        }
+      }
+    },
+    [deriveProgressMessage, updateStatusMessage]
   );
 
   useEffect(() => {
@@ -103,16 +173,28 @@ export const usePopupController = (): PopupControllerState & PopupControllerActi
           | undefined;
         if (!payload) {
           setSummary({ activityCount: 0, lastUpdated: null, newActivities: 0 });
-          updateStatusMessage('No data cached yet.');
+          if (
+            !localBusyRef.current &&
+            !refreshInProgressRef.current &&
+            !refreshProgressRef.current
+          ) {
+            updateStatusMessage(
+              'No cached data yet. Refresh activities from the popup to populate this view.'
+            );
+          }
           return;
         }
+        const activityCount = Array.isArray(payload.activities) ? payload.activities.length : 0;
+        const lastUpdated = payload.lastUpdated ?? null;
         setSummary((previous) => ({
           ...previous,
-          activityCount: Array.isArray(payload.activities) ? payload.activities.length : 0,
-          lastUpdated: payload.lastUpdated ?? null,
+          activityCount,
+          lastUpdated,
           newActivities: 0,
         }));
-        updateStatusMessage('Cached snapshot loaded.');
+        if (!localBusyRef.current && !refreshInProgressRef.current && !refreshProgressRef.current) {
+          updateStatusMessage(formatIdleStatus(lastUpdated));
+        }
       } catch (error) {
         if (!isMounted) {
           return;
@@ -132,7 +214,11 @@ export const usePopupController = (): PopupControllerState & PopupControllerActi
       setContextAllowsFetching(isAllowed);
       if (!isAllowed) {
         updateStatusMessage(CONTEXT_WARNING_MESSAGE);
-      } else if (statusMessageRef.current === CONTEXT_WARNING_MESSAGE && !localBusyRef.current) {
+      } else if (
+        statusMessageRef.current === CONTEXT_WARNING_MESSAGE &&
+        !localBusyRef.current &&
+        !refreshProgressRef.current
+      ) {
         updateStatusMessage('');
       }
     };
@@ -146,8 +232,12 @@ export const usePopupController = (): PopupControllerState & PopupControllerActi
           return;
         }
         const inProgress = Boolean(response?.inProgress);
+        const progress = response?.progress ?? null;
+        if (progress) {
+          applyProgressUpdate(progress);
+        }
         setRefreshInProgress(inProgress);
-        if (inProgress && !localBusyRef.current) {
+        if (inProgress && !localBusyRef.current && !progress) {
           updateStatusMessage(REFRESH_BUSY_MESSAGE);
         }
       } catch (error) {
@@ -180,20 +270,32 @@ export const usePopupController = (): PopupControllerState & PopupControllerActi
     loadFetchPreferences();
 
     const messageListener = (message: unknown) => {
-      if (
-        !message ||
-        typeof message !== 'object' ||
-        (message as { type?: string }).type !== REFRESH_STATUS_CHANGE_MESSAGE
-      ) {
+      if (!message || typeof message !== 'object') {
         return;
       }
-      const payload = message as { inProgress?: boolean };
-      const inProgress = Boolean(payload.inProgress);
-      setRefreshInProgress(inProgress);
-      if (inProgress && !localBusyRef.current) {
-        updateStatusMessage(REFRESH_BUSY_MESSAGE);
-      } else if (!inProgress && globalBusyForcedRef.current && !localBusyRef.current) {
-        updateStatusMessage('');
+      const payload = message as {
+        type?: string;
+        progress?: RefreshProgress | null;
+        inProgress?: boolean;
+      };
+      if (payload.type === REFRESH_PROGRESS_MESSAGE) {
+        if (payload.progress) {
+          applyProgressUpdate(payload.progress);
+        }
+        setRefreshInProgress(true);
+        return;
+      }
+      if (payload.type === REFRESH_STATUS_CHANGE_MESSAGE) {
+        const inProgress = Boolean(payload.inProgress);
+        setRefreshInProgress(inProgress);
+        if (!inProgress) {
+          applyProgressUpdate(null);
+          if (globalBusyForcedRef.current && !localBusyRef.current) {
+            updateStatusMessage('');
+          }
+        } else if (!localBusyRef.current && !refreshProgressRef.current) {
+          updateStatusMessage(REFRESH_BUSY_MESSAGE);
+        }
       }
     };
 
@@ -213,13 +315,31 @@ export const usePopupController = (): PopupControllerState & PopupControllerActi
           | undefined;
         if (!newValue) {
           setSummary({ activityCount: 0, lastUpdated: null, newActivities: 0 });
+          if (
+            !localBusyRef.current &&
+            !refreshInProgressRef.current &&
+            !refreshProgressRef.current
+          ) {
+            updateStatusMessage(
+              'No cached data yet. Refresh activities from the popup to populate this view.'
+            );
+          }
         } else {
+          const activityCount = Array.isArray(newValue.activities) ? newValue.activities.length : 0;
+          const lastUpdated = newValue.lastUpdated ?? null;
           setSummary((previous) => ({
             ...previous,
-            activityCount: Array.isArray(newValue.activities) ? newValue.activities.length : 0,
-            lastUpdated: newValue.lastUpdated ?? null,
+            activityCount,
+            lastUpdated,
             newActivities: 0,
           }));
+          if (
+            !localBusyRef.current &&
+            !refreshInProgressRef.current &&
+            !refreshProgressRef.current
+          ) {
+            updateStatusMessage(formatIdleStatus(lastUpdated));
+          }
         }
       }
       if (changes[SETTINGS_KEY]) {
@@ -235,10 +355,11 @@ export const usePopupController = (): PopupControllerState & PopupControllerActi
       chrome.runtime.onMessage.removeListener(messageListener);
       chrome.storage.onChanged.removeListener(storageListener);
     };
-  }, [updateStatusMessage]);
+  }, [applyProgressUpdate, updateStatusMessage]);
 
   const sendRefreshRequest = useCallback(
     async (limit: number | null, busyMessage: string) => {
+      applyProgressUpdate(null);
       updateBusyState(true, busyMessage);
       try {
         const payload: { type: string; limit?: number | null } = { type: REFRESH_MESSAGE };
@@ -261,22 +382,19 @@ export const usePopupController = (): PopupControllerState & PopupControllerActi
         }
         setSummary(response.summary);
         const newActivities = response.summary.newActivities ?? 0;
-        const suffix =
-          newActivities > 0
-            ? `Added ${newActivities} new ${newActivities === 1 ? 'activity' : 'activities'}.`
-            : 'No new activities found.';
+        const suffix = `Cached ${newActivities} new activities.`;
         updateBusyState(false, suffix);
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unexpected error.';
         updateBusyState(false, message);
       }
     },
-    [updateBusyState]
+    [applyProgressUpdate, updateBusyState]
   );
 
   const refreshAll = useCallback(async () => {
     const limit = configuredFetchLimit ?? null;
-    await sendRefreshRequest(limit, 'Refreshing activities…');
+    await sendRefreshRequest(limit, 'Refreshing list of activities…');
   }, [configuredFetchLimit, sendRefreshRequest]);
 
   const openInsights = useCallback(() => {
@@ -304,12 +422,23 @@ export const usePopupController = (): PopupControllerState & PopupControllerActi
     statusMessage,
     showSpinner,
     actionsDisabled,
-    insightsDisabled: localBusy,
+    insightsDisabled: false,
     refreshAll,
     openInsights,
     openPreferences,
   };
 };
+
+function formatIdleStatus(lastUpdated: string | null): string {
+  if (!lastUpdated) {
+    return 'Last refresh completed never.';
+  }
+  const date = new Date(lastUpdated);
+  if (Number.isNaN(date.getTime())) {
+    return `Last refresh completed ${lastUpdated}.`;
+  }
+  return `Last refresh completed ${date.toLocaleString()}.`;
+}
 
 function normalizeFetchLimit(value: unknown): number | null {
   if (value === null || value === undefined) {

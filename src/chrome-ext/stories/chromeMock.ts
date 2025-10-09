@@ -1,4 +1,4 @@
-import type { ExtensionCache, ExtensionSettings } from '../shared/types';
+import type { ExtensionCache, ExtensionSettings, RefreshProgress } from '../shared/types';
 
 const STORAGE_KEY = 'mountaineersAssistantData';
 const SETTINGS_KEY = 'mountaineersAssistantSettings';
@@ -22,6 +22,16 @@ export interface ChromeMockConfig {
     newActivities: number;
   };
   tabsUrl?: string;
+  progressUpdates?: ProgressUpdateConfig[];
+}
+
+export interface ProgressUpdateConfig {
+  delay: number;
+  stage: string;
+  total?: number;
+  completed?: number;
+  activityUid?: string | null;
+  activityTitle?: string | null;
 }
 
 const defaultSettings: ExtensionSettings = {
@@ -34,12 +44,29 @@ export const createChromeMock = ({
   settings,
   popupSummary,
   tabsUrl = 'https://www.mountaineers.org/my-dashboard',
+  progressUpdates = [],
 }: ChromeMockConfig = {}) => {
   const storageListeners: StorageListener[] = [];
   const runtimeListeners: RuntimeListener[] = [];
+  const scheduledTimers: number[] = [];
 
   let currentData: ExtensionCache | null = data ? clone(data) : null;
   let currentSettings: ExtensionSettings = { ...defaultSettings, ...settings };
+
+  const clearScheduledTimers = () => {
+    while (scheduledTimers.length > 0) {
+      const timerId = scheduledTimers.pop();
+      if (typeof timerId === 'number') {
+        window.clearTimeout(timerId);
+      }
+    }
+  };
+
+  const scheduleTimeout = (callback: () => void, delay: number) => {
+    const timerId = window.setTimeout(callback, Math.max(0, delay));
+    scheduledTimers.push(timerId);
+    return timerId;
+  };
 
   const emitStorageChange = (key: string, newValue: unknown, oldValue: unknown) => {
     const change = {
@@ -51,6 +78,31 @@ export const createChromeMock = ({
     storageListeners.forEach((listener) => listener(change, 'local'));
   };
 
+  const broadcastRuntimeMessage = (message: unknown) => {
+    runtimeListeners.forEach((listener) =>
+      listener(message, {} as chrome.runtime.MessageSender, () => {})
+    );
+  };
+
+  const buildProgressPayload = (update: ProgressUpdateConfig): RefreshProgress => {
+    const total = Number.isFinite(update.total) && update.total !== undefined ? update.total : 0;
+    const completed =
+      Number.isFinite(update.completed) && update.completed !== undefined ? update.completed : 0;
+    let remaining: number | null = null;
+    if (Number.isFinite(total) && total > 0) {
+      remaining = Math.max(total - completed, 0);
+    }
+    return {
+      total,
+      completed,
+      remaining,
+      stage: update.stage,
+      activityUid: update.activityUid ?? null,
+      activityTitle: update.activityTitle ?? null,
+      timestamp: Date.now(),
+    };
+  };
+
   const runtime = {
     sendMessage: (message: unknown, responseCallback?: (response: unknown) => void): void => {
       const payload = message as { type?: string; limit?: number | null };
@@ -59,6 +111,8 @@ export const createChromeMock = ({
         return;
       }
       if (payload?.type === 'start-refresh') {
+        clearScheduledTimers();
+
         const summary =
           popupSummary ??
           ({
@@ -66,7 +120,35 @@ export const createChromeMock = ({
             lastUpdated: currentData?.lastUpdated ?? new Date().toISOString(),
             newActivities: payload.limit ? Math.min(payload.limit, 3) : 0,
           } as const);
-        responseCallback?.({ success: true, summary });
+
+        broadcastRuntimeMessage({
+          type: 'refresh-status-changed',
+          inProgress: true,
+        });
+
+        const sortedUpdates = [...progressUpdates].sort((a, b) => a.delay - b.delay);
+
+        for (const update of sortedUpdates) {
+          scheduleTimeout(() => {
+            const progress = buildProgressPayload(update);
+            broadcastRuntimeMessage({
+              type: 'refresh-progress',
+              progress,
+            });
+          }, update.delay);
+        }
+
+        const completionDelay =
+          sortedUpdates.length > 0 ? sortedUpdates[sortedUpdates.length - 1].delay + 200 : 400;
+
+        scheduleTimeout(() => {
+          broadcastRuntimeMessage({
+            type: 'refresh-status-changed',
+            inProgress: false,
+          });
+          responseCallback?.({ success: true, summary });
+        }, completionDelay);
+
         return;
       }
       responseCallback?.({ success: true });
@@ -198,6 +280,10 @@ export const createChromeMock = ({
       runtimeListeners.forEach((listener) =>
         listener(message, {} as chrome.runtime.MessageSender, () => {})
       );
+    },
+    destroy: () => {
+      clearScheduledTimers();
+      Reflect.deleteProperty(window as unknown as Record<string, unknown>, 'chrome');
     },
   };
 };

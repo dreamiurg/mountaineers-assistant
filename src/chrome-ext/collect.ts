@@ -26,7 +26,7 @@ const ROSTER_SEGMENT = 'roster-tab';
 
   try {
     console.info('Mountaineers Assistant: starting refresh workflow');
-    sendProgressUpdate({ stage: 'starting', total: 0, completed: 0 });
+    sendProgressUpdate({ stage: 'fetching-activities', total: 0, completed: 0 });
 
     const { activities, currentUserUid } = await collectMemberActivities(
       existingActivityUids,
@@ -241,11 +241,20 @@ async function loadRosters(
 
   for (const activity of activities) {
     let resolvedType = activity.activity_type ?? null;
+    const activityTitle = activity.title ?? null;
 
-    const [detailsResult, rosterResult] = await Promise.allSettled([
-      loadActivityDetails(activity),
-      loadActivityRoster(activity),
-    ]);
+    const detailsPromise = loadActivityDetails(activity);
+    const rosterPromise = loadActivityRoster(activity);
+
+    sendProgressUpdate({
+      stage: 'loading-details',
+      total,
+      completed: processed,
+      activityUid: activity.uid,
+      activityTitle,
+    });
+
+    const detailsResult = await settlePromise(detailsPromise);
 
     if (detailsResult.status === 'fulfilled') {
       if (detailsResult.value.activityType) {
@@ -257,6 +266,16 @@ async function loadRosters(
         detailsResult.reason
       );
     }
+
+    sendProgressUpdate({
+      stage: 'loading-roster',
+      total,
+      completed: processed,
+      activityUid: activity.uid,
+      activityTitle,
+    });
+
+    const rosterResult = await settlePromise(rosterPromise);
 
     if (rosterResult.status === 'fulfilled') {
       const { people, entries } = rosterResult.value;
@@ -307,7 +326,7 @@ async function loadRosters(
       total,
       completed: processed,
       activityUid: activity.uid,
-      activityTitle: activity.title ?? null,
+      activityTitle,
       delta: {
         activities: [enrichedActivity],
         people: rosterDelta.people,
@@ -321,6 +340,12 @@ async function loadRosters(
     people: Array.from(peopleByUid.values()),
     rosterEntries,
   };
+}
+
+function settlePromise<T>(promise: Promise<T>): Promise<PromiseSettledResult<T>> {
+  return promise
+    .then<PromiseSettledResult<T>>((value) => ({ status: 'fulfilled', value }))
+    .catch<PromiseSettledResult<T>>((reason) => ({ status: 'rejected', reason }));
 }
 
 function sendProgressUpdate(update: {
