@@ -6,7 +6,7 @@ src/chrome-ext/tailwind.css
 storybook-static/
 
 # Local artifacts & reports
-artifacts/
+mountaineers-assistant-*.zip
 playwright-report/
 test-results/
 blob-report/

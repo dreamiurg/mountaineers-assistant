@@ -144,4 +144,4 @@ mountaineers-assistant/
 1. Start from a clean working tree (no staged or unstaged changes).
 2. Run `npm run release` and enter the next semantic version when prompted. The script runs `npm run typecheck`, updates `package.json`, `package-lock.json`, and `src/chrome-ext/manifest.json`, then stages those files for you.
 3. Review the staged diff, commit with your release message, and tag the commit (for example, `git tag v0.2.0`).
-4. Build the distributable bundle with `npm run build` before packaging it for upload to the Chrome Web Store.
+4. Package the release with `npm run package -- <version>` (for example, `npm run package -- 0.2.0`). The command rebuilds the extension and drops `mountaineers-assistant-<version>.zip` in the repository root, ready for Chrome Web Store upload or to attach to the GitHub release.
