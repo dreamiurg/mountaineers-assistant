@@ -1,15 +1,23 @@
 # Mountaineers Assistant
 
-Mountaineers Assistant is a Chrome extension (Manifest V3) that brings your Mountaineers.org activity history and quick insights directly into the site.
+Mountaineers Assistant is a Chrome extension that improves your Mountaineers.org experience by adding a few features that site does not offer.
 
-## Capabilities
+## Features
 
-- Fetches Mountaineers activity JSON and roster pages from the active tab using your signed-in browser session.
-- Persists normalized data in `chrome.storage.local` so insights remain available offline.
+- Refresh your Mountaineers activity history using your current signed-in session.
+- Explore a dedicated insights dashboard that visualizes your activity history, with powerful filters for type, category, and your role in each event.
+
+![Insights dashboard screenshot](tests/extension-snapshots.spec.ts-snapshots/insights-default-chromium-extension-darwin.png)
+
+## Privacy
+
+All your data is stored locally in your browser and never sent to external servers.
 
 ## Development Setup
 
-## Tech Stack
+If you would like to contribute to this extension, here's what you may want to know.
+
+### Tech Stack
 
 - TypeScript + React
 - [Tailwind CSS](https://tailwindcss.com/) for styling
@@ -18,9 +26,6 @@ Mountaineers Assistant is a Chrome extension (Manifest V3) that brings your Moun
 
 ### Prerequisites
 
-- Node.js 18 or newer
-- `npm`
-
 Install the pinned Node version with Homebrew if needed:
 
 ```bash
@@ -28,44 +33,51 @@ brew install node@18
 npm --version
 ```
 
-### Install & build
+### Install dependencies & build
 
 ```bash
 npm install
 npm run build
 ```
 
-`npm run build` runs Tailwind CSS and bundles the extension into `dist/` via Vite. Run it after any change to TypeScript/JavaScript, Tailwind sources, or static assets so Chrome loads the latest bundle.
+`npm run build` compiles TypeScript, minifies the CSS etc, then bundles the extension into `dist/`.
 
 ### Load the extension
 
-1. Open `chrome://extensions`.
+1. Open [`chrome://extensions`](chrome://extensions).
 2. Enable **Developer mode**.
 3. Click **Load unpacked** and choose the freshly built `dist/` directory.
 
 Reload the unpacked extension in `chrome://extensions` after every rebuild so Chrome’s service worker, popup, and preferences page pick up the latest bundle.
 
-### Iterate quickly
+### Automatic Rebuilds
 
-- `npm run dev` starts the Vite development server and rebuilds bundles as you save (served at `http://localhost:5173/`).
-- `npm run build:css` quickly refreshes `src/chrome-ext/tailwind.css` without touching the rest of the bundle
-- `npm run build` does a full extension rebuild into `dist/` (Tailwind CSS compilation included)
-- `npx vite build --watch` writes incremental bundles to `dist/` if you prefer a watch-only workflow.
+For continuous development, use Vite autorebuild:
 
-## Storybook
+```bash
+npx vite build --watch
+```
+
+This keeps the output in `dist/` up to date without manual rebuilds. Reload the extension in Chrome after each change to see updates.
+
+### Storybook
+
+If you prefer Storybook-style development, Reac components have stories as well. Run Storybook as usual and explore in your browser.
 
 ```bash
 npm run storybook
 ```
 
-Storybook consumes the compiled stylesheet at `src/chrome-ext/tailwind.css`. Run `npm run build:css` before launching Storybook (and whenever you change Tailwind tokens) so the utilities are up to date. Use `npm run storybook:build` to generate a static bundle in `storybook-static/` for documentation or design review.
+## Automate testing
 
-## Extension UI Snapshots
+In addition to standard pre-commit checks for linting and formatting, this extension includes a quick and dirty automated test suite powered by Playwright. When run, tests verify that the main UI features of the [popup](src/chrome-ext/popup.html), [preferences](src/chrome-ext/preferences.html), and [insights](src/chrome-ext/insights.html) pages are still working and that the UI looks as expected.
+
+Here’s what you need to know:
 
 - Run `npx playwright install` once to download the Chromium build Playwright uses to exercise the extension.
 - `npm run test:extension` seeds `chrome.storage.local` with `src/data/sample-activities.json`, launches Chromium with the MV3 bundle from `dist/`, blocks all outbound network traffic, and captures deterministic screenshots of the popup (`popup.html`), preferences (`preferences.html`), and insights dashboard (`insights.html`).
 - Regenerate baselines after intentional UI updates with `npm run test:extension:update`.
-- Snapshot artifacts live under `tests/extension-snapshots.spec.ts-snapshots/`; Playwright drops comparison diffs and traces under `test-results/` when assertions fail (ignored by git via `.gitignore`).
+- Snapshot artifacts live under `tests/extension-snapshots.spec.ts-snapshots/`; Playwright drops comparison diffs and traces under `test-results/` when assertions fail.
 
 ## Sample Data Fixtures
 
@@ -107,6 +119,5 @@ mountaineers-assistant/
 - `npm run lint` runs Prettier in check mode and fails on formatting drift.
 - `npm run typecheck` validates the TypeScript sources with the project `tsconfig`.
 - `npm run test:extension` runs the Playwright-driven MV3 snapshot suite against the built bundle.
-- `npm run test:dashboards` is currently experimental while the snapshot pipeline transitions to Storybook-driven checks.
 - `uv run pre-commit install` installs the pinned hook environment; run `uv run pre-commit run --all-files` if hooks are not installed locally.
 - Keep the version in `src/chrome-ext/manifest.json` in sync with `package.json` when cutting releases.
