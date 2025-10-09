@@ -67,6 +67,18 @@ dist/                      # Bundled extension output produced by Vite (gitignor
 - Keep `manifest.json` version aligned with the extension version in `package.json`.
 - Install Python tooling with `uv run pre-commit install`; run hooks via `uv run pre-commit run --all-files`.
 
+### Commit Message Style Guide
+
+Use the format `<prefix>: <summary in past tense>`, for example:
+`fix: corrected timeout logic in API client`.
+
+- Common prefixes: `feat`, `fix`, `refactor`, `docs`, `style`, `test`, `build`, `ci`, `perf`, `chore`.
+- Use **lowercase** prefixes and **past tense** verbs (e.g., “added,” “fixed”).
+- Keep the first line under ~60 characters, without punctuation.
+- Focus on **what changed**, not why; add a short body only if needed.
+- Avoid vague language like “updated code” or “made improvements.”
+- Example: `feat: added dark mode toggle in settings`.
+
 ## Quality Gates
 
 - Run `npm run format` before committing to apply Prettier.
