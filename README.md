@@ -113,7 +113,7 @@ mountaineers-assistant/
 └─ README.md
 ```
 
-## Quality Gates & Tooling
+### Cheatsheet
 
 - `npm run format` applies Prettier to JS/TS, HTML, and CSS under `src/`.
 - `npm run lint` runs Prettier in check mode and fails on formatting drift.
