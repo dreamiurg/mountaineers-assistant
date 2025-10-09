@@ -1,6 +1,22 @@
 # Mountaineers Assistant
 
-Mountaineers Assistant is a Chrome extension that improves your Mountaineers.org experience by adding a few features that site does not offer.
+Mountaineers Assistant is a Chrome extension that improves your Mountaineers.org experience by adding features the site does not offer.
+
+## Table of Contents
+
+- [Features](#features)
+- [Privacy](#privacy)
+- [Development Setup](#development-setup)
+  - [Tech Stack](#tech-stack)
+  - [Prerequisites](#prerequisites)
+  - [Install Dependencies & Build](#install-dependencies--build)
+  - [Load the Extension](#load-the-extension)
+  - [Automatic Rebuilds](#automatic-rebuilds)
+  - [Storybook](#storybook)
+- [Automated Testing](#automated-testing)
+- [Sample Data Fixtures](#sample-data-fixtures)
+- [Project Layout](#project-layout)
+- [Cheatsheet](#cheatsheet)
 
 ## Features
 
@@ -33,16 +49,16 @@ brew install node@18
 npm --version
 ```
 
-### Install dependencies & build
+### Install Dependencies & Build
 
 ```bash
 npm install
 npm run build
 ```
 
-`npm run build` compiles TypeScript, minifies the CSS etc, then bundles the extension into `dist/`.
+`npm run build` compiles TypeScript, minifies the CSS, and bundles the extension into `dist/`.
 
-### Load the extension
+### Load the Extension
 
 1. Open [`chrome://extensions`](chrome://extensions).
 2. Enable **Developer mode**.
@@ -62,15 +78,15 @@ This keeps the output in `dist/` up to date without manual rebuilds. Reload the 
 
 ### Storybook
 
-If you prefer Storybook-style development, Reac components have stories as well. Run Storybook as usual and explore in your browser.
+If you prefer Storybook-style development, React components have stories as well. Run Storybook and explore in your browser:
 
 ```bash
 npm run storybook
 ```
 
-## Automate testing
+## Automated Testing
 
-In addition to standard pre-commit checks for linting and formatting, this extension includes a quick and dirty automated test suite powered by Playwright. When run, tests verify that the main UI features of the [popup](src/chrome-ext/popup.html), [preferences](src/chrome-ext/preferences.html), and [insights](src/chrome-ext/insights.html) pages are still working and that the UI looks as expected.
+In addition to standard pre-commit checks for linting and formatting, this extension includes an automated test suite powered by Playwright. When run, tests verify that the main UI features of the [popup](src/chrome-ext/popup.html), [preferences](src/chrome-ext/preferences.html), and [insights](src/chrome-ext/insights.html) pages are working and that the UI looks as expected.
 
 Here’s what you need to know:
 
@@ -81,7 +97,7 @@ Here’s what you need to know:
 
 ## Sample Data Fixtures
 
-- Sanitized fixtures now live at `src/data/sample-activities.json` and mirror the structure returned by Mountaineers APIs.
+- Sanitized fixtures live at `src/data/sample-activities.json` and mirror the structure returned by Mountaineers APIs.
 - Storybook stories and Playwright tests import this file directly; update it whenever you need to cover new scenarios or edge cases.
 
 ## Project Layout
@@ -105,8 +121,8 @@ mountaineers-assistant/
 │     ├─ shared/              # Reusable TypeScript models shared across scripts.
 │     ├─ types/               # Ambient type declarations consumed by content scripts.
 │     └─ styles/              # Tailwind sources compiled into tailwind.css.
-├─ src/data/               # Sanitized Storybook/Playwright fixtures.
-├─ dist/                   # Generated MV3 bundle emitted by Vite (not checked in).
+├─ src/data/                  # Sanitized Storybook/Playwright fixtures.
+├─ dist/                      # Generated MV3 bundle emitted by Vite (not checked in).
 ├─ package.json               # npm scripts and extension metadata.
 ├─ package-lock.json
 ├─ .pre-commit-config.yaml    # Pre-commit hook definitions (Prettier, ESLint, gitleaks).
