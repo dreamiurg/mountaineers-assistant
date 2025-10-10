@@ -21,7 +21,8 @@
     "storybook:build": "storybook build",
     "test:dashboards": "node scripts/snapshot-dashboards.js",
     "test:extension": "playwright test --project=chromium-extension",
-    "test:extension:update": "playwright test --project=chromium-extension --update-snapshots"
+    "test:extension:update": "playwright test --project=chromium-extension --update-snapshots",
+    "screenshot:insights": "node scripts/generate-insights-screenshot.js"
   },
   "repository": {
     "type": "git",
