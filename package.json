@@ -1,6 +1,6 @@
 {
   "name": "mountaineers-assistant",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Chrome extension that surfaces Mountaineers activity insights directly in the browser.",
   "main": "src/chrome-ext/background.js",
   "directories": {

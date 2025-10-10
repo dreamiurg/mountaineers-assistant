@@ -199,6 +199,9 @@ async function main() {
   console.log(`\nUpdating manifest version to ${nextSemver.raw}…\n`);
   updateManifest(nextSemver.raw);
 
+  console.log('\nFormatting release files with Prettier…\n');
+  runCommand('npx prettier --write package.json src/chrome-ext/manifest.json');
+
   const filesToStage = [packageJsonPath, manifestPath];
 
   if (fs.existsSync(packageLockPath)) {
