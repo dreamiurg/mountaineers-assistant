@@ -171,9 +171,8 @@ function logStep(message) {
 }
 
 function logCommand(command) {
-  if (verboseMode) {
-    console.log(`$ ${command}`);
-  }
+  const prefix = verboseMode ? '$' : '    $';
+  console.log(`${prefix} ${command}`);
 }
 
 async function main() {
