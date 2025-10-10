@@ -131,6 +131,28 @@ function updateManifest(version) {
   writeJson(manifestPath, manifest);
 }
 
+function parseCliVersion() {
+  const args = process.argv.slice(2);
+  let versionArg = null;
+
+  for (let i = 0; i < args.length; i += 1) {
+    const arg = args[i];
+    if (arg === '--') {
+      break;
+    }
+    if (arg === '--version' && args[i + 1]) {
+      versionArg = args[i + 1];
+      break;
+    }
+    if (!arg.startsWith('--') && !versionArg) {
+      versionArg = arg;
+      break;
+    }
+  }
+
+  return versionArg ? versionArg.trim() : null;
+}
+
 async function main() {
   ensureCleanGitState();
 
@@ -146,7 +168,10 @@ async function main() {
     throw new Error(`Current package version "${currentVersion}" is not a valid semver string.`);
   }
 
-  const nextVersionInput = await promptForVersion(currentVersion);
+  let nextVersionInput = parseCliVersion();
+  if (!nextVersionInput) {
+    nextVersionInput = await promptForVersion(currentVersion);
+  }
 
   if (!nextVersionInput) {
     throw new Error('No version provided. Release aborted.');

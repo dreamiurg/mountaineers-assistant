@@ -90,6 +90,7 @@ Use the format `<prefix>: <summary in past tense>`, for example:
 
 ## Agent Checklist
 
+- Before returning results, run `uv run pre-commit run --all-files` and resolve every reported issue.
 - Follow the architectural outline above when extending the extension.
 - Document breaking changes in `README.md`.
 - Update Tailwind build step if stylesheets or entry points move.

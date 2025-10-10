@@ -137,9 +137,16 @@ mountaineers-assistant/
 - `npm run typecheck` validates the TypeScript sources with the project `tsconfig`.
 - `npm run test:extension` runs the Playwright-driven MV3 snapshot suite against the built bundle.
 - `uv run pre-commit install` installs the pinned hook environment; run `uv run pre-commit run --all-files` if hooks are not installed locally.
-- Keep the version in `src/chrome-ext/manifest.json` in sync with `package.json` when cutting releases.
+- Use `npm run publish -- <version>` to automate releases; rely on `npm run release` and `npm run package -- <version>` if you prefer manual control.
 
 ## Release Workflow
+
+### One-command flow
+
+1. Run `npm run publish -- <version>` (for example, `npm run publish -- 0.2.0`). The helper verifies a clean git state, bumps versions, runs the build, writes `mountaineers-assistant-<version>.zip` in the repo root, tags the commit, pushes branch and tag, and drafts a GitHub release (if the `gh` CLI is installed).
+2. Upload the generated ZIP to the Chrome Web Store to finish the release.
+
+### Manual flow (if you prefer to control each step)
 
 1. Start from a clean working tree (no staged or unstaged changes).
 2. Run `npm run release` and enter the next semantic version when prompted. The script runs `npm run typecheck`, updates `package.json`, `package-lock.json`, and `src/chrome-ext/manifest.json`, then stages those files for you.
