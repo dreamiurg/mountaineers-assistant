@@ -7,43 +7,68 @@ const readline = require('readline');
 
 const repoRoot = path.resolve(__dirname, '..');
 const packageJsonPath = path.join(repoRoot, 'package.json');
+let verboseMode = false;
+let stepCounter = 0;
 
 function runCommand(command, options = {}) {
-  execSync(command, {
-    stdio: 'inherit',
-    cwd: repoRoot,
-    ...options,
-  });
+  const stdio = verboseMode ? 'inherit' : ['inherit', 'pipe', 'pipe'];
+
+  try {
+    execSync(command, {
+      stdio,
+      cwd: repoRoot,
+      ...options,
+    });
+  } catch (error) {
+    if (!verboseMode) {
+      if (error.stdout) {
+        process.stdout.write(error.stdout.toString());
+      }
+      if (error.stderr) {
+        process.stderr.write(error.stderr.toString());
+      }
+    }
+    throw error;
+  }
 }
 
 function getCommandOutput(command) {
   return execSync(command, {
-    stdio: 'pipe',
+    stdio: ['inherit', 'pipe', 'pipe'],
     cwd: repoRoot,
     encoding: 'utf8',
   }).trim();
 }
 
-function parseCliVersion() {
+function parseArgs() {
   const args = process.argv.slice(2);
-  let versionArg = null;
+  let version = null;
+  let verbose = false;
 
   for (let i = 0; i < args.length; i += 1) {
     const arg = args[i];
     if (arg === '--') {
       break;
     }
-    if (arg === '--version' && args[i + 1]) {
-      versionArg = args[i + 1];
-      break;
+    if (arg === '-v' || arg === '--verbose') {
+      verbose = true;
+      continue;
     }
-    if (!arg.startsWith('--') && !versionArg) {
-      versionArg = arg;
-      break;
+    if (arg === '--version' && args[i + 1]) {
+      version = args[i + 1];
+      i += 1;
+      continue;
+    }
+    if (!arg.startsWith('--') && !version) {
+      version = arg;
+      continue;
     }
   }
 
-  return versionArg ? versionArg.trim() : null;
+  return {
+    version: version ? version.trim() : null,
+    verbose,
+  };
 }
 
 function promptForVersion(currentVersion) {
@@ -99,6 +124,7 @@ function pushBranch(branch) {
         'Unable to push branch: no origin remote configured. Push manually once origin is available.'
       );
     }
+    logCommand(`git push --set-upstream origin ${branch}`);
     runCommand(`git push --set-upstream origin ${branch}`);
   }
 }
@@ -126,6 +152,9 @@ function createGithubRelease(version, zipPath) {
   const releaseNotes = `Mountaineers Assistant v${version}`;
 
   try {
+    logCommand(
+      `gh release create v${version} --title "${releaseTitle}" --notes "${releaseNotes}" "${relativeZip}"`
+    );
     runCommand(
       `gh release create v${version} --title "${releaseTitle}" --notes "${releaseNotes}" "${relativeZip}"`
     );
@@ -136,13 +165,27 @@ function createGithubRelease(version, zipPath) {
   }
 }
 
+function logStep(message) {
+  stepCounter += 1;
+  console.log(`\n[${stepCounter}] ${message}`);
+}
+
+function logCommand(command) {
+  if (verboseMode) {
+    console.log(`$ ${command}`);
+  }
+}
+
 async function main() {
   ensureCleanGitState();
 
   const initialPackage = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
   const currentVersion = initialPackage.version;
 
-  let targetVersion = parseCliVersion();
+  const { version: cliVersion, verbose } = parseArgs();
+  verboseMode = verbose;
+
+  let targetVersion = cliVersion;
   if (!targetVersion) {
     targetVersion = await promptForVersion(currentVersion);
   }
@@ -153,7 +196,8 @@ async function main() {
 
   ensureTagDoesNotExist(targetVersion);
 
-  console.log(`\nPreparing release for version ${targetVersion}…\n`);
+  logStep(`Preparing release for version ${targetVersion}`);
+  logCommand(`node scripts/release.js --version ${targetVersion}`);
   runCommand(`node scripts/release.js --version ${targetVersion}`);
 
   const updatedPackage = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
@@ -163,10 +207,12 @@ async function main() {
     );
   }
 
-  console.log('\nCommitting staged release files…\n');
+  logStep('Committing staged release files');
+  logCommand(`git commit -m "release: prepared v${targetVersion}"`);
   runCommand(`git commit -m "release: prepared v${targetVersion}"`);
 
-  console.log('\nBuilding and packaging distributable…\n');
+  logStep('Building and packaging distributable');
+  logCommand(`npm run package -- ${targetVersion}`);
   runCommand(`npm run package -- ${targetVersion}`);
 
   const zipPath = path.join(repoRoot, `mountaineers-assistant-${targetVersion}.zip`);
@@ -174,17 +220,20 @@ async function main() {
     throw new Error(`Expected package ${zipPath} not found.`);
   }
 
-  console.log('\nCreating release tag…\n');
+  logStep('Creating release tag');
+  logCommand(`git tag -a v${targetVersion} -m "Release v${targetVersion}"`);
   runCommand(`git tag -a v${targetVersion} -m "Release v${targetVersion}"`);
 
   const branch = getCurrentBranch();
-  console.log(`\nPushing branch (${branch})…\n`);
+  logStep(`Pushing branch (${branch})`);
+  logCommand('git push');
   pushBranch(branch);
 
-  console.log(`\nPushing tag v${targetVersion}…\n`);
+  logStep(`Pushing tag v${targetVersion}`);
+  logCommand(`git push origin v${targetVersion}`);
   runCommand(`git push origin v${targetVersion}`);
 
-  console.log('\nPublishing GitHub release…\n');
+  logStep('Publishing GitHub release');
   createGithubRelease(targetVersion, zipPath);
 
   console.log('\nAll done! Upload the ZIP to the Chrome Web Store to complete the release.\n');

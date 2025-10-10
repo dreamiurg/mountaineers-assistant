@@ -143,7 +143,7 @@ mountaineers-assistant/
 
 ### One-command flow
 
-1. Run `npm run publish -- <version>` (for example, `npm run publish -- 0.2.0`). The helper verifies a clean git state, bumps versions, runs the build, writes `mountaineers-assistant-<version>.zip` in the repo root, tags the commit, pushes branch and tag, and drafts a GitHub release (if the `gh` CLI is installed).
+1. Run `npm run publish -- <version>` (for example, `npm run publish -- 0.2.0`). The helper verifies a clean git state, bumps versions, runs the build, writes `mountaineers-assistant-<version>.zip` in the repo root, tags the commit, pushes branch and tag, and drafts a GitHub release (if the `gh` CLI is installed). Add `-v` (or `--verbose`) to see full command output.
 2. Upload the generated ZIP to the Chrome Web Store to finish the release.
 
 ### Manual flow (if you prefer to control each step)
