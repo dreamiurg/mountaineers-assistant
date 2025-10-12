@@ -4,6 +4,7 @@ const {
   parseConventionalCommit,
   categorizeCommits,
   formatChangelogEntry,
+  generateChangelog,
 } = require('./changelog-utils');
 
 console.log('Testing getCommitsSinceLastTag...');
@@ -96,3 +97,24 @@ if (!entry.includes('### Changed')) {
 }
 
 console.log('✓ formatChangelogEntry test passed');
+
+console.log('\nTesting generateChangelog...');
+const changelog = generateChangelog('0.1.7', '2025-10-11');
+
+if (!changelog.includes('# Changelog')) {
+  throw new Error('Missing changelog header');
+}
+if (!changelog.includes('Keep a Changelog')) {
+  throw new Error('Missing Keep a Changelog reference');
+}
+if (!changelog.includes('Semantic Versioning')) {
+  throw new Error('Missing Semantic Versioning reference');
+}
+if (!changelog.includes('## [0.1.7] - 2025-10-11')) {
+  throw new Error('Missing version entry');
+}
+
+console.log('✓ generateChangelog test passed');
+console.log('\n--- Sample Changelog Output ---');
+console.log(changelog.split('\n').slice(0, 20).join('\n'));
+console.log('...');

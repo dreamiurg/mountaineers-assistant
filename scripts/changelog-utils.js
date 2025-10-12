@@ -207,9 +207,40 @@ function formatChangelogEntry(version, date, categories) {
   return lines.join('\n');
 }
 
+/**
+ * Generate complete CHANGELOG.md content.
+ * @param {string} version - Semantic version
+ * @param {string} date - Release date (YYYY-MM-DD)
+ * @returns {string} Complete changelog content
+ */
+function generateChangelog(version, date) {
+  const lines = [];
+
+  // Keep a Changelog header
+  lines.push('# Changelog');
+  lines.push('');
+  lines.push('All notable changes to this project will be documented in this file.');
+  lines.push('');
+  lines.push('The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),');
+  lines.push(
+    'and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).'
+  );
+  lines.push('');
+
+  // Generate entry for this version
+  const commits = getCommitsSinceLastTag();
+  const categories = categorizeCommits(commits);
+  const entry = formatChangelogEntry(version, date, categories);
+
+  lines.push(entry);
+
+  return lines.join('\n');
+}
+
 module.exports = {
   getCommitsSinceLastTag,
   parseConventionalCommit,
   categorizeCommits,
   formatChangelogEntry,
+  generateChangelog,
 };
