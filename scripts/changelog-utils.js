@@ -51,6 +51,34 @@ function parseGitLog(output) {
     .filter((commit) => commit.hash && commit.message);
 }
 
+/**
+ * Parse a conventional commit message.
+ * @param {string} message - Commit message
+ * @returns {{type: string|null, scope: string|null, message: string}}
+ */
+function parseConventionalCommit(message) {
+  const conventionalRegex =
+    /^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(([^)]+)\))?!?:\s*(.+)$/i;
+  const match = message.match(conventionalRegex);
+
+  if (!match) {
+    return {
+      type: null,
+      scope: null,
+      message: message.trim(),
+    };
+  }
+
+  const [, type, , scope, msg] = match;
+
+  return {
+    type: type.toLowerCase(),
+    scope: scope || null,
+    message: msg.trim(),
+  };
+}
+
 module.exports = {
   getCommitsSinceLastTag,
+  parseConventionalCommit,
 };
