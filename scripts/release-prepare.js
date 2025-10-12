@@ -6,7 +6,6 @@ const path = require('path');
 
 const repoRoot = path.resolve(__dirname, '..');
 
-// eslint-disable-next-line no-unused-vars
 function runCommand(command, options = {}) {
   return execSync(command, {
     stdio: 'inherit',
@@ -100,6 +99,39 @@ function parseVersion() {
   return args[0] ? args[0].trim() : null;
 }
 
+function fetchLatest() {
+  console.log('Fetching latest from origin...');
+  runCommand('git fetch origin');
+}
+
+function createOrSwitchReleaseBranch(version) {
+  const branchName = `release/v${version}`;
+
+  // Check if branch exists locally
+  try {
+    const branches = getCommandOutput('git branch --list');
+    const branchExists = branches
+      .split('\n')
+      .some((b) => b.trim() === branchName || b.trim() === `* ${branchName}`);
+
+    if (branchExists) {
+      console.log(`\nRelease branch ${branchName} already exists. Switching to it...`);
+      runCommand(`git checkout ${branchName}`);
+      console.log('⚠️  Working on existing release branch. Previous changes may exist.\n');
+      return branchName;
+    }
+  } catch {
+    // Branch check failed, continue to create
+  }
+
+  // Create new branch from current main
+  console.log(`\nCreating release branch ${branchName} from main...`);
+  runCommand(`git checkout -b ${branchName}`);
+  console.log(`✓ Created branch ${branchName}\n`);
+
+  return branchName;
+}
+
 async function main() {
   ensureGhAvailable();
 
@@ -120,9 +152,13 @@ async function main() {
 
   console.log(`\nPreparing release for version ${version}...\n`);
 
-  // TODO: Implement release preparation steps
+  fetchLatest();
+  const releaseBranch = createOrSwitchReleaseBranch(version);
+
+  // TODO: Implement remaining release preparation steps
 
   console.log('\nRelease preparation completed!\n');
+  console.log(`Release branch: ${releaseBranch}\n`);
 }
 
 main().catch((error) => {
