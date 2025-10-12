@@ -164,8 +164,52 @@ function cleanCommitMessage(message) {
   return cleaned;
 }
 
+/**
+ * Format a changelog entry for a version.
+ * @param {string} version - Semantic version
+ * @param {string} date - Release date (YYYY-MM-DD)
+ * @param {{added: string[], fixed: string[], changed: string[], other: string[]}} categories
+ * @returns {string} Formatted changelog entry
+ */
+function formatChangelogEntry(version, date, categories) {
+  const lines = [];
+
+  lines.push(`## [${version}] - ${date}`);
+  lines.push('');
+
+  // Add sections in Keep a Changelog order
+  const sections = [
+    { key: 'added', title: 'Added' },
+    { key: 'changed', title: 'Changed' },
+    { key: 'fixed', title: 'Fixed' },
+    { key: 'other', title: 'Other' },
+  ];
+
+  sections.forEach(({ key, title }) => {
+    const entries = categories[key];
+    if (entries && entries.length > 0) {
+      lines.push(`### ${title}`);
+      lines.push('');
+      entries.forEach((entry) => {
+        lines.push(`- ${entry}`);
+      });
+      lines.push('');
+    }
+  });
+
+  // If no entries at all, add a note
+  const totalEntries = Object.values(categories).reduce((sum, arr) => sum + arr.length, 0);
+  if (totalEntries === 0) {
+    lines.push('No changes recorded.');
+    lines.push('');
+  }
+
+  return lines.join('\n');
+}
+
 module.exports = {
   getCommitsSinceLastTag,
   parseConventionalCommit,
   categorizeCommits,
+  formatChangelogEntry,
 };

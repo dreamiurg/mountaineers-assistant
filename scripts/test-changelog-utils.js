@@ -3,6 +3,7 @@ const {
   getCommitsSinceLastTag,
   parseConventionalCommit,
   categorizeCommits,
+  formatChangelogEntry,
 } = require('./changelog-utils');
 
 console.log('Testing getCommitsSinceLastTag...');
@@ -67,3 +68,31 @@ if (categorized.added[0] !== 'Added partner filter') {
 }
 
 console.log('✓ All categorizeCommits tests passed');
+
+console.log('\nTesting formatChangelogEntry...');
+const categories = {
+  added: ['Added partner filter', 'Added dark mode'],
+  fixed: ['Corrected timeout'],
+  changed: ['Updated dependencies'],
+  other: [],
+};
+
+const entry = formatChangelogEntry('0.1.7', '2025-10-11', categories);
+
+if (!entry.includes('## [0.1.7] - 2025-10-11')) {
+  throw new Error('Missing version header');
+}
+if (!entry.includes('### Added')) {
+  throw new Error('Missing Added section');
+}
+if (!entry.includes('- Added partner filter')) {
+  throw new Error('Missing added entry');
+}
+if (!entry.includes('### Fixed')) {
+  throw new Error('Missing Fixed section');
+}
+if (!entry.includes('### Changed')) {
+  throw new Error('Missing Changed section');
+}
+
+console.log('✓ formatChangelogEntry test passed');
