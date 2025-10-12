@@ -12,6 +12,11 @@ function getCommitsSinceLastTag() {
       stdio: ['pipe', 'pipe', 'pipe'],
     }).trim();
 
+    // Security: Validate tag format before using in command
+    if (!/^[a-zA-Z0-9._/-]+$/.test(lastTag)) {
+      throw new Error(`Invalid git tag format: ${lastTag}`);
+    }
+
     // Get commits since last tag
     const output = execSync(`git log ${lastTag}..HEAD --format='%H|%s'`, {
       encoding: 'utf8',

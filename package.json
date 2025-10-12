@@ -9,7 +9,8 @@
   "scripts": {
     "dev": "vite",
     "build": "npm run build:css && vite build",
-    "release:prepare": "node scripts/release-prepare.js",
+    "release:bump": "node scripts/release-bump.js",
+    "release:submit": "node scripts/release-submit.js",
     "release:publish": "node scripts/release-publish.js",
     "release:package": "node scripts/release-package.js",
     "preview": "vite preview",

@@ -1,9 +1,5 @@
 #!/usr/bin/env node
 
-console.warn(
-  '\n⚠️  DEPRECATED: Use "npm run release:bump" followed by "npm run release:submit" instead.\n'
-);
-
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
@@ -194,80 +190,20 @@ function runTypecheck() {
   console.log('✓ Typecheck passed\n');
 }
 
-function commitReleaseFiles(version) {
-  const packageJsonPath = path.join(repoRoot, 'package.json');
-  const packageLockPath = path.join(repoRoot, 'package-lock.json');
-  const manifestPath = path.join(repoRoot, 'src', 'chrome-ext', 'manifest.json');
-  const changelogPath = path.join(repoRoot, 'CHANGELOG.md');
-
-  console.log('Staging release files...');
-
-  const filesToStage = [
-    path.relative(repoRoot, packageJsonPath),
-    path.relative(repoRoot, packageLockPath),
-    path.relative(repoRoot, manifestPath),
-    path.relative(repoRoot, changelogPath),
-  ];
-
-  filesToStage.forEach((file) => {
-    runCommand(`git add "${file}"`);
-  });
-
-  console.log('Committing release files...');
-  runCommand(`git commit -m "release: prepared v${version}"`);
-  console.log(`✓ Committed release files\n`);
-}
-
-function pushReleaseBranch(branchName) {
-  console.log(`Pushing ${branchName} to origin...`);
-
-  try {
-    runCommand('git push');
-  } catch {
-    // Branch might not have upstream set
-    console.log('Setting upstream and pushing...');
-    runCommand(`git push --set-upstream origin ${branchName}`);
-  }
-
-  console.log(`✓ Pushed ${branchName}\n`);
-}
-
-function createPullRequest(version, branchName) {
-  console.log('Creating pull request...');
-
-  const title = `Release v${version}`;
-  const body = `Release v${version}`;
-
-  try {
-    const prUrl = getCommandOutput(
-      `gh pr create --base main --head ${branchName} --title "${title}" --body "${body}"`
-    );
-    console.log(`✓ Pull request created: ${prUrl}\n`);
-    return prUrl;
-  } catch (error) {
-    // PR might already exist
-    if (error.message.includes('already exists')) {
-      console.log('⚠️  Pull request already exists for this branch\n');
-      try {
-        const prUrl = getCommandOutput(`gh pr view ${branchName} --json url --jq .url`);
-        console.log(`   Existing PR: ${prUrl}\n`);
-        return prUrl;
-      } catch {
-        console.log('   Run: gh pr list --head ' + branchName + '\n');
-        return null;
-      }
-    }
-    throw error;
-  }
-}
-
 async function main() {
   ensureGhAvailable();
 
   const version = parseVersion();
 
   if (!version) {
-    throw new Error('Version required. Usage: npm run release:prepare <version>');
+    throw new Error('Version required. Usage: npm run release:bump <version>');
+  }
+
+  // Security: Strict validation before using version in any shell commands
+  if (!/^\d+\.\d+\.\d+(-[0-9A-Za-z-.]+)?(\+[0-9A-Za-z-.]+)?$/.test(version)) {
+    throw new Error(
+      `Invalid version format: "${version}". Must be valid semver (e.g., 1.2.3, 1.2.3-beta.1)`
+    );
   }
 
   ensureCleanWorkingTree();
@@ -279,7 +215,7 @@ async function main() {
 
   validateVersion(version, currentVersion);
 
-  console.log(`\nPreparing release for version ${version}...\n`);
+  console.log(`\nPreparing release files for version ${version}...\n`);
 
   fetchLatest();
   const releaseBranch = createOrSwitchReleaseBranch(version);
@@ -289,21 +225,19 @@ async function main() {
   generateChangelogFile(version);
   formatReleaseFiles();
 
-  commitReleaseFiles(version);
-  pushReleaseBranch(releaseBranch);
-  const prUrl = createPullRequest(version, releaseBranch);
-
   console.log('='.repeat(60));
-  console.log('Release preparation completed!');
+  console.log('Release files updated successfully!');
   console.log('='.repeat(60));
   console.log(`\nRelease branch: ${releaseBranch}`);
-  if (prUrl) {
-    console.log(`Pull request: ${prUrl}`);
-  }
+  console.log('\nModified files:');
+  console.log('  - package.json');
+  console.log('  - package-lock.json');
+  console.log('  - src/chrome-ext/manifest.json');
+  console.log('  - CHANGELOG.md');
   console.log('\nNext steps:');
-  console.log('1. Review the pull request on GitHub');
-  console.log('2. Merge the pull request when ready');
-  console.log(`3. Run: npm run release:publish ${version}`);
+  console.log('1. Review the changes (especially CHANGELOG.md)');
+  console.log('2. Make any additional edits if needed');
+  console.log('3. When ready, run: npm run release:submit');
   console.log('');
 }
 
