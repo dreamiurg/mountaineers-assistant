@@ -4,11 +4,13 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
+const { generateChangelog } = require('./changelog-utils');
 
 const repoRoot = path.resolve(__dirname, '..');
 const packageJsonPath = path.join(repoRoot, 'package.json');
 const packageLockPath = path.join(repoRoot, 'package-lock.json');
 const manifestPath = path.join(repoRoot, 'src', 'chrome-ext', 'manifest.json');
+const changelogPath = path.join(repoRoot, 'CHANGELOG.md');
 
 function runCommand(command, options = {}) {
   execSync(command, {
@@ -199,10 +201,15 @@ async function main() {
   console.log(`\nUpdating manifest version to ${nextSemver.raw}…\n`);
   updateManifest(nextSemver.raw);
 
-  console.log('\nFormatting release files with Prettier…\n');
-  runCommand('npx prettier --write package.json src/chrome-ext/manifest.json');
+  console.log(`\nGenerating CHANGELOG.md entry for ${nextSemver.raw}…\n`);
+  const changelogDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+  const changelogContent = generateChangelog(nextSemver.raw, changelogDate);
+  fs.writeFileSync(changelogPath, changelogContent, 'utf8');
 
-  const filesToStage = [packageJsonPath, manifestPath];
+  console.log('\nFormatting release files with Prettier…\n');
+  runCommand('npx prettier --write package.json src/chrome-ext/manifest.json CHANGELOG.md');
+
+  const filesToStage = [packageJsonPath, manifestPath, changelogPath];
 
   if (fs.existsSync(packageLockPath)) {
     filesToStage.push(packageLockPath);
@@ -214,7 +221,7 @@ async function main() {
   });
 
   console.log(
-    '\nRelease preparation completed. Review the staged changes, commit, and tag when ready.'
+    '\nRelease preparation completed. Review the staged changes with "git diff --cached", then commit and tag when ready.'
   );
 }
 
