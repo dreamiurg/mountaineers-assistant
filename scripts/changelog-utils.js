@@ -213,15 +213,11 @@ function formatChangelogEntry(version, date, categories) {
 }
 
 /**
- * Generate complete CHANGELOG.md content.
- * @param {string} version - Semantic version
- * @param {string} date - Release date (YYYY-MM-DD)
- * @returns {string} Complete changelog content
+ * Generate the changelog header.
+ * @returns {string} Changelog header
  */
-function generateChangelog(version, date) {
+function generateChangelogHeader() {
   const lines = [];
-
-  // Keep a Changelog header
   lines.push('# Changelog');
   lines.push('');
   lines.push('All notable changes to this project will be documented in this file.');
@@ -231,6 +227,50 @@ function generateChangelog(version, date) {
     'and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).'
   );
   lines.push('');
+  return lines.join('\n');
+}
+
+/**
+ * Parse existing changelog to separate header and entries.
+ * @param {string} content - Existing changelog content
+ * @returns {{header: string, entries: string}} Parsed changelog parts
+ */
+function parseExistingChangelog(content) {
+  const lines = content.split('\n');
+  const headerLines = [];
+  const entryLines = [];
+  let foundFirstEntry = false;
+
+  for (const line of lines) {
+    // Look for the first release entry (## [version])
+    if (line.match(/^##\s+\[.+\]/)) {
+      foundFirstEntry = true;
+    }
+
+    if (foundFirstEntry) {
+      entryLines.push(line);
+    } else {
+      headerLines.push(line);
+    }
+  }
+
+  return {
+    header: headerLines.join('\n').trim(),
+    entries: entryLines.join('\n').trim(),
+  };
+}
+
+/**
+ * Generate complete CHANGELOG.md content.
+ * @param {string} version - Semantic version
+ * @param {string} date - Release date (YYYY-MM-DD)
+ * @returns {string} Complete changelog content
+ */
+function generateChangelog(version, date) {
+  const lines = [];
+
+  // Keep a Changelog header
+  lines.push(generateChangelogHeader());
 
   // Generate entry for this version
   const commits = getCommitsSinceLastTag();
@@ -242,10 +282,48 @@ function generateChangelog(version, date) {
   return lines.join('\n');
 }
 
+/**
+ * Prepend a new entry to an existing changelog.
+ * @param {string} existingContent - Existing changelog content
+ * @param {string} version - Semantic version
+ * @param {string} date - Release date (YYYY-MM-DD)
+ * @returns {string} Updated changelog content
+ */
+function prependChangelogEntry(existingContent, version, date) {
+  const { header, entries } = parseExistingChangelog(existingContent);
+
+  // Generate entry for this version
+  const commits = getCommitsSinceLastTag();
+  const categories = categorizeCommits(commits);
+  const newEntry = formatChangelogEntry(version, date, categories);
+
+  const lines = [];
+
+  // Add header
+  if (header) {
+    lines.push(header);
+    lines.push('');
+  } else {
+    // If no header exists, create one
+    lines.push(generateChangelogHeader());
+  }
+
+  // Add new entry
+  lines.push(newEntry);
+
+  // Add existing entries if any
+  if (entries) {
+    lines.push(entries);
+  }
+
+  return lines.join('\n');
+}
+
 module.exports = {
   getCommitsSinceLastTag,
   parseConventionalCommit,
   categorizeCommits,
   formatChangelogEntry,
   generateChangelog,
+  prependChangelogEntry,
 };

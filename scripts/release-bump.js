@@ -3,7 +3,7 @@
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const { generateChangelog } = require('./changelog-utils');
+const { generateChangelog, prependChangelogEntry } = require('./changelog-utils');
 
 const repoRoot = path.resolve(__dirname, '..');
 
@@ -170,10 +170,20 @@ function generateChangelogFile(version) {
   const changelogPath = path.join(repoRoot, 'CHANGELOG.md');
   const changelogDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
-  console.log('Generating CHANGELOG.md...');
-  const changelogContent = generateChangelog(version, changelogDate);
+  console.log('Updating CHANGELOG.md...');
+
+  let changelogContent;
+  if (fs.existsSync(changelogPath)) {
+    // Read existing changelog and prepend new entry
+    const existingContent = fs.readFileSync(changelogPath, 'utf8');
+    changelogContent = prependChangelogEntry(existingContent, version, changelogDate);
+  } else {
+    // Create new changelog if it doesn't exist
+    changelogContent = generateChangelog(version, changelogDate);
+  }
+
   fs.writeFileSync(changelogPath, changelogContent, 'utf8');
-  console.log('✓ CHANGELOG.md generated\n');
+  console.log('✓ CHANGELOG.md updated\n');
 }
 
 function formatReleaseFiles() {
