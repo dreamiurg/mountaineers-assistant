@@ -11,12 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added partner filter to insights dashboard (#3)
 
-### Changed
-
-- Added .worktrees/ to .gitignore (#2)
-- No more accidental commits to main (#1)
-
 ### Other
 
+- Pre-commit hooks prevent accidental commits to main (#1)
 - Automated changelog generation (#4)
 - Refactor release workflow for branch protection compatibility (#5)
