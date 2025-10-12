@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { ExtensionCache } from '../../shared/types';
+import type { ExtensionCache, RefreshSummary } from '../../shared/types';
 import {
   DEFAULT_DISPLAY_SETTINGS,
   buildSummary,
@@ -12,6 +12,9 @@ import type { DashboardFilters, DashboardView, DisplaySettings, PreparedData } f
 
 const STORAGE_KEY = 'mountaineersAssistantData';
 const SETTINGS_KEY = 'mountaineersAssistantSettings';
+const REFRESH_MESSAGE = 'start-refresh';
+const REFRESH_PROGRESS_MESSAGE = 'refresh-progress';
+const REFRESH_STATUS_CHANGE_MESSAGE = 'refresh-status-changed';
 
 type ReadyPayload = {
   filterOptions: PreparedData['filterOptions'] | null;
@@ -75,6 +78,10 @@ export interface InsightsState {
   statusMessage: string;
   setFilter: (key: keyof DashboardFilters, values: string[]) => void;
   clearFilters: () => void;
+  fetchActivities: () => Promise<void>;
+  isLoading: boolean;
+  fetchLimit: number | null;
+  refreshSummary: RefreshSummary;
 }
 
 declare global {
@@ -107,6 +114,13 @@ export const useInsightsDashboard = (): InsightsState => {
     'Snapshot of recent Mountaineers activities with quick views of cadence, discipline mix, and the partners you adventure with most often.'
   );
   const [statusMessage, setStatusMessage] = useState<string>('Loading cached data…');
+  const [isLoading, setIsLoading] = useState(false);
+  const [fetchLimit, setFetchLimit] = useState<number | null>(null);
+  const [refreshSummary, setRefreshSummary] = useState<RefreshSummary>({
+    activityCount: 0,
+    lastUpdated: null,
+    newActivities: 0,
+  });
 
   const baseDataRef = useRef<PreparedData | null>(null);
   const filtersRef = useRef<DashboardFilters>(filters);
@@ -286,6 +300,141 @@ export const useInsightsDashboard = (): InsightsState => {
     setFilters({ ...INITIAL_FILTERS });
   }, []);
 
+  // Load fetch limit from settings
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadFetchLimit = async () => {
+      try {
+        const stored = await chrome.storage.local.get(SETTINGS_KEY);
+        if (!isMounted) return;
+
+        const limit = stored?.[SETTINGS_KEY]?.fetchLimit;
+        const parsed = typeof limit === 'number' && limit > 0 ? limit : null;
+        setFetchLimit(parsed);
+      } catch (error) {
+        console.error('Failed to load fetch limit', error);
+      }
+    };
+
+    loadFetchLimit();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Listen for progress and status messages
+  useEffect(() => {
+    const messageListener = (message: unknown) => {
+      if (!message || typeof message !== 'object') return;
+
+      const payload = message as { type?: string; stage?: string; inProgress?: boolean };
+
+      if (payload.type === REFRESH_PROGRESS_MESSAGE) {
+        const stage = payload.stage || '';
+        let message = '';
+
+        switch (stage) {
+          case 'fetching-activities':
+          case 'starting':
+            message = 'Refreshing list of activities…';
+            break;
+          case 'activities-collected':
+            message = 'Caching activity details…';
+            break;
+          case 'loading-details':
+          case 'loading-roster':
+          case 'processing':
+            message = 'Caching activity data…';
+            break;
+          case 'finalizing':
+            message = 'Wrapping up…';
+            break;
+          case 'no-new-activities':
+            message = 'No new activities found.';
+            setIsLoading(false);
+            break;
+          case 'error':
+            message = 'Refresh encountered an error.';
+            setIsLoading(false);
+            break;
+        }
+
+        if (message) {
+          setStatusMessage(message);
+        }
+      }
+
+      if (payload.type === REFRESH_STATUS_CHANGE_MESSAGE) {
+        setIsLoading(Boolean(payload.inProgress));
+        if (!payload.inProgress) {
+          // Refresh completed, reload data will be handled by storage listener
+        }
+      }
+    };
+
+    chrome.runtime.onMessage.addListener(messageListener);
+
+    return () => {
+      chrome.runtime.onMessage.removeListener(messageListener);
+    };
+  }, []);
+
+  // Fetch activities function
+  const fetchActivities = useCallback(async () => {
+    setIsLoading(true);
+    setStatusMessage('Starting refresh…');
+
+    try {
+      const response = await chrome.runtime.sendMessage({
+        type: REFRESH_MESSAGE,
+        limit: fetchLimit,
+      });
+
+      if (!response) {
+        setStatusMessage('No response from background script.');
+        setIsLoading(false);
+        return;
+      }
+
+      if (!response.success) {
+        setStatusMessage(response.error || 'Refresh failed.');
+        setIsLoading(false);
+        return;
+      }
+
+      const newActivities = response.summary?.newActivities ?? 0;
+      setStatusMessage(`Cached ${newActivities} new activities.`);
+      setRefreshSummary(response.summary);
+      setIsLoading(false);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unexpected error.';
+      setStatusMessage(message);
+      setIsLoading(false);
+    }
+  }, [fetchLimit]);
+
+  // Update refresh summary when data changes
+  useEffect(() => {
+    const updateSummary = async () => {
+      try {
+        const data = await loadExtensionData();
+        if (data) {
+          setRefreshSummary({
+            activityCount: data.activities.length,
+            lastUpdated: data.lastUpdated,
+            newActivities: 0,
+          });
+        }
+      } catch (error) {
+        console.error('Failed to update refresh summary', error);
+      }
+    };
+
+    updateSummary();
+  }, [loadExtensionData, view]);
+
   return useMemo(
     () => ({
       loading,
@@ -299,6 +448,10 @@ export const useInsightsDashboard = (): InsightsState => {
       statusMessage,
       setFilter,
       clearFilters,
+      fetchActivities,
+      isLoading,
+      fetchLimit,
+      refreshSummary,
     }),
     [
       loading,
@@ -312,6 +465,10 @@ export const useInsightsDashboard = (): InsightsState => {
       statusMessage,
       setFilter,
       clearFilters,
+      fetchActivities,
+      isLoading,
+      fetchLimit,
+      refreshSummary,
     ]
   );
 };
