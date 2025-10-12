@@ -146,6 +146,18 @@ async function main() {
   const currentBranch = getCurrentBranch();
   const version = extractVersionFromBranch(currentBranch);
 
+  // Verify package.json version matches branch name
+  const packageJsonPath = path.join(repoRoot, 'package.json');
+  const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+  if (pkg.version !== version) {
+    throw new Error(
+      `Version mismatch: branch name indicates v${version} but package.json has v${pkg.version}. ` +
+        'Did you manually edit package.json after running release:bump?'
+    );
+  }
+
+  console.log(`✓ Version verified: ${version}\n`);
+
   if (!hasModifiedFiles()) {
     console.log('\n⚠️  No modified files found.');
     console.log('Did you run "npm run release:bump" first?\n');
