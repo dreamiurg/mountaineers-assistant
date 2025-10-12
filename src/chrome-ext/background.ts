@@ -38,6 +38,24 @@ let activeRefresh: Promise<HandleRefreshResult> | null = null;
 let currentProgress: RefreshProgress | null = null;
 let activeCacheContext: ActiveCacheContext | null = null;
 
+async function ensureOffscreenDocument(): Promise<void> {
+  // Check if offscreen document already exists
+  const existingContexts = await chrome.runtime.getContexts({
+    contextTypes: [chrome.runtime.ContextType.OFFSCREEN_DOCUMENT],
+  });
+
+  if (existingContexts.length > 0) {
+    return; // Already exists, reuse it
+  }
+
+  // Create new offscreen document
+  await chrome.offscreen.createDocument({
+    url: 'offscreen.html',
+    reasons: [chrome.offscreen.Reason.DOM_SCRAPING],
+    justification: 'Fetch and parse Mountaineers.org activity data using DOM APIs',
+  });
+}
+
 chrome.runtime.onMessage.addListener((rawMessage, sender, sendResponse) => {
   if (!isRecord(rawMessage) || typeof rawMessage.type !== 'string') {
     return undefined;
