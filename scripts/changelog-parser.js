@@ -7,6 +7,13 @@ const fs = require('fs');
  * @returns {string} The changelog section for that version (without the ## [version] header)
  */
 function extractVersionSection(changelogPath, version) {
+  if (!changelogPath || typeof changelogPath !== 'string') {
+    throw new Error('changelogPath must be a non-empty string');
+  }
+  if (!version || typeof version !== 'string') {
+    throw new Error('version must be a non-empty string');
+  }
+
   const content = fs.readFileSync(changelogPath, 'utf8');
   const lines = content.split('\n');
 
@@ -29,6 +36,10 @@ function extractVersionSection(changelogPath, version) {
       }
       sectionLines.push(line);
     }
+  }
+
+  if (!inSection) {
+    throw new Error(`Version ${version} not found in ${changelogPath}`);
   }
 
   // Trim empty lines from start and end
