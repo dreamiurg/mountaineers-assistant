@@ -85,7 +85,19 @@ async function handleCollectionRequest(
     });
   } catch (error: unknown) {
     console.error('Mountaineers Assistant offscreen: collection failed', error);
-    const errorMessage = error instanceof Error ? error.message : String(error);
+
+    let errorMessage = error instanceof Error ? error.message : String(error);
+
+    // Detect authentication errors
+    if (
+      errorMessage.includes('Unable to locate') ||
+      errorMessage.includes('My Activities') ||
+      errorMessage.includes('401') ||
+      errorMessage.includes('Unauthorized')
+    ) {
+      errorMessage = 'Please log in to Mountaineers.org first.';
+    }
+
     sendProgressUpdate({
       stage: 'error',
       total: 0,
