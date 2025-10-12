@@ -21,7 +21,6 @@ const REFRESH_RESULT_MESSAGE = 'refresh-result';
 const REFRESH_PROGRESS_MESSAGE = 'refresh-progress';
 const REFRESH_STATUS_REQUEST_MESSAGE = 'get-refresh-status';
 const REFRESH_STATUS_CHANGE_MESSAGE = 'refresh-status-changed';
-const SUPPORTED_HOST = 'www.mountaineers.org';
 
 type HandleRefreshResult = {
   success: true;
@@ -142,16 +141,8 @@ async function handleRefreshRequest({
   fetchLimit?: number | null;
 } = {}): Promise<HandleRefreshResult> {
   try {
-    const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
-    if (!activeTab?.id || !activeTab.url) {
-      throw new Error('Unable to locate the active tab.');
-    }
-
-    const url = new URL(activeTab.url);
-    if (url.hostname !== SUPPORTED_HOST) {
-      throw new Error('Open a Mountaineers.org page (for example My Activities) to fetch updates.');
-    }
+    // Ensure offscreen document exists
+    await ensureOffscreenDocument();
 
     const stored = (await chrome.storage.local.get('mountaineersAssistantData')) as Record<
       string,
@@ -164,21 +155,18 @@ async function handleRefreshRequest({
 
     const existingActivityUids = existingCache.activities.map((activity) => activity.uid);
 
-    console.debug('Mountaineers Assistant: injecting collector into tab', activeTab.id);
-    const resultPromise = waitForRefreshResult(activeTab.id);
+    console.debug('Mountaineers Assistant: sending collection request to offscreen document');
 
-    await chrome.scripting.executeScript({
-      target: { tabId: activeTab.id },
-      func: injectCollectorContext,
-      args: [existingActivityUids, fetchLimit ?? null],
+    // Send collection request to offscreen document
+    const resultPromise = waitForOffscreenResult();
+
+    chrome.runtime.sendMessage({
+      type: 'offscreen-collect',
+      existingActivityUids,
+      fetchLimit: fetchLimit ?? null,
     });
 
-    await chrome.scripting.executeScript({
-      target: { tabId: activeTab.id },
-      files: ['collect.js'],
-    });
-
-    console.debug('Mountaineers Assistant: awaiting collector response');
+    console.debug('Mountaineers Assistant: awaiting offscreen response');
     const result = await resultPromise;
 
     if (!result.success || !result.data) {
@@ -202,12 +190,7 @@ async function handleRefreshRequest({
   }
 }
 
-function injectCollectorContext(uids: string[], limit: number | null): void {
-  window.__mtgExistingActivityUids = Array.isArray(uids) ? uids : [];
-  window.__mtgFetchLimit = typeof limit === 'number' && Number.isFinite(limit) ? limit : null;
-}
-
-function waitForRefreshResult(tabId: number): Promise<CollectorResultMessage> {
+function waitForOffscreenResult(): Promise<CollectorResultMessage> {
   return new Promise((resolve, reject) => {
     let settled = false;
 
@@ -215,21 +198,11 @@ function waitForRefreshResult(tabId: number): Promise<CollectorResultMessage> {
       finalize(() => reject(new Error('Timed out while refreshing activities.')));
     }, 60_000);
 
-    function handleMessage(message: unknown, messageSender: chrome.runtime.MessageSender): void {
+    function handleMessage(message: unknown): void {
       if (!isCollectorResultMessage(message)) {
         return;
       }
-      if (messageSender.tab?.id !== tabId) {
-        return;
-      }
       finalize(() => resolve(message));
-    }
-
-    function handleTabRemoved(removedTabId: number): void {
-      if (removedTabId !== tabId) {
-        return;
-      }
-      finalize(() => reject(new Error('The tab was closed before refresh completed.')));
     }
 
     function finalize(callback: () => void): void {
@@ -244,11 +217,9 @@ function waitForRefreshResult(tabId: number): Promise<CollectorResultMessage> {
     function cleanup(): void {
       clearTimeout(timeout);
       chrome.runtime.onMessage.removeListener(handleMessage);
-      chrome.tabs.onRemoved.removeListener(handleTabRemoved);
     }
 
     chrome.runtime.onMessage.addListener(handleMessage);
-    chrome.tabs.onRemoved.addListener(handleTabRemoved);
   });
 }
 
