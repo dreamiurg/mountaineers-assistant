@@ -11,6 +11,11 @@ import type {
   RosterEntryRecord,
 } from './shared/types';
 
+// Handle extension icon click - open insights page
+chrome.action.onClicked.addListener(() => {
+  chrome.tabs.create({ url: chrome.runtime.getURL('insights.html') });
+});
+
 const REFRESH_MESSAGE = 'start-refresh';
 const REFRESH_RESULT_MESSAGE = 'refresh-result';
 const REFRESH_PROGRESS_MESSAGE = 'refresh-progress';
