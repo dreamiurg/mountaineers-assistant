@@ -87,9 +87,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           VERSION="${{ steps.extract_version.outputs.version }}"
-          RELEASE_NOTES=$(cat release-notes.txt)
           gh release create "v${VERSION}" \
             --title "Release v${VERSION}" \
-            --notes "${RELEASE_NOTES}" \
+            --notes-file release-notes.txt \
             "mountaineers-assistant-${VERSION}.zip"
           echo "GitHub release created for v${VERSION}"
