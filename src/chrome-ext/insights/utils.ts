@@ -244,6 +244,30 @@ export const prepareDashboardData = (payload: ExtensionCache): PreparedData => {
   });
   const roles = Array.from(roleSet).sort((a, b) => a.localeCompare(b));
 
+  // Extract unique partners (excluding current user)
+  const partners: Array<{ uid: string; name: string }> = [];
+  const partnerUids = new Set<string>();
+
+  peopleMap.forEach((person, uid) => {
+    // Skip current user
+    if (uid === resolvedCurrentUserUid) {
+      return;
+    }
+    // Skip if no name
+    if (!person.name || person.name.trim().length === 0) {
+      return;
+    }
+    // Skip duplicates
+    if (partnerUids.has(uid)) {
+      return;
+    }
+    partnerUids.add(uid);
+    partners.push({ uid, name: person.name });
+  });
+
+  // Sort alphabetically by name
+  partners.sort((a, b) => a.name.localeCompare(b.name));
+
   return {
     activities: activitiesEnriched,
     rosterByActivity,
@@ -255,6 +279,7 @@ export const prepareDashboardData = (payload: ExtensionCache): PreparedData => {
       activityTypes,
       categories,
       roles,
+      partners,
     },
   };
 };
