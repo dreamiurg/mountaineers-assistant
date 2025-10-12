@@ -302,7 +302,7 @@ export const calculateDashboard = (
   const categoryFilter = new Set(filters.category || []);
   const roleFilter = new Set(filters.role || []);
 
-  const filteredActivities = prepared.activities.filter((activity) => {
+  let filteredActivities = prepared.activities.filter((activity) => {
     if (typeFilter.size && !typeFilter.has(activity.typeLabel)) return false;
     if (categoryFilter.size && !categoryFilter.has(activity.categoryKey)) return false;
     if (roleFilter.size) {
@@ -312,6 +312,21 @@ export const calculateDashboard = (
     }
     return true;
   });
+
+  // Apply partner filter (AND logic: all selected partners must be present)
+  if (filters.partner.length > 0) {
+    filteredActivities = filteredActivities.filter((activity) => {
+      const roster = prepared.rosterByActivity.get(activity.uid);
+      if (!roster || roster.length === 0) {
+        return false; // No roster data means no partners
+      }
+
+      const activityPartnerUids = new Set(roster.map((entry) => entry.person_uid));
+
+      // Check if ALL selected partners are present in this activity
+      return filters.partner.every((partnerUid) => activityPartnerUids.has(partnerUid));
+    });
+  }
 
   const activityTypeCounts = new Map<string, number>();
   const monthTypeCounts = new Map<string, Map<string, number>>();
@@ -328,8 +343,9 @@ export const calculateDashboard = (
     }
   });
 
+  // Partners table calculation (uses unfiltered base data)
   const partnerStats = new Map<string, { count: number; lastDate: Date | null }>();
-  filteredActivities.forEach((activity) => {
+  prepared.activities.forEach((activity) => {
     const roster = prepared.rosterByActivity.get(activity.uid) || [];
     const seen = new Set<string>();
     roster.forEach((entry) => {
@@ -461,14 +477,42 @@ export const calculateDashboard = (
   };
 };
 
-export const buildSummary = (view: DashboardView): string => {
+export const buildSummary = (
+  view: DashboardView,
+  filters: DashboardFilters,
+  baseData: PreparedData
+): string => {
   if (!view.metrics.totalActivities) {
     return 'No activities match the current filters. Adjust selections to see insights.';
   }
+
+  const filterParts: string[] = [];
+
+  // Add partner filter text
+  if (filters.partner.length > 0) {
+    const partnerNames = filters.partner
+      .map((uid) => {
+        const partner = baseData.filterOptions.partners.find((p) => p.uid === uid);
+        return partner?.name ?? uid;
+      })
+      .filter(Boolean);
+
+    if (partnerNames.length === 1) {
+      filterParts.push(`activities with ${partnerNames[0]}`);
+    } else if (partnerNames.length === 2) {
+      filterParts.push(`activities with ${partnerNames[0]} and ${partnerNames[1]}`);
+    } else if (partnerNames.length > 2) {
+      const first = partnerNames.slice(0, -1).join(', ');
+      const last = partnerNames[partnerNames.length - 1];
+      filterParts.push(`activities with ${first}, and ${last}`);
+    }
+  }
+
+  const filterText = filterParts.length > 0 ? ` • Showing ${filterParts.join('; ')}` : '';
   const refreshed = view.meta.lastUpdated ? view.meta.lastUpdated.toLocaleString() : 'Never';
   return `Last refreshed ${refreshed} • ${formatNumber(view.metrics.totalActivities)} activities, ${formatNumber(
     view.metrics.uniquePartners
-  )} unique partners.`;
+  )} unique partners${filterText}.`;
 };
 
 export const getActivityTypeColors = (): string[] => ACTIVITY_TYPE_COLORS;
