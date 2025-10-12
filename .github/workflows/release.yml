@@ -1,0 +1,95 @@
+name: Release
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+jobs:
+  release:
+    # Only run if PR was merged (not just closed) and branch is a release branch
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release/v')
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Extract version from branch name
+        id: extract_version
+        run: |
+          BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
+          VERSION="${BRANCH_NAME#release/v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Extracted version: $VERSION"
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run typecheck
+        run: npm run typecheck
+
+      - name: Build extension
+        run: npm run build
+
+      - name: Package extension
+        run: |
+          VERSION="${{ steps.extract_version.outputs.version }}"
+          cd dist
+          zip -r "../mountaineers-assistant-${VERSION}.zip" .
+          cd ..
+
+      - name: Verify package exists
+        run: |
+          VERSION="${{ steps.extract_version.outputs.version }}"
+          if [ ! -f "mountaineers-assistant-${VERSION}.zip" ]; then
+            echo "Package file not found: mountaineers-assistant-${VERSION}.zip"
+            exit 1
+          fi
+          echo "Package created successfully"
+
+      - name: Extract changelog for this version
+        id: changelog
+        run: |
+          VERSION="${{ steps.extract_version.outputs.version }}"
+          node -e "
+            const { extractVersionSection } = require('./scripts/changelog-parser.js');
+            const content = extractVersionSection('CHANGELOG.md', '${VERSION}');
+            const fs = require('fs');
+            fs.writeFileSync('release-notes.txt', content);
+          "
+          echo "Changelog extracted for version ${VERSION}"
+
+      - name: Create git tag
+        run: |
+          VERSION="${{ steps.extract_version.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "v${VERSION}" -m "Release v${VERSION}"
+          git push origin "v${VERSION}"
+          echo "Tag v${VERSION} created and pushed"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${{ steps.extract_version.outputs.version }}"
+          RELEASE_NOTES=$(cat release-notes.txt)
+          gh release create "v${VERSION}" \
+            --title "Release v${VERSION}" \
+            --notes "${RELEASE_NOTES}" \
+            "mountaineers-assistant-${VERSION}.zip"
+          echo "GitHub release created for v${VERSION}"
