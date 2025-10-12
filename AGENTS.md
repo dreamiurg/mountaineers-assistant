@@ -79,19 +79,6 @@ Use the format `<prefix>: <summary in past tense>`, for example:
 - Avoid vague language like "updated code" or "made improvements."
 - Example: `feat: added dark mode toggle in settings`.
 
-### Release Process
-
-The release script (`npm run release <version>`) automates version bumping and changelog generation:
-
-- Runs typecheck before making changes
-- Updates version in `package.json`, `package-lock.json`, and `manifest.json`
-- Automatically generates `CHANGELOG.md` from conventional commits since the last git tag
-- Follows [Keep a Changelog](https://keepachangelog.com/) format
-- Categorizes commits: `feat:` → Added, `fix:` → Fixed, `chore:`/`refactor:`/`perf:` → Changed
-- Filters out `docs:`, `test:`, `build:`, `ci:`, `release:`, and merge commits
-- Stages all release files for review with `git diff --cached`
-- User commits and tags manually after reviewing changes
-
 ## Quality Gates
 
 - Run `npm run format` before committing to apply Prettier.
