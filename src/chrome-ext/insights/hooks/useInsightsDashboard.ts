@@ -275,7 +275,7 @@ export const useInsightsDashboard = (): InsightsState => {
 
     const nextView = calculateDashboard(prepared, sanitized);
     setView(nextView);
-    setSummary(buildSummary(nextView));
+    setSummary(buildSummary(nextView, sanitized, prepared));
   }, [filters]);
 
   const setFilter = useCallback((key: keyof DashboardFilters, values: string[]) => {
