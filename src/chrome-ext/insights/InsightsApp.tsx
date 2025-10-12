@@ -3,6 +3,7 @@ import { useInsightsDashboard } from './hooks/useInsightsDashboard';
 import type { Options as HighchartsOptions } from 'highcharts';
 import type { DistributionEntry, PartnerEntry, TimelineView } from './types';
 import ChoicesMultiSelect from './components/ChoicesMultiSelect';
+import { FetchControls } from './components/FetchControls';
 import {
   formatDate,
   formatDateRange,
@@ -314,6 +315,10 @@ const InsightsApp = () => {
     statusMessage,
     setFilter,
     clearFilters,
+    fetchActivities,
+    isLoading,
+    fetchLimit,
+    refreshSummary,
   } = useInsightsDashboard();
 
   const filterDisabled = empty || !view;
@@ -355,6 +360,14 @@ const InsightsApp = () => {
           </div>
           <p className="max-w-3xl text-sm text-slate-600">{summary}</p>
         </header>
+
+        <FetchControls
+          onFetch={fetchActivities}
+          isLoading={isLoading}
+          statusMessage={statusMessage}
+          summary={refreshSummary}
+          fetchLimit={fetchLimit}
+        />
 
         <section className="glass-card filter-card rounded-2xl p-5">
           <div className="mb-4 flex items-center justify-between">
