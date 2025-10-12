@@ -31,6 +31,7 @@ module.exports = defineConfig({
       input: {
         background: resolve(chromeExtensionRoot, 'background.ts'),
         collect: resolve(chromeExtensionRoot, 'collect.ts'),
+        offscreen: resolve(chromeExtensionRoot, 'offscreen.html'),
         popup: resolve(chromeExtensionRoot, 'popup.html'),
         preferences: resolve(chromeExtensionRoot, 'preferences.html'),
         insights: resolve(chromeExtensionRoot, 'insights.html'),
