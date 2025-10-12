@@ -126,7 +126,7 @@ function buildExtension() {
 
 function packageExtension(version) {
   console.log('Packaging extension...');
-  runCommand(`npm run package -- ${version}`);
+  runCommand(`npm run release:package -- ${version}`);
 
   const zipPath = path.join(repoRoot, `mountaineers-assistant-${version}.zip`);
   if (!fs.existsSync(zipPath)) {
