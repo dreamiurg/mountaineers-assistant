@@ -1,5 +1,9 @@
 // scripts/test-changelog-utils.js
-const { getCommitsSinceLastTag, parseConventionalCommit } = require('./changelog-utils');
+const {
+  getCommitsSinceLastTag,
+  parseConventionalCommit,
+  categorizeCommits,
+} = require('./changelog-utils');
 
 console.log('Testing getCommitsSinceLastTag...');
 const commits = getCommitsSinceLastTag();
@@ -33,3 +37,33 @@ tests.forEach((test, i) => {
   }
 });
 console.log('✓ All parseConventionalCommit tests passed');
+
+console.log('\nTesting categorizeCommits...');
+const sampleCommits = [
+  { hash: 'abc123', message: 'feat: added partner filter' },
+  { hash: 'def456', message: 'fix: corrected timeout' },
+  { hash: 'ghi789', message: 'chore: updated deps' },
+  { hash: 'jkl012', message: 'docs: updated README' },
+  { hash: 'mno345', message: 'release: prepared v0.1.6' },
+  { hash: 'pqr678', message: 'random commit message' },
+];
+
+const categorized = categorizeCommits(sampleCommits);
+
+if (!categorized.added || categorized.added.length !== 1) {
+  throw new Error('Expected 1 "added" entry');
+}
+if (!categorized.fixed || categorized.fixed.length !== 1) {
+  throw new Error('Expected 1 "fixed" entry');
+}
+if (!categorized.changed || categorized.changed.length !== 1) {
+  throw new Error('Expected 1 "changed" entry');
+}
+if (!categorized.other || categorized.other.length !== 1) {
+  throw new Error('Expected 1 "other" entry');
+}
+if (categorized.added[0] !== 'Added partner filter') {
+  throw new Error('Expected cleaned message "Added partner filter"');
+}
+
+console.log('✓ All categorizeCommits tests passed');

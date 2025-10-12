@@ -78,7 +78,94 @@ function parseConventionalCommit(message) {
   };
 }
 
+/**
+ * Categorize commits into Keep a Changelog sections.
+ * @param {Array<{hash: string, message: string}>} commits
+ * @returns {{added: string[], fixed: string[], changed: string[], other: string[]}}
+ */
+function categorizeCommits(commits) {
+  const categories = {
+    added: [],
+    fixed: [],
+    changed: [],
+    other: [],
+  };
+
+  commits.forEach((commit) => {
+    const parsed = parseConventionalCommit(commit.message);
+
+    // Skip release and merge commits
+    if (
+      commit.message.toLowerCase().startsWith('release:') ||
+      commit.message.toLowerCase().startsWith('merge ')
+    ) {
+      return;
+    }
+
+    // Skip docs, test, build, ci commits
+    if (['docs', 'test', 'build', 'ci'].includes(parsed.type)) {
+      return;
+    }
+
+    const cleanedMessage = cleanCommitMessage(parsed.message);
+
+    // Map conventional commit types to changelog categories
+    switch (parsed.type) {
+      case 'feat':
+        categories.added.push(cleanedMessage);
+        break;
+      case 'fix':
+        categories.fixed.push(cleanedMessage);
+        break;
+      case 'chore':
+      case 'refactor':
+      case 'perf':
+      case 'style':
+      case 'revert':
+        categories.changed.push(cleanedMessage);
+        break;
+      default:
+        categories.other.push(cleanedMessage);
+        break;
+    }
+  });
+
+  // Sort entries alphabetically within each category
+  Object.keys(categories).forEach((key) => {
+    categories[key].sort();
+  });
+
+  return categories;
+}
+
+/**
+ * Clean and format a commit message for changelog display.
+ * @param {string} message - Raw commit message
+ * @returns {string} Cleaned message
+ */
+function cleanCommitMessage(message) {
+  let cleaned = message.trim();
+
+  // Capitalize first letter if lowercase
+  if (cleaned.length > 0 && cleaned[0] === cleaned[0].toLowerCase()) {
+    cleaned = cleaned[0].toUpperCase() + cleaned.slice(1);
+  }
+
+  // Remove trailing period if present
+  if (cleaned.endsWith('.')) {
+    cleaned = cleaned.slice(0, -1);
+  }
+
+  // Truncate extremely long messages
+  if (cleaned.length > 100) {
+    cleaned = cleaned.slice(0, 97) + '...';
+  }
+
+  return cleaned;
+}
+
 module.exports = {
   getCommitsSinceLastTag,
   parseConventionalCommit,
+  categorizeCommits,
 };
