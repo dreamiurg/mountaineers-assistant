@@ -137,18 +137,48 @@ mountaineers-assistant/
 - `npm run typecheck` validates the TypeScript sources with the project `tsconfig`.
 - `npm run test:extension` runs the Playwright-driven MV3 snapshot suite against the built bundle.
 - `uv run pre-commit install` installs the pinned hook environment; run `uv run pre-commit run --all-files` if hooks are not installed locally.
-- Use `npm run publish -- <version>` to automate releases; rely on `npm run release` and `npm run package -- <version>` if you prefer manual control.
+- Use `npm run release:prepare <version>` and `npm run release:publish <version>` for releases.
 
 ## Release Workflow
 
-### One-command flow
+This project uses a two-phase release workflow:
 
-1. Run `npm run publish -- <version>` (for example, `npm run publish -- 0.2.0`). The helper verifies a clean git state, bumps versions, runs the build, writes `mountaineers-assistant-<version>.zip` in the repo root, tags the commit, pushes branch and tag, and drafts a GitHub release (if the `gh` CLI is installed). Add `-v` (or `--verbose`) to see full command output.
-2. Upload the generated ZIP to the Chrome Web Store to finish the release.
+### 1. Prepare Release
 
-### Manual flow (if you prefer to control each step)
+Create a release branch and pull request:
 
-1. Start from a clean working tree (no staged or unstaged changes).
-2. Run `npm run release` and enter the next semantic version when prompted. The script runs `npm run typecheck`, updates `package.json`, `package-lock.json`, and `src/chrome-ext/manifest.json`, then stages those files for you.
-3. Review the staged diff, commit with your release message, and tag the commit (for example, `git tag v0.2.0`).
-4. Package the release with `npm run package -- <version>` (for example, `npm run package -- 0.2.0`). The command rebuilds the extension and drops `mountaineers-assistant-<version>.zip` in the repository root, ready for Chrome Web Store upload or to attach to the GitHub release.
+```bash
+npm run release:prepare 0.1.7
+```
+
+This will:
+
+- Create a `release/v0.1.7` branch
+- Bump versions and generate changelog
+- Push the branch and create a PR to main
+
+Review the PR, then merge it on GitHub.
+
+### 2. Publish Release
+
+After the PR is merged, publish the release:
+
+```bash
+git checkout main
+git pull
+npm run release:publish 0.1.7
+```
+
+This will:
+
+- Create and push a git tag
+- Build and package the extension
+- Create a GitHub release with the ZIP
+
+Finally, upload the ZIP to the [Chrome Web Store](https://chrome.google.com/webstore).
+
+### Requirements
+
+- [GitHub CLI (`gh`)](https://cli.github.com/) must be installed
+- You must have push access to the repository
+- Main branch has protection rules requiring PR reviews
