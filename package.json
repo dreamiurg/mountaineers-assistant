@@ -9,6 +9,8 @@
   "scripts": {
     "dev": "vite",
     "build": "npm run build:css && vite build",
+    "release:prepare": "node scripts/release-prepare.js",
+    "release:publish": "node scripts/release-publish.js",
     "release": "node scripts/release.js",
     "package": "node scripts/package.js",
     "publish": "node scripts/publish.js",
