@@ -9,6 +9,7 @@ export type DashboardFilters = {
   activityType: string[];
   category: string[];
   role: string[];
+  partner: string[];
 };
 
 export type DisplaySettings = {
@@ -34,6 +35,7 @@ export interface PreparedData {
     activityTypes: string[];
     categories: string[];
     roles: string[];
+    partners: Array<{ uid: string; name: string }>;
   };
 }
 

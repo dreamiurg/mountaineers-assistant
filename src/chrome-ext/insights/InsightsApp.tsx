@@ -370,7 +370,7 @@ const InsightsApp = () => {
               Clear filters
             </button>
           </div>
-          <form className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <form className="grid grid-cols-1 gap-4 md:grid-cols-4">
             <ChoicesMultiSelect
               id="filter-activity-type"
               label="Activity type"
@@ -401,6 +401,23 @@ const InsightsApp = () => {
                   ? 'Role filter available once your roster roles are known.'
                   : undefined
               }
+            />
+            <ChoicesMultiSelect
+              id="filter-partner"
+              label="Activity partner"
+              options={filterOptions.partners.map((p) => p.uid)}
+              value={filters.partner}
+              onChange={(values) => setFilter('partner', values)}
+              disabled={filterDisabled || filterOptions.partners.length === 0}
+              helperText={
+                filterOptions.partners.length === 0
+                  ? 'Partner filter available once roster data is known.'
+                  : undefined
+              }
+              formatter={(uid) => {
+                const partner = filterOptions.partners.find((p) => p.uid === uid);
+                return partner?.name ?? uid;
+              }}
             />
           </form>
         </section>

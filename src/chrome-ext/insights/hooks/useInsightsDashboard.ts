@@ -24,6 +24,7 @@ const INITIAL_FILTERS: DashboardFilters = {
   activityType: [],
   category: [],
   role: [],
+  partner: [],
 };
 
 const cloneFilterOptions = (options: PreparedData['filterOptions'] | null) => {
@@ -98,6 +99,7 @@ export const useInsightsDashboard = (): InsightsState => {
     activityTypes: [],
     categories: [],
     roles: [],
+    partners: [],
   });
   const [settings, setSettings] = useState<DisplaySettings>(DEFAULT_DISPLAY_SETTINGS);
   const [view, setView] = useState<DashboardView | null>(null);
@@ -150,6 +152,12 @@ export const useInsightsDashboard = (): InsightsState => {
               ? sanitizeSelection(overrides.category, options.categories)
               : current.category,
             role: overrides.role ? sanitizeSelection(overrides.role, options.roles) : current.role,
+            partner: overrides.partner
+              ? sanitizeSelection(
+                  overrides.partner,
+                  options.partners.map((p) => p.uid)
+                )
+              : current.partner,
           };
         });
       },
@@ -193,7 +201,7 @@ export const useInsightsDashboard = (): InsightsState => {
             'No cached data available. Open the extension popup and run a refresh first.'
           );
           resolveReady({ filterOptions: null, empty: true });
-          setFilterOptions({ activityTypes: [], categories: [], roles: [] });
+          setFilterOptions({ activityTypes: [], categories: [], roles: [], partners: [] });
           window.mountaineersDashboard!.filterOptions = null;
           setLoading(false);
           return;
@@ -249,12 +257,17 @@ export const useInsightsDashboard = (): InsightsState => {
       activityType: sanitizeSelection(filters.activityType, prepared.filterOptions.activityTypes),
       category: sanitizeSelection(filters.category, prepared.filterOptions.categories),
       role: sanitizeSelection(filters.role, prepared.filterOptions.roles),
+      partner: sanitizeSelection(
+        filters.partner,
+        prepared.filterOptions.partners.map((p) => p.uid)
+      ),
     } satisfies DashboardFilters;
 
     if (
       !arraysEqual(sanitized.activityType, filters.activityType) ||
       !arraysEqual(sanitized.category, filters.category) ||
-      !arraysEqual(sanitized.role, filters.role)
+      !arraysEqual(sanitized.role, filters.role) ||
+      !arraysEqual(sanitized.partner, filters.partner)
     ) {
       setFilters(sanitized);
       return;
@@ -262,7 +275,7 @@ export const useInsightsDashboard = (): InsightsState => {
 
     const nextView = calculateDashboard(prepared, sanitized);
     setView(nextView);
-    setSummary(buildSummary(nextView));
+    setSummary(buildSummary(nextView, sanitized, prepared));
   }, [filters]);
 
   const setFilter = useCallback((key: keyof DashboardFilters, values: string[]) => {
