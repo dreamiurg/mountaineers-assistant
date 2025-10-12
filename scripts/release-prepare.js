@@ -1,5 +1,9 @@
 #!/usr/bin/env node
 
+console.warn(
+  '\n⚠️  DEPRECATED: Use "npm run release:bump" followed by "npm run release:submit" instead.\n'
+);
+
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
