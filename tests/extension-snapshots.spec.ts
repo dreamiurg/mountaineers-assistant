@@ -491,7 +491,7 @@ test.describe('Mountaineers Assistant extension snapshots', () => {
     await page.setViewportSize({ width: 420, height: 640 });
     await page.goto(`chrome-extension://${extensionId}/popup.html`);
     await page.waitForSelector('text=Mountaineers Assistant', { state: 'visible' });
-    await page.waitForSelector('text=Cached snapshot loaded.', { state: 'visible' });
+    await page.waitForSelector('text=Last refresh completed', { state: 'visible' });
     await expect(page).toHaveScreenshot('popup.png', { fullPage: true });
     await page.close();
   });

@@ -32,6 +32,7 @@ interface PopupControllerState {
   showSpinner: boolean;
   actionsDisabled: boolean;
   insightsDisabled: boolean;
+  fetchLimit: number | null;
 }
 
 interface PopupControllerActions {
@@ -423,6 +424,7 @@ export const usePopupController = (): PopupControllerState & PopupControllerActi
     showSpinner,
     actionsDisabled,
     insightsDisabled: false,
+    fetchLimit: configuredFetchLimit,
     refreshAll,
     openInsights,
     openPreferences,
