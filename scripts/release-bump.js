@@ -199,6 +199,13 @@ async function main() {
     throw new Error('Version required. Usage: npm run release:bump <version>');
   }
 
+  // Security: Strict validation before using version in any shell commands
+  if (!/^\d+\.\d+\.\d+(-[0-9A-Za-z-.]+)?(\+[0-9A-Za-z-.]+)?$/.test(version)) {
+    throw new Error(
+      `Invalid version format: "${version}". Must be valid semver (e.g., 1.2.3, 1.2.3-beta.1)`
+    );
+  }
+
   ensureCleanWorkingTree();
   ensureOnMain();
 
