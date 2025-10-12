@@ -190,6 +190,73 @@ function runTypecheck() {
   console.log('✓ Typecheck passed\n');
 }
 
+function commitReleaseFiles(version) {
+  const packageJsonPath = path.join(repoRoot, 'package.json');
+  const packageLockPath = path.join(repoRoot, 'package-lock.json');
+  const manifestPath = path.join(repoRoot, 'src', 'chrome-ext', 'manifest.json');
+  const changelogPath = path.join(repoRoot, 'CHANGELOG.md');
+
+  console.log('Staging release files...');
+
+  const filesToStage = [
+    path.relative(repoRoot, packageJsonPath),
+    path.relative(repoRoot, packageLockPath),
+    path.relative(repoRoot, manifestPath),
+    path.relative(repoRoot, changelogPath),
+  ];
+
+  filesToStage.forEach((file) => {
+    runCommand(`git add "${file}"`);
+  });
+
+  console.log('Committing release files...');
+  runCommand(`git commit -m "release: prepared v${version}"`);
+  console.log(`✓ Committed release files\n`);
+}
+
+function pushReleaseBranch(branchName) {
+  console.log(`Pushing ${branchName} to origin...`);
+
+  try {
+    runCommand('git push');
+  } catch {
+    // Branch might not have upstream set
+    console.log('Setting upstream and pushing...');
+    runCommand(`git push --set-upstream origin ${branchName}`);
+  }
+
+  console.log(`✓ Pushed ${branchName}\n`);
+}
+
+function createPullRequest(version, branchName) {
+  console.log('Creating pull request...');
+
+  const title = `Release v${version}`;
+  const body = `Release v${version}`;
+
+  try {
+    const prUrl = getCommandOutput(
+      `gh pr create --base main --head ${branchName} --title "${title}" --body "${body}"`
+    );
+    console.log(`✓ Pull request created: ${prUrl}\n`);
+    return prUrl;
+  } catch (error) {
+    // PR might already exist
+    if (error.message.includes('already exists')) {
+      console.log('⚠️  Pull request already exists for this branch\n');
+      try {
+        const prUrl = getCommandOutput(`gh pr view ${branchName} --json url --jq .url`);
+        console.log(`   Existing PR: ${prUrl}\n`);
+        return prUrl;
+      } catch {
+        console.log('   Run: gh pr list --head ' + branchName + '\n');
+        return null;
+      }
+    }
+    throw error;
+  }
+}
+
 async function main() {
   ensureGhAvailable();
 
@@ -218,10 +285,22 @@ async function main() {
   generateChangelogFile(version);
   formatReleaseFiles();
 
-  // TODO: Implement commit, push, and PR creation
+  commitReleaseFiles(version);
+  pushReleaseBranch(releaseBranch);
+  const prUrl = createPullRequest(version, releaseBranch);
 
-  console.log('\nRelease preparation completed!\n');
-  console.log(`Release branch: ${releaseBranch}\n`);
+  console.log('='.repeat(60));
+  console.log('Release preparation completed!');
+  console.log('='.repeat(60));
+  console.log(`\nRelease branch: ${releaseBranch}`);
+  if (prUrl) {
+    console.log(`Pull request: ${prUrl}`);
+  }
+  console.log('\nNext steps:');
+  console.log('1. Review the pull request on GitHub');
+  console.log('2. Merge the pull request when ready');
+  console.log(`3. Run: npm run release:publish ${version}`);
+  console.log('');
 }
 
 main().catch((error) => {
