@@ -3,6 +3,7 @@
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const { generateChangelog } = require('./changelog-utils');
 
 const repoRoot = path.resolve(__dirname, '..');
 
@@ -132,6 +133,63 @@ function createOrSwitchReleaseBranch(version) {
   return branchName;
 }
 
+function loadJson(filePath) {
+  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+}
+
+function writeJson(filePath, data) {
+  fs.writeFileSync(filePath, `${JSON.stringify(data, null, 2)}\n`, 'utf8');
+}
+
+function updateManifest(manifestPath, version) {
+  const manifest = loadJson(manifestPath);
+  manifest.version = version;
+
+  if (manifest.version_name) {
+    manifest.version_name = version;
+  }
+
+  writeJson(manifestPath, manifest);
+}
+
+function bumpVersions(version) {
+  const manifestPath = path.join(repoRoot, 'src', 'chrome-ext', 'manifest.json');
+
+  console.log(`Bumping version to ${version}...`);
+
+  // Update package.json and package-lock.json via npm
+  runCommand(`npm version ${version} --no-git-tag-version`);
+
+  // Update manifest.json
+  updateManifest(manifestPath, version);
+
+  console.log('✓ Version bumped in package.json, package-lock.json, and manifest.json\n');
+}
+
+function generateChangelogFile(version) {
+  const changelogPath = path.join(repoRoot, 'CHANGELOG.md');
+  const changelogDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+
+  console.log('Generating CHANGELOG.md...');
+  const changelogContent = generateChangelog(version, changelogDate);
+  fs.writeFileSync(changelogPath, changelogContent, 'utf8');
+  console.log('✓ CHANGELOG.md generated\n');
+}
+
+function formatReleaseFiles() {
+  console.log('Formatting release files with Prettier...');
+  runCommand(
+    'npx prettier --write package.json package-lock.json src/chrome-ext/manifest.json CHANGELOG.md'
+  );
+  console.log('✓ Files formatted\n');
+}
+
+function runTypecheck() {
+  console.log('Running typecheck...');
+  runCommand('npm run typecheck');
+  console.log('✓ Typecheck passed\n');
+}
+
 async function main() {
   ensureGhAvailable();
 
@@ -155,7 +213,12 @@ async function main() {
   fetchLatest();
   const releaseBranch = createOrSwitchReleaseBranch(version);
 
-  // TODO: Implement remaining release preparation steps
+  runTypecheck();
+  bumpVersions(version);
+  generateChangelogFile(version);
+  formatReleaseFiles();
+
+  // TODO: Implement commit, push, and PR creation
 
   console.log('\nRelease preparation completed!\n');
   console.log(`Release branch: ${releaseBranch}\n`);
