@@ -112,6 +112,67 @@ function parseVersion() {
   return args[0] ? args[0].trim() : null;
 }
 
+function runTypecheck() {
+  console.log('Running typecheck...');
+  runCommand('npm run typecheck');
+  console.log('✓ Typecheck passed\n');
+}
+
+function buildExtension() {
+  console.log('Building extension...');
+  runCommand('npm run build');
+  console.log('✓ Extension built\n');
+}
+
+function packageExtension(version) {
+  console.log('Packaging extension...');
+  runCommand(`npm run package -- ${version}`);
+
+  const zipPath = path.join(repoRoot, `mountaineers-assistant-${version}.zip`);
+  if (!fs.existsSync(zipPath)) {
+    throw new Error(`Expected package file not found: ${zipPath}`);
+  }
+
+  console.log(`✓ Extension packaged: mountaineers-assistant-${version}.zip\n`);
+  return zipPath;
+}
+
+function createAndPushTag(version) {
+  const tagName = `v${version}`;
+
+  console.log(`Creating git tag ${tagName}...`);
+  runCommand(`git tag -a ${tagName} -m "Release ${tagName}"`);
+  console.log(`✓ Tag ${tagName} created\n`);
+
+  console.log(`Pushing tag ${tagName} to origin...`);
+  runCommand(`git push origin ${tagName}`);
+  console.log(`✓ Tag ${tagName} pushed\n`);
+
+  return tagName;
+}
+
+function createGitHubRelease(version, zipPath) {
+  const tagName = `v${version}`;
+  const relativeZipPath = path.relative(repoRoot, zipPath);
+
+  console.log('Creating GitHub release...');
+
+  try {
+    const releaseUrl = getCommandOutput(
+      `gh release create ${tagName} --title "${tagName}" --notes "Release ${tagName}" "${relativeZipPath}"`
+    );
+    console.log(`✓ GitHub release created: ${releaseUrl}\n`);
+    return releaseUrl;
+  } catch (error) {
+    console.error(`\n⚠️  Failed to create GitHub release: ${error.message}`);
+    console.error(`   Tag ${tagName} was pushed. You can create the release manually:`);
+    console.error(
+      `   gh release create ${tagName} --title "${tagName}" --notes "Release ${tagName}" "${relativeZipPath}"\n`
+    );
+    throw error;
+  }
+}
+
 async function main() {
   ensureGhAvailable();
 
@@ -129,9 +190,25 @@ async function main() {
 
   console.log(`\nPublishing release for version ${version}...\n`);
 
-  // TODO: Implement release publishing steps
+  runTypecheck();
+  buildExtension();
+  const zipPath = packageExtension(version);
+  const tagName = createAndPushTag(version);
+  const releaseUrl = createGitHubRelease(version, zipPath);
 
-  console.log('\nRelease published successfully!\n');
+  console.log('='.repeat(60));
+  console.log('Release published successfully!');
+  console.log('='.repeat(60));
+  console.log(`\nVersion: ${version}`);
+  console.log(`Tag: ${tagName}`);
+  console.log(`Package: ${path.basename(zipPath)}`);
+  if (releaseUrl) {
+    console.log(`GitHub Release: ${releaseUrl}`);
+  }
+  console.log('\nNext steps:');
+  console.log('1. Upload the ZIP to Chrome Web Store');
+  console.log('2. Update the extension listing if needed');
+  console.log('');
 }
 
 main().catch((error) => {
