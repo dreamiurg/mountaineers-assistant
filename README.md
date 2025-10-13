@@ -2,8 +2,6 @@
 
 A Chrome extension that enhances your Mountaineers.org experience with personalized activity insights and analytics.
 
-![Insights dashboard screenshot](tests/extension-snapshots.spec.ts-snapshots/insights-default-chromium-extension-darwin.png)
-
 ## Features
 
 - **Activity History Sync** - Fetch and cache your Mountaineers activity data using your existing login session
@@ -12,6 +10,8 @@ A Chrome extension that enhances your Mountaineers.org experience with personali
   - Category (Climbs, Courses, etc.)
   - Your role (Leader, Participant, etc.)
   - Activity partners
+
+![Insights dashboard screenshot](tests/chrome-extension/insights-dashboard-visual.spec.ts-snapshots/insights-default-chromium-extension-darwin.png)
 
 ## Installation
 
