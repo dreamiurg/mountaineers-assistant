@@ -17,7 +17,7 @@ A Chrome extension that enhances your Mountaineers.org experience with personali
 
 ### From Chrome Web Store (Recommended)
 
-[Install from Chrome Web Store](https://chrome.google.com/webstore) _(link coming soon)_
+[Install from Chrome Web Store](https://chromewebstore.google.com/detail/mountaineers-assistant/dinamjoegfooacbhmhgbjeidfgcmbonl)
 
 ### Manual Installation (Latest Development Build)
 
@@ -37,14 +37,13 @@ A Chrome extension that enhances your Mountaineers.org experience with personali
 3. The **Insights dashboard** will open
 4. **Click "Fetch New Activities"** to sync your data
 
-The extension uses your existing Mountaineers.org session - no separate login required!
+The extension uses your existing Mountaineers.org session - no separate login required.
 
 ### Fetching New Activities
 
-- Click **"Fetch New Activities"** from the Insights dashboard
-- The extension will sync your activity history (typically takes 30-60 seconds)
-- Progress updates show in real-time
-- Data is cached locally for fast access
+- Click **"Fetch New Activities"** from the Insights dashboard.
+- The extension will sync your activity history (typically takes 30-60 seconds but may take longer if you participated in a lot of activities in the past). Progress updates show in real-time.
+- Data is cached locally for fast access.
 
 ### Exploring Your Data
 
@@ -92,6 +91,6 @@ The extension requires these permissions:
 
 Want to contribute? See [CONTRIBUTING.md](CONTRIBUTING.md) for developer setup and guidelines.
 
-## License
+## Changelog
 
-MIT License - see [LICENSE](LICENSE) for details.
+See [CHANGELOG.md](CHANGELOG.md) for a list of changes in each version.
