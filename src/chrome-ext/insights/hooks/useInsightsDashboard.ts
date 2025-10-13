@@ -368,9 +368,6 @@ export const useInsightsDashboard = (): InsightsState => {
 
       if (payload.type === REFRESH_STATUS_CHANGE_MESSAGE) {
         setIsLoading(Boolean(payload.inProgress));
-        if (!payload.inProgress) {
-          // Refresh completed, reload data will be handled by storage listener
-        }
       }
     };
 
@@ -380,6 +377,32 @@ export const useInsightsDashboard = (): InsightsState => {
       chrome.runtime.onMessage.removeListener(messageListener);
     };
   }, []);
+
+  // Listen for storage changes to reload data when cache is updated
+  useEffect(() => {
+    const storageListener = (changes: { [key: string]: chrome.storage.StorageChange }) => {
+      if (changes[STORAGE_KEY]) {
+        // Cache was updated, reload the dashboard
+        loadExtensionData()
+          .then(() => {
+            setStatusMessage('Dashboard updated with latest data.');
+            // Clear the message after a few seconds
+            setTimeout(() => {
+              setStatusMessage('');
+            }, 3000);
+          })
+          .catch((error) => {
+            console.error('Failed to reload data after storage change', error);
+          });
+      }
+    };
+
+    chrome.storage.onChanged.addListener(storageListener);
+
+    return () => {
+      chrome.storage.onChanged.removeListener(storageListener);
+    };
+  }, [loadExtensionData]);
 
   // Fetch activities function
   const fetchActivities = useCallback(async () => {

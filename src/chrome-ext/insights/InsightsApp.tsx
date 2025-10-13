@@ -350,12 +350,6 @@ const InsightsApp = () => {
               <p className="mt-1">
                 Last sync: <span className="font-medium text-slate-900">{lastUpdated}</span>
               </p>
-              <p className="mt-1">
-                Activity types tracked:{' '}
-                <span className="font-medium text-slate-900">
-                  {formatNumber(view?.metrics.uniqueTypes ?? 0)}
-                </span>
-              </p>
             </div>
           </div>
           <p className="max-w-3xl text-sm text-slate-600">{summary}</p>
