@@ -1,0 +1,318 @@
+# Contributing to Mountaineers Assistant
+
+Thank you for your interest in contributing! This guide covers everything you need to know to set up your development environment and make contributions.
+
+## Table of Contents
+
+- [Development Setup](#development-setup)
+- [Architecture](#architecture)
+- [Project Structure](#project-structure)
+- [Development Workflow](#development-workflow)
+- [Testing](#testing)
+- [Code Quality](#code-quality)
+- [Release Process](#release-process)
+
+## Development Setup
+
+### Prerequisites
+
+**Node.js 18+**
+
+Install with Homebrew if needed:
+
+```bash
+brew install node@18
+node --version  # Should be 18.x
+npm --version
+```
+
+### Install Dependencies
+
+```bash
+npm install
+```
+
+### Build the Extension
+
+```bash
+npm run build
+```
+
+This compiles TypeScript, processes CSS with Tailwind, and bundles everything into `dist/`.
+
+### Load in Chrome
+
+1. Open `chrome://extensions`
+2. Enable **Developer mode** (toggle in top right)
+3. Click **Load unpacked**
+4. Select the `dist/` directory
+
+**Important:** Reload the extension in `chrome://extensions` after every rebuild to pick up changes.
+
+### Development Mode
+
+For continuous development with auto-rebuild:
+
+```bash
+npx vite build --watch
+```
+
+This keeps `dist/` up to date. You still need to reload the extension in Chrome after each change.
+
+## Architecture
+
+### Tech Stack
+
+- **TypeScript + React** - Type-safe UI development
+- **Tailwind CSS** - Utility-first styling
+- **Vite** - Fast bundling and dev server
+- **Storybook** - Isolated component development
+- **Playwright** - End-to-end testing
+- **Manifest V3** - Latest Chrome extension standard
+
+### Key Architectural Decisions
+
+#### Offscreen Document Pattern
+
+The extension uses Chrome's [Offscreen Document API](https://developer.chrome.com/docs/extensions/reference/api/offscreen) to fetch and parse activity data:
+
+**Why?**
+
+- Offscreen documents have access to DOM APIs (needed for HTML parsing)
+- Can make authenticated requests using browser's session cookies
+- Runs without requiring a specific tab to be open
+
+**Alternative Considered:**
+
+- Content script injection required user to be on mountaineers.org page
+- Led to confusing UX (disabled buttons, unclear error messages)
+
+**Implementation:**
+
+- `src/chrome-ext/background.ts` - Manages offscreen document lifecycle
+- `src/chrome-ext/offscreen.ts` - Fetches and parses data from Mountaineers.org
+- `src/chrome-ext/insights/` - React UI that triggers fetches via messaging
+
+#### Message Passing Flow
+
+```
+User clicks "Fetch" → insights page
+  ↓ sends message
+background.ts (receives 'start-refresh')
+  ↓ calls ensureOffscreenDocument()
+  ↓ sends message to offscreen
+offscreen.ts (receives 'offscreen-collect')
+  ↓ fetches data, parses HTML
+  ↓ sends progress updates
+background.ts (receives progress, broadcasts)
+  ↓ saves to storage
+insights page (receives progress, updates UI)
+```
+
+## Project Structure
+
+```
+mountaineers-assistant/
+├─ src/
+│  └─ chrome-ext/
+│     ├─ background.ts              # Service worker: manages offscreen document
+│     ├─ offscreen.html             # Offscreen document shell
+│     ├─ offscreen.ts               # Data collection logic
+│     ├─ manifest.json              # Extension manifest (MV3)
+│     ├─ insights.html              # Insights dashboard shell
+│     ├─ insights-react-root.tsx    # React entry point
+│     ├─ insights/                  # Dashboard components & hooks
+│     │  ├─ components/             # React components
+│     │  ├─ hooks/                  # Custom hooks
+│     │  └─ utils/                  # Utilities
+│     ├─ preferences.html           # Preferences shell
+│     ├─ preferences-react-root.tsx # React entry point
+│     ├─ preferences/               # Preferences UI
+│     ├─ shared/                    # Shared types & utilities
+│     ├─ types/                     # TypeScript type declarations
+│     └─ styles/                    # Tailwind sources
+├─ tests/
+│  ├─ unit/                         # Unit tests
+│  └─ e2e/                          # End-to-end tests
+├─ src/data/                        # Test fixtures
+├─ dist/                            # Build output (gitignored)
+└─ docs/                            # Documentation
+```
+
+## Development Workflow
+
+### Making Changes
+
+1. **Create a feature branch**
+
+   ```bash
+   git checkout -b feat/your-feature-name
+   ```
+
+2. **Make your changes**
+   - Follow existing code patterns
+   - Add tests for new functionality
+   - Update documentation if needed
+
+3. **Test your changes**
+
+   ```bash
+   npm run typecheck    # TypeScript validation
+   npm run lint         # Code formatting check
+   npm test             # Unit tests
+   npm run test:extension  # E2E tests
+   ```
+
+4. **Commit your changes**
+   - Pre-commit hooks will automatically run checks
+   - Use conventional commit format: `feat:`, `fix:`, `docs:`, etc.
+
+5. **Push and create PR**
+   ```bash
+   git push origin feat/your-feature-name
+   # Create PR on GitHub
+   ```
+
+### Component Development with Storybook
+
+For UI work, use Storybook for isolated component development:
+
+```bash
+npm run storybook
+```
+
+This opens a local server where you can develop and test components without loading the full extension.
+
+## Testing
+
+### Unit Tests
+
+Located in `tests/unit/`, use Node.js test runner:
+
+```bash
+npm test
+# or run specific test
+npx tsx --test tests/unit/your-test.test.ts
+```
+
+### End-to-End Tests
+
+Located in `tests/e2e/`, use Playwright:
+
+```bash
+# First time setup
+npx playwright install
+
+# Run E2E tests
+npm run test:extension
+
+# Update snapshots after UI changes
+npm run test:extension:update
+```
+
+**What E2E tests do:**
+
+- Load extension into Chromium
+- Seed storage with sample data
+- Take screenshots of preferences and insights pages
+- Verify UI renders correctly
+- Test fetch workflows
+
+### Test Data
+
+Sample data lives in `src/data/sample-activities.json`. Update this file when you need to test new scenarios or edge cases.
+
+## Code Quality
+
+### Automatic Checks
+
+Pre-commit hooks automatically run on `git commit`:
+
+```bash
+# Install hooks (first time)
+uv run pre-commit install
+
+# Run manually
+uv run pre-commit run --all-files
+```
+
+Checks include:
+
+- **Prettier** - Code formatting
+- **ESLint** - Linting
+- **detect-secrets** - Prevent committing secrets
+- **TypeScript** - Type checking
+
+### Manual Commands
+
+```bash
+npm run format      # Apply Prettier formatting
+npm run lint        # Check formatting (CI mode)
+npm run typecheck   # Validate TypeScript
+```
+
+## Release Process
+
+This project uses a two-phase release workflow managed by npm scripts.
+
+### Requirements
+
+- [GitHub CLI (`gh`)](https://cli.github.com/) installed and authenticated
+- Push access to the repository
+- Main branch protection rules configured
+
+### Phase 1: Prepare Release
+
+Create a release branch and PR:
+
+```bash
+npm run release:prepare 0.2.0
+```
+
+This script:
+
+1. Creates `release/v0.2.0` branch
+2. Bumps version in `package.json` and `manifest.json`
+3. Updates `CHANGELOG.md` from commit messages
+4. Commits changes
+5. Pushes branch
+6. Creates PR to main
+
+**Next:** Review the PR, ensure CI passes, then merge on GitHub.
+
+### Phase 2: Publish Release
+
+After PR is merged, publish the release:
+
+```bash
+git checkout main
+git pull
+npm run release:publish 0.2.0
+```
+
+This script:
+
+1. Creates and pushes git tag `v0.2.0`
+2. Builds production bundle
+3. Packages extension as ZIP
+4. Creates GitHub release with ZIP attachment
+
+**Final step:** Upload ZIP to [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole).
+
+### Version Numbering
+
+Follow [Semantic Versioning](https://semver.org/):
+
+- **Major** (1.0.0) - Breaking changes
+- **Minor** (0.2.0) - New features, backwards compatible
+- **Patch** (0.1.8) - Bug fixes
+
+## Questions?
+
+- Check existing [issues](https://github.com/dreamiurg/mountaineers-assistant/issues)
+- Start a [discussion](https://github.com/dreamiurg/mountaineers-assistant/discussions)
+- Review the [architecture docs](docs/)
+
+## Code of Conduct
+
+Be respectful and constructive. This is a community project built by climbers for climbers.
