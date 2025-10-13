@@ -1,184 +1,96 @@
 # Mountaineers Assistant
 
-Mountaineers Assistant is a Chrome extension that improves your Mountaineers.org experience by adding features the site does not offer.
-
-## Table of Contents
-
-- [Features](#features)
-- [Privacy](#privacy)
-- [Development Setup](#development-setup)
-  - [Tech Stack](#tech-stack)
-  - [Prerequisites](#prerequisites)
-  - [Install Dependencies & Build](#install-dependencies--build)
-  - [Load the Extension](#load-the-extension)
-  - [Automatic Rebuilds](#automatic-rebuilds)
-  - [Storybook](#storybook)
-- [Automated Testing](#automated-testing)
-- [Sample Data Fixtures](#sample-data-fixtures)
-- [Project Layout](#project-layout)
-- [Release Workflow](#release-workflow)
-- [Cheatsheet](#cheatsheet)
-
-## Features
-
-- Refresh your Mountaineers activity history using your current signed-in session.
-- Explore a dedicated insights dashboard that visualizes your activity history, with powerful filters for type, category, and your role in each event.
+A Chrome extension that enhances your Mountaineers.org experience with personalized activity insights and analytics.
 
 ![Insights dashboard screenshot](tests/extension-snapshots.spec.ts-snapshots/insights-default-chromium-extension-darwin.png)
 
-## Privacy
+## Features
 
-All your data is stored locally in your browser and never sent to external servers.
+- **Activity History Sync** - Fetch and cache your Mountaineers activity data using your existing login session
+- **Interactive Dashboard** - Explore visualizations of your climbing history with filters for:
+  - Activity type (Alpine Scramble, Rock Climbing, etc.)
+  - Category (Climbs, Courses, etc.)
+  - Your role (Leader, Participant, etc.)
+  - Activity partners
 
-## Development Setup
+## Installation
 
-If you would like to contribute to this extension, here's what you may want to know.
+### From Chrome Web Store (Recommended)
 
-### Tech Stack
+[Install from Chrome Web Store](https://chromewebstore.google.com/detail/mountaineers-assistant/dinamjoegfooacbhmhgbjeidfgcmbonl)
 
-- TypeScript + React
-- [Tailwind CSS](https://tailwindcss.com/) for styling
-- [Vite](https://vitejs.dev/) for bundling and local development
-- [Storybook](https://storybook.js.org/) for isolated component work
+### Manual Installation (Latest Development Build)
 
-### Prerequisites
+1. Download the latest release ZIP from [GitHub Releases](https://github.com/dreamiurg/mountaineers-assistant/releases)
+2. Extract the ZIP file
+3. Open Chrome and navigate to `chrome://extensions`
+4. Enable **Developer mode** (toggle in top right)
+5. Click **Load unpacked**
+6. Select the extracted folder
 
-Install the pinned Node version with Homebrew if needed:
+## How to Use
 
-```bash
-brew install node@18
-npm --version
-```
+### First Time Setup
 
-### Install Dependencies & Build
+1. **Log in to Mountaineers.org** in your browser
+2. **Click the extension icon** in your Chrome toolbar
+3. The **Insights dashboard** will open
+4. **Click "Fetch New Activities"** to sync your data
 
-```bash
-npm install
-npm run build
-```
+The extension uses your existing Mountaineers.org session - no separate login required.
 
-`npm run build` compiles TypeScript, minifies the CSS, and bundles the extension into `dist/`.
+### Fetching New Activities
 
-### Load the Extension
+- Click **"Fetch New Activities"** from the Insights dashboard.
+- The extension will sync your activity history (typically takes 30-60 seconds but may take longer if you participated in a lot of activities in the past). Progress updates show in real-time.
+- Data is cached locally for fast access.
 
-1. Open [`chrome://extensions`](chrome://extensions).
-2. Enable **Developer mode**.
-3. Click **Load unpacked** and choose the freshly built `dist/` directory.
+### Exploring Your Data
 
-Reload the unpacked extension in `chrome://extensions` after every rebuild so Chrome’s service worker, popup, and preferences page pick up the latest bundle.
+The Insights dashboard provides:
 
-### Automatic Rebuilds
+- **Activity statistics** - Total activities, success rate, date ranges
+- **Visual charts** - Activity distribution by type and category
+- **Activity list** - Searchable, filterable list of all your activities
+- **Partner analysis** - See who you've climbed with most
 
-For continuous development, use Vite autorebuild:
+Use the filters at the top to focus on specific activity types, time periods, or partners.
 
-```bash
-npx vite build --watch
-```
+### Settings
 
-This keeps the output in `dist/` up to date without manual rebuilds. Reload the extension in Chrome after each change to see updates.
+Click **Preferences** to configure:
 
-### Storybook
+- **Fetch limit** - Limit how many recent activities to sync (useful for faster syncs)
 
-If you prefer Storybook-style development, React components have stories as well. Run Storybook and explore in your browser:
+## Privacy & Data
 
-```bash
-npm run storybook
-```
+**Your data never leaves your browser.**
 
-## Automated Testing
+- All activity data is stored locally in Chrome's storage
+- No external servers or analytics
+- Only communicates with Mountaineers.org to fetch your data
+- Uses your existing session cookies (same as browsing the site)
 
-In addition to standard pre-commit checks for linting and formatting, this extension includes an automated test suite powered by Playwright. When run, tests verify that the main UI features of the [popup](src/chrome-ext/popup.html), [preferences](src/chrome-ext/preferences.html), and [insights](src/chrome-ext/insights.html) pages are working and that the UI looks as expected.
+For technical details, see our [Privacy Policy](PRIVACY.md).
 
-Here’s what you need to know:
+## Permissions
 
-- Run `npx playwright install` once to download the Chromium build Playwright uses to exercise the extension.
-- `npm run test:extension` seeds `chrome.storage.local` with `src/data/sample-activities.json`, launches Chromium with the MV3 bundle from `dist/`, blocks all outbound network traffic, and captures deterministic screenshots of the popup (`popup.html`), preferences (`preferences.html`), and insights dashboard (`insights.html`).
-- Regenerate baselines after intentional UI updates with `npm run test:extension:update`.
-- Snapshot artifacts live under `tests/extension-snapshots.spec.ts-snapshots/`; Playwright drops comparison diffs and traces under `test-results/` when assertions fail.
+The extension requires these permissions:
 
-## Sample Data Fixtures
+- **storage** - Save your cached activity data locally
+- **offscreen** - Run data collection in the background
+- **tabs** - Open the insights dashboard when you click the extension icon
+- **mountaineers.org** - Access your activity data using your login session
 
-- Sanitized fixtures live at `src/data/sample-activities.json` and mirror the structure returned by Mountaineers APIs.
-- Storybook stories and Playwright tests import this file directly; update it whenever you need to cover new scenarios or edge cases.
+## Support
 
-## Project Layout
+- **Found a bug?** [Report an issue](https://github.com/dreamiurg/mountaineers-assistant/issues)
+- **Feature request?** [Open a discussion](https://github.com/dreamiurg/mountaineers-assistant/discussions)
 
-```
-mountaineers-assistant/
-├─ src/
-│  └─ chrome-ext/
-│     ├─ background.ts        # Service worker: handles refresh requests and caches results in storage.
-│     ├─ collect.ts           # Injected content script: calls Mountaineers APIs and parses roster pages.
-│     ├─ manifest.json        # Manifest V3 definition.
-│     ├─ preferences.html     # Preferences shell loaded by Chrome.
-│     ├─ preferences-react-root.tsx # Entry point that mounts the React preferences experience.
-│     ├─ preferences/         # React preferences application (components, hooks, services).
-│     ├─ popup.html           # Popup shell loaded by Chrome.
-│     ├─ popup-react-root.tsx  # Entry point that mounts the React popup experience.
-│     ├─ popup/               # React popup application (components, hooks, services).
-│     ├─ insights.html        # Activity insights shell loaded by Chrome.
-│     ├─ insights-react-root.tsx # Entry point that mounts the React insights experience.
-│     ├─ insights/            # React insights dashboard (components, hooks, utilities).
-│     ├─ shared/              # Reusable TypeScript models shared across scripts.
-│     ├─ types/               # Ambient type declarations consumed by content scripts.
-│     └─ styles/              # Tailwind sources compiled into tailwind.css.
-├─ src/data/                  # Sanitized Storybook/Playwright fixtures.
-├─ dist/                      # Generated MV3 bundle emitted by Vite (not checked in).
-├─ package.json               # npm scripts and extension metadata.
-├─ package-lock.json
-├─ .pre-commit-config.yaml    # Pre-commit hook definitions (Prettier, ESLint, gitleaks).
-└─ README.md
-```
+## Contributing
 
-## Cheatsheet
+Want to contribute? See [CONTRIBUTING.md](CONTRIBUTING.md) for developer setup and guidelines.
 
-- `npm run format` applies Prettier to JS/TS, HTML, and CSS under `src/`.
-- `npm run lint` runs Prettier in check mode and fails on formatting drift.
-- `npm run typecheck` validates the TypeScript sources with the project `tsconfig`.
-- `npm run test:extension` runs the Playwright-driven MV3 snapshot suite against the built bundle.
-- `uv run pre-commit install` installs the pinned hook environment; run `uv run pre-commit run --all-files` if hooks are not installed locally.
-- Use `npm run release:prepare <version>` and `npm run release:publish <version>` for releases.
+## Changelog
 
-## Release Workflow
-
-This project uses a two-phase release workflow:
-
-### 1. Prepare Release
-
-Create a release branch and pull request:
-
-```bash
-npm run release:prepare 0.1.7
-```
-
-This will:
-
-- Create a `release/v0.1.7` branch
-- Bump versions and generate changelog
-- Push the branch and create a PR to main
-
-Review the PR, then merge it on GitHub.
-
-### 2. Publish Release
-
-After the PR is merged, publish the release:
-
-```bash
-git checkout main
-git pull
-npm run release:publish 0.1.7
-```
-
-This will:
-
-- Create and push a git tag
-- Build and package the extension
-- Create a GitHub release with the ZIP
-
-Finally, upload the ZIP to the [Chrome Web Store](https://chrome.google.com/webstore).
-
-### Requirements
-
-- [GitHub CLI (`gh`)](https://cli.github.com/) must be installed
-- You must have push access to the repository
-- Main branch has protection rules requiring PR reviews
+See [CHANGELOG.md](CHANGELOG.md) for a list of changes in each release.

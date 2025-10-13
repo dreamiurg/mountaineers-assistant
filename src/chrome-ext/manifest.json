@@ -3,14 +3,13 @@
   "name": "Mountaineers Assistant",
   "version": "0.1.8",
   "description": "Enhance your Mountaineers browsing experience with personalized activity insights.",
-  "permissions": ["storage", "scripting", "tabs"],
+  "permissions": ["storage", "offscreen", "tabs"],
   "host_permissions": ["https://www.mountaineers.org/*"],
   "background": {
     "service_worker": "background.js"
   },
   "action": {
-    "default_title": "Mountaineers Assistant",
-    "default_popup": "popup.html"
+    "default_title": "Mountaineers Assistant"
   },
   "options_ui": {
     "page": "preferences.html",

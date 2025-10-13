@@ -314,46 +314,93 @@ const InsightsApp = () => {
     statusMessage,
     setFilter,
     clearFilters,
+    fetchActivities,
+    isLoading,
+    fetchLimit,
+    refreshSummary,
+    fullDateRange,
   } = useInsightsDashboard();
 
   const filterDisabled = empty || !view;
 
   const coverageRange = useMemo(
-    () => formatDateRange(view?.meta.earliest ?? null, view?.meta.latest ?? null),
-    [view]
+    () => formatDateRange(fullDateRange.earliest, fullDateRange.latest),
+    [fullDateRange]
   );
   const lastUpdated = useMemo(() => formatDate(view?.meta.lastUpdated ?? null), [view]);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
-      <div className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6">
-        <header className="space-y-3">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-600">
-                Mountaineers Assistant
-              </p>
-              <h1 className="text-3xl font-semibold text-slate-900 sm:text-4xl">
-                Activity Insights Dashboard
-              </h1>
+      <div className="mx-auto max-w-7xl space-y-4 px-4 py-8 sm:px-6">
+        <header>
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div className="space-y-2">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-600">
+                  Mountaineers Assistant
+                </p>
+                <h1 className="text-3xl font-semibold text-slate-900 sm:text-4xl">
+                  Activity Insights Dashboard
+                </h1>
+              </div>
+              <p className="max-w-3xl text-sm text-slate-600">{summary}</p>
             </div>
-            <div className="glass-card rounded-xl px-4 py-3 text-sm text-slate-600">
-              <p>
-                Dataset coverage:{' '}
-                <span className="font-medium text-slate-900">{coverageRange}</span>
-              </p>
-              <p className="mt-1">
-                Last sync: <span className="font-medium text-slate-900">{lastUpdated}</span>
-              </p>
-              <p className="mt-1">
-                Activity types tracked:{' '}
-                <span className="font-medium text-slate-900">
-                  {formatNumber(view?.metrics.uniqueTypes ?? 0)}
-                </span>
-              </p>
+            <div className="glass-card space-y-3 rounded-xl px-4 py-3 text-sm">
+              <div className="text-slate-600">
+                <p>
+                  Dataset coverage:{' '}
+                  <span className="font-medium text-slate-900">{coverageRange}</span>
+                </p>
+                <p className="mt-1">
+                  Last sync: <span className="font-medium text-slate-900">{lastUpdated}</span>
+                </p>
+              </div>
+              <button
+                data-testid="fetch-button"
+                onClick={fetchActivities}
+                disabled={isLoading}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-sky-600 px-3 py-2 text-sm font-medium text-white shadow-lg shadow-sky-600/25 transition-colors hover:bg-sky-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 disabled:pointer-events-none disabled:opacity-60"
+              >
+                {isLoading && (
+                  <svg
+                    className="h-4 w-4 animate-spin"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                    />
+                  </svg>
+                )}
+                {fetchLimit
+                  ? `Fetch New Activities (limit: ${fetchLimit})`
+                  : 'Fetch New Activities'}
+              </button>
+              {statusMessage && (
+                <p
+                  className={`text-xs ${
+                    statusMessage.toLowerCase().includes('error') ||
+                    statusMessage.toLowerCase().includes('log in')
+                      ? 'text-rose-600'
+                      : 'text-slate-600'
+                  }`}
+                >
+                  {statusMessage}
+                </p>
+              )}
             </div>
           </div>
-          <p className="max-w-3xl text-sm text-slate-600">{summary}</p>
         </header>
 
         <section className="glass-card filter-card rounded-2xl p-5">
@@ -429,7 +476,7 @@ const InsightsApp = () => {
         )}
 
         {!loading && !error && !empty && view && (
-          <div className="space-y-6" id="dashboardContent">
+          <div className="space-y-4" id="dashboardContent">
             <section className="grid gap-4 md:grid-cols-4">
               <article className="glass-card rounded-2xl p-5">
                 <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">

@@ -498,21 +498,18 @@ export const buildSummary = (
       .filter(Boolean);
 
     if (partnerNames.length === 1) {
-      filterParts.push(`activities with ${partnerNames[0]}`);
+      filterParts.push(`with ${partnerNames[0]}`);
     } else if (partnerNames.length === 2) {
-      filterParts.push(`activities with ${partnerNames[0]} and ${partnerNames[1]}`);
+      filterParts.push(`with ${partnerNames[0]} and ${partnerNames[1]}`);
     } else if (partnerNames.length > 2) {
       const first = partnerNames.slice(0, -1).join(', ');
       const last = partnerNames[partnerNames.length - 1];
-      filterParts.push(`activities with ${first}, and ${last}`);
+      filterParts.push(`with ${first}, and ${last}`);
     }
   }
 
-  const filterText = filterParts.length > 0 ? ` • Showing ${filterParts.join('; ')}` : '';
-  const refreshed = view.meta.lastUpdated ? view.meta.lastUpdated.toLocaleString() : 'Never';
-  return `Last refreshed ${refreshed} • ${formatNumber(view.metrics.totalActivities)} activities, ${formatNumber(
-    view.metrics.uniquePartners
-  )} unique partners${filterText}.`;
+  const filterText = filterParts.length > 0 ? ` ${filterParts.join('; ')}` : '';
+  return `Visualize your Mountaineers activity history, filter by type or partner, and explore participation trends over time${filterText}.`;
 };
 
 export const getActivityTypeColors = (): string[] => ACTIVITY_TYPE_COLORS;
