@@ -93,4 +93,4 @@ Want to contribute? See [CONTRIBUTING.md](CONTRIBUTING.md) for developer setup a
 
 ## Changelog
 
-See [CHANGELOG.md](CHANGELOG.md) for a list of changes in each version.
+See [CHANGELOG.md](CHANGELOG.md) for a list of changes in each release.

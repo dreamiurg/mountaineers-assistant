@@ -283,12 +283,6 @@ npm run typecheck   # Validate TypeScript
 
 This project uses a two-phase release workflow managed by npm scripts.
 
-### Requirements
-
-- [GitHub CLI (`gh`)](https://cli.github.com/) installed and authenticated
-- Push access to the repository
-- Main branch protection rules configured
-
 ### Phase 1: Prepare Release
 
 Create a release branch and PR:
@@ -301,7 +295,7 @@ This script:
 
 1. Creates `release/v0.2.0` branch
 2. Bumps version in `package.json` and `manifest.json`
-3. Updates `CHANGELOG.md` from commit messages
+3. Creates new section for the release in `CHANGELOG.md` and populates it based on commit log
 4. Commits changes
 5. Pushes branch
 6. Creates PR to main
@@ -339,8 +333,3 @@ Follow [Semantic Versioning](https://semver.org/):
 
 - Check existing [issues](https://github.com/dreamiurg/mountaineers-assistant/issues)
 - Start a [discussion](https://github.com/dreamiurg/mountaineers-assistant/discussions)
-- Review the [architecture docs](docs/)
-
-## Code of Conduct
-
-Be respectful and constructive. This is a community project built by climbers for climbers.
