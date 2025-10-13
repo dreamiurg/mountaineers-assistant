@@ -121,6 +121,7 @@ export const useInsightsDashboard = (): InsightsState => {
     lastUpdated: null,
     newActivities: 0,
   });
+  const [dataVersion, setDataVersion] = useState(0); // Increment to force recalculation
 
   const baseDataRef = useRef<PreparedData | null>(null);
   const filtersRef = useRef<DashboardFilters>(filters);
@@ -290,7 +291,7 @@ export const useInsightsDashboard = (): InsightsState => {
     const nextView = calculateDashboard(prepared, sanitized);
     setView(nextView);
     setSummary(buildSummary(nextView, sanitized, prepared));
-  }, [filters]);
+  }, [filters, dataVersion]);
 
   const setFilter = useCallback((key: keyof DashboardFilters, values: string[]) => {
     setFilters((current) => ({ ...current, [key]: values }));
@@ -410,8 +411,8 @@ export const useInsightsDashboard = (): InsightsState => {
             }
 
             setEmpty(false);
-            // Trigger view recalculation by updating filters (which triggers the useEffect on line 264)
-            setFilters((current) => ({ ...current }));
+            // Trigger view recalculation by incrementing dataVersion
+            setDataVersion((v) => v + 1);
             setStatusMessage('Dashboard updated with latest data.');
             // Clear the message after a few seconds
             setTimeout(() => {
