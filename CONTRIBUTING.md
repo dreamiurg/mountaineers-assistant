@@ -32,6 +32,43 @@ npm --version
 npm install
 ```
 
+### Install Pre-commit Hooks
+
+This project uses [pre-commit](https://pre-commit.com/) to automatically run code quality checks before each commit.
+
+**Prerequisites:**
+
+- [uv](https://docs.astral.sh/uv/) - Fast Python package installer
+
+**Install uv (if not already installed):**
+
+```bash
+# macOS/Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Or with Homebrew
+brew install uv
+```
+
+**Install pre-commit hooks:**
+
+```bash
+uv run pre-commit install
+```
+
+This sets up hooks that will automatically run on every `git commit`:
+
+- **Prettier** - Auto-formats code
+- **ESLint** - Lints JavaScript/TypeScript
+- **detect-secrets** - Prevents committing secrets
+- **TypeScript** - Validates types
+
+**Run hooks manually (optional):**
+
+```bash
+uv run pre-commit run --all-files
+```
+
 ### Build the Extension
 
 ```bash
@@ -81,17 +118,6 @@ The extension uses Chrome's [Offscreen Document API](https://developer.chrome.co
 - Offscreen documents have access to DOM APIs (needed for HTML parsing)
 - Can make authenticated requests using browser's session cookies
 - Runs without requiring a specific tab to be open
-
-**Alternative Considered:**
-
-- Content script injection required user to be on mountaineers.org page
-- Led to confusing UX (disabled buttons, unclear error messages)
-
-**Implementation:**
-
-- `src/chrome-ext/background.ts` - Manages offscreen document lifecycle
-- `src/chrome-ext/offscreen.ts` - Fetches and parses data from Mountaineers.org
-- `src/chrome-ext/insights/` - React UI that triggers fetches via messaging
 
 #### Message Passing Flow
 
@@ -224,24 +250,26 @@ Sample data lives in `src/data/sample-activities.json`. Update this file when yo
 
 ## Code Quality
 
-### Automatic Checks
+### Pre-commit Hooks
 
-Pre-commit hooks automatically run on `git commit`:
+Pre-commit hooks automatically run on every `git commit` (after installing per setup instructions above).
+
+**What runs automatically:**
+
+- **Prettier** - Auto-formats code (modifies files)
+- **ESLint** - Lints JavaScript/TypeScript
+- **detect-secrets** - Prevents committing secrets
+- **TypeScript** - Validates types
+
+**If hooks aren't running:**
 
 ```bash
-# Install hooks (first time)
+# Ensure hooks are installed
 uv run pre-commit install
 
-# Run manually
+# Run manually to test
 uv run pre-commit run --all-files
 ```
-
-Checks include:
-
-- **Prettier** - Code formatting
-- **ESLint** - Linting
-- **detect-secrets** - Prevent committing secrets
-- **TypeScript** - Type checking
 
 ### Manual Commands
 
