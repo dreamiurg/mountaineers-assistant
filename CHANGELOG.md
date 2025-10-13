@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Extension popup have been removed in favor of Insights dashboard
+- Extension popup have been removed in favor of Insights dashboard with refresh button
 
 ## [0.1.8] - 2025-10-12
 
