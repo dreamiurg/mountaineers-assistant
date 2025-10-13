@@ -281,7 +281,7 @@ npm run typecheck   # Validate TypeScript
 
 ## Release Process
 
-This project uses a three-phase release workflow managed by npm scripts.
+This project uses a four-phase release workflow.
 
 ### Phase 1: Bump Version
 
@@ -341,7 +341,30 @@ npm run release:publish 0.2.0
 
 This runs the same steps manually.
 
-**Final step:** Download ZIP from the GitHub Release and upload to [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole).
+**Next:** Phase 4 - Manual upload to Chrome Web Store.
+
+### Phase 4: Publish to Chrome Web Store (Manual)
+
+**This step requires Chrome Web Store developer credentials.**
+
+After GitHub Release is created (Phase 3), manually upload to Chrome Web Store:
+
+1. **Download the ZIP** from the [GitHub Release](https://github.com/dreamiurg/mountaineers-assistant/releases)
+2. **Open Chrome Web Store Developer Dashboard**
+   - Go to [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole)
+   - Login with credentials (requires publisher account access)
+3. **Upload new version**
+   - Select "Mountaineers Assistant" extension
+   - Click "Upload new version"
+   - Select the downloaded ZIP file
+4. **Submit for review**
+   - Review changes and ensure all fields are correct
+   - Click "Submit for review"
+5. **Wait for approval**
+   - Google reviews typically take a few hours to a few days
+   - You'll receive email notification when published
+
+**Important:** Only maintainers with Chrome Web Store publisher access can complete this phase.
 
 ### Version Numbering
 
