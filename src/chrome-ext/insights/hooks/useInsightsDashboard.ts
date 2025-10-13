@@ -82,6 +82,7 @@ export interface InsightsState {
   isLoading: boolean;
   fetchLimit: number | null;
   refreshSummary: RefreshSummary;
+  fullDateRange: { earliest: Date | null; latest: Date | null };
 }
 
 declare global {
@@ -120,6 +121,13 @@ export const useInsightsDashboard = (): InsightsState => {
     activityCount: 0,
     lastUpdated: null,
     newActivities: 0,
+  });
+  const [fullDateRange, setFullDateRange] = useState<{
+    earliest: Date | null;
+    latest: Date | null;
+  }>({
+    earliest: null,
+    latest: null,
   });
 
   const baseDataRef = useRef<PreparedData | null>(null);
@@ -225,6 +233,16 @@ export const useInsightsDashboard = (): InsightsState => {
         baseDataRef.current = prepared;
         setFilterOptions(prepared.filterOptions);
         window.mountaineersDashboard!.filterOptions = cloneFilterOptions(prepared.filterOptions);
+
+        // Calculate full date range from all activities
+        const dates = prepared.activities
+          .map((a) => a.date)
+          .filter((d): d is Date => d !== null)
+          .sort((a, b) => a.getTime() - b.getTime());
+        setFullDateRange({
+          earliest: dates.length > 0 ? dates[0] : null,
+          latest: dates.length > 0 ? dates[dates.length - 1] : null,
+        });
 
         if (!prepared.activities.length) {
           setEmpty(true);
@@ -466,6 +484,7 @@ export const useInsightsDashboard = (): InsightsState => {
       isLoading,
       fetchLimit,
       refreshSummary,
+      fullDateRange,
     }),
     [
       loading,
@@ -483,6 +502,7 @@ export const useInsightsDashboard = (): InsightsState => {
       isLoading,
       fetchLimit,
       refreshSummary,
+      fullDateRange,
     ]
   );
 };

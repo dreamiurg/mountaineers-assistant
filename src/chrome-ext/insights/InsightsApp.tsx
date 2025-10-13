@@ -318,13 +318,14 @@ const InsightsApp = () => {
     isLoading,
     fetchLimit,
     refreshSummary,
+    fullDateRange,
   } = useInsightsDashboard();
 
   const filterDisabled = empty || !view;
 
   const coverageRange = useMemo(
-    () => formatDateRange(view?.meta.earliest ?? null, view?.meta.latest ?? null),
-    [view]
+    () => formatDateRange(fullDateRange.earliest, fullDateRange.latest),
+    [fullDateRange]
   );
   const lastUpdated = useMemo(() => formatDate(view?.meta.lastUpdated ?? null), [view]);
 
