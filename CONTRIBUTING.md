@@ -159,7 +159,7 @@ mountaineers-assistant/
 │     └─ styles/                    # Tailwind sources
 ├─ tests/
 │  ├─ unit/                         # Unit tests
-│  └─ e2e/                          # End-to-end tests
+│  └─ chrome-extension/             # Chrome extension tests
 ├─ src/data/                        # Test fixtures
 ├─ dist/                            # Build output (gitignored)
 └─ docs/                            # Documentation
@@ -185,21 +185,22 @@ mountaineers-assistant/
    ```bash
    npm run typecheck    # TypeScript validation
    npm run lint         # Code formatting check
-   npm test             # All tests (unit + E2E)
+   npm test             # All tests (unit + chrome extension)
    ```
 
    **Test Organization:**
    - `tests/unit/` - Unit tests with Node.js test runner
-   - `tests/e2e/` - Playwright E2E tests
+   - `tests/chrome-extension/` - Chrome extension tests with Playwright
      - `*-visual.spec.ts` - Visual regression tests (snapshot comparisons)
      - `*.spec.ts` (without -visual) - Behavioral/functional tests
 
    **Run specific test suites:**
 
    ```bash
-   npm run test:unit              # Unit tests only
-   npm run test:extension         # E2E tests only
-   npx playwright test --grep-invert visual  # Behavioral E2E only (skip snapshots)
+   npm run test:unit                         # Unit tests only
+   npm run test:chrome-extension             # Chrome extension tests only
+   npm run test:chrome-extension:update-snapshots  # Update visual snapshots
+   npx playwright test --grep-invert visual  # Behavioral tests only (skip snapshots)
    ```
 
 4. **Commit your changes**
@@ -234,28 +235,29 @@ npm test
 npx tsx --test tests/unit/your-test.test.ts
 ```
 
-### End-to-End Tests
+### Chrome Extension Tests
 
-Located in `tests/e2e/`, use Playwright:
+Located in `tests/chrome-extension/`, use Playwright:
 
 ```bash
 # First time setup
 npx playwright install
 
-# Run E2E tests
-npm run test:extension
+# Run chrome extension tests
+npm run test:chrome-extension
 
 # Update snapshots after UI changes
-npm run test:extension:update
+npm run test:chrome-extension:update-snapshots
 ```
 
-**What E2E tests do:**
+**What chrome extension tests do:**
 
-- Load extension into Chromium
-- Seed storage with sample data
-- Take screenshots of preferences and insights pages
+- Load extension into Chromium browser
+- Block all external network calls (tests run in isolation)
+- Seed storage with sample data from `src/data/sample-activities.json`
+- Take visual snapshots of preferences and insights pages
 - Verify UI renders correctly
-- Test fetch workflows
+- Test fetch workflows and offscreen document lifecycle
 
 ### Test Data
 
