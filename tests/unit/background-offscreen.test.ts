@@ -80,14 +80,9 @@ const mockChrome = {
   },
 };
 
-// Type for global with chrome property
-declare global {
-  // eslint-disable-next-line no-var
-  var chrome: typeof mockChrome;
-}
-
 // Set up global chrome
-(global as typeof globalThis).chrome = mockChrome as typeof chrome;
+// @ts-expect-error - Overriding global chrome for testing
+(global as typeof globalThis).chrome = mockChrome;
 
 // Function under test (copied from background.ts)
 async function ensureOffscreenDocument(): Promise<void> {
