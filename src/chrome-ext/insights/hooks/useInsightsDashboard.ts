@@ -121,7 +121,6 @@ export const useInsightsDashboard = (): InsightsState => {
     lastUpdated: null,
     newActivities: 0,
   });
-  const [dataVersion, setDataVersion] = useState(0); // Increment to force recalculation
 
   const baseDataRef = useRef<PreparedData | null>(null);
   const filtersRef = useRef<DashboardFilters>(filters);
@@ -291,7 +290,7 @@ export const useInsightsDashboard = (): InsightsState => {
     const nextView = calculateDashboard(prepared, sanitized);
     setView(nextView);
     setSummary(buildSummary(nextView, sanitized, prepared));
-  }, [filters, dataVersion]);
+  }, [filters]);
 
   const setFilter = useCallback((key: keyof DashboardFilters, values: string[]) => {
     setFilters((current) => ({ ...current, [key]: values }));
@@ -379,50 +378,13 @@ export const useInsightsDashboard = (): InsightsState => {
     };
   }, []);
 
-  // Listen for storage changes to reload data when cache is updated
+  // Listen for storage changes to reload page when cache is updated
   useEffect(() => {
     const storageListener = (changes: { [key: string]: chrome.storage.StorageChange }) => {
       if (changes[STORAGE_KEY]) {
-        // Cache was updated, reload and recalculate the dashboard
-        loadExtensionData()
-          .then((data) => {
-            if (!data) {
-              setEmpty(true);
-              setStatusMessage('Cache was cleared.');
-              baseDataRef.current = null;
-              setView(null);
-              return;
-            }
-
-            const prepared = prepareDashboardData(data);
-            baseDataRef.current = prepared;
-            setFilterOptions(prepared.filterOptions);
-            if (window.mountaineersDashboard) {
-              window.mountaineersDashboard.filterOptions = cloneFilterOptions(
-                prepared.filterOptions
-              );
-            }
-
-            if (!prepared.activities.length) {
-              setEmpty(true);
-              setStatusMessage('No activities in cache.');
-              setView(null);
-              return;
-            }
-
-            setEmpty(false);
-            // Trigger view recalculation by incrementing dataVersion
-            setDataVersion((v) => v + 1);
-            setStatusMessage('Dashboard updated with latest data.');
-            // Clear the message after a few seconds
-            setTimeout(() => {
-              setStatusMessage('');
-            }, 3000);
-          })
-          .catch((error) => {
-            console.error('Failed to reload data after storage change', error);
-            setStatusMessage('Failed to update dashboard.');
-          });
+        // Cache was updated, reload the page to show new data
+        // This is simpler and more reliable than trying to update Highcharts in-place
+        window.location.reload();
       }
     };
 
@@ -431,7 +393,7 @@ export const useInsightsDashboard = (): InsightsState => {
     return () => {
       chrome.storage.onChanged.removeListener(storageListener);
     };
-  }, [loadExtensionData]);
+  }, []);
 
   // Fetch activities function
   const fetchActivities = useCallback(async () => {
