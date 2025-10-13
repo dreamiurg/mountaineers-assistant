@@ -21,14 +21,37 @@ Mountaineers Assistant is a Chrome extension that improves your Mountaineers.org
 
 ## Features
 
-- Refresh your Mountaineers activity history using your current signed-in session.
-- Explore a dedicated insights dashboard that visualizes your activity history, with powerful filters for type, category, and your role in each event.
+- Click the extension icon to open the insights dashboard from any page
+- Fetch your Mountaineers activity history using your current signed-in session (no tab switching required)
+- Explore a dedicated insights dashboard that visualizes your activity history, with powerful filters for type, category, and your role in each event
 
 ![Insights dashboard screenshot](tests/extension-snapshots.spec.ts-snapshots/insights-default-chromium-extension-darwin.png)
 
 ## Privacy
 
 All your data is stored locally in your browser and never sent to external servers.
+
+## How It Works
+
+The Mountaineers Assistant uses Chrome's offscreen document API to fetch and analyze your activity data:
+
+1. **Click the extension icon** - Opens the insights dashboard
+2. **Click "Fetch New Activities"** - Triggers data collection (works from any page)
+3. **Offscreen collection** - Extension creates an invisible offscreen document that:
+   - Uses your existing Mountaineers.org session cookies (no separate login needed)
+   - Fetches your activity history from Mountaineers.org
+   - Parses HTML to extract activity details and rosters
+   - Caches data locally in browser storage
+4. **View insights** - Dashboard displays statistics and visualizations
+
+**No tab switching required!** The extension works entirely in the background using your existing login session.
+
+### Permissions
+
+- `storage` - Save cached activity data locally
+- `offscreen` - Create invisible document for data collection
+- `tabs` - Open insights page when extension icon is clicked
+- `host_permissions: mountaineers.org` - Fetch activity data using your session
 
 ## Development Setup
 
@@ -65,7 +88,19 @@ npm run build
 2. Enable **Developer mode**.
 3. Click **Load unpacked** and choose the freshly built `dist/` directory.
 
-Reload the unpacked extension in `chrome://extensions` after every rebuild so Chrome’s service worker, popup, and preferences page pick up the latest bundle.
+Reload the unpacked extension in `chrome://extensions` after every rebuild so Chrome's service worker and extension pages pick up the latest bundle.
+
+### Architecture Notes
+
+#### Offscreen Document
+
+The extension uses Chrome's offscreen document API (Chrome 109+) to run data collection code:
+
+- **Why?** Offscreen documents have access to DOM APIs (needed for HTML parsing) and can make authenticated requests using the browser's cookies
+- **Alternative considered:** Content script injection required being on mountaineers.org page
+- **Benefits:** Seamless UX - fetch from any page, no tab switching needed
+
+See `src/chrome-ext/offscreen.ts` for implementation.
 
 ### Automatic Rebuilds
 
@@ -87,12 +122,12 @@ npm run storybook
 
 ## Automated Testing
 
-In addition to standard pre-commit checks for linting and formatting, this extension includes an automated test suite powered by Playwright. When run, tests verify that the main UI features of the [popup](src/chrome-ext/popup.html), [preferences](src/chrome-ext/preferences.html), and [insights](src/chrome-ext/insights.html) pages are working and that the UI looks as expected.
+In addition to standard pre-commit checks for linting and formatting, this extension includes an automated test suite powered by Playwright. When run, tests verify that the main UI features of the [preferences](src/chrome-ext/preferences.html) and [insights](src/chrome-ext/insights.html) pages are working and that the UI looks as expected.
 
-Here’s what you need to know:
+Here's what you need to know:
 
 - Run `npx playwright install` once to download the Chromium build Playwright uses to exercise the extension.
-- `npm run test:extension` seeds `chrome.storage.local` with `src/data/sample-activities.json`, launches Chromium with the MV3 bundle from `dist/`, blocks all outbound network traffic, and captures deterministic screenshots of the popup (`popup.html`), preferences (`preferences.html`), and insights dashboard (`insights.html`).
+- `npm run test:extension` seeds `chrome.storage.local` with `src/data/sample-activities.json`, launches Chromium with the MV3 bundle from `dist/`, blocks all outbound network traffic, and captures deterministic screenshots of the preferences (`preferences.html`) and insights dashboard (`insights.html`).
 - Regenerate baselines after intentional UI updates with `npm run test:extension:update`.
 - Snapshot artifacts live under `tests/extension-snapshots.spec.ts-snapshots/`; Playwright drops comparison diffs and traces under `test-results/` when assertions fail.
 
@@ -107,15 +142,14 @@ Here’s what you need to know:
 mountaineers-assistant/
 ├─ src/
 │  └─ chrome-ext/
-│     ├─ background.ts        # Service worker: handles refresh requests and caches results in storage.
-│     ├─ collect.ts           # Injected content script: calls Mountaineers APIs and parses roster pages.
+│     ├─ background.ts        # Service worker: handles refresh requests and manages offscreen document.
+│     ├─ offscreen.html       # Offscreen document shell loaded by Chrome.
+│     ├─ offscreen.ts         # Offscreen document: fetches and parses activity data from Mountaineers.org.
+│     ├─ collect.ts           # Legacy content script (kept for reference).
 │     ├─ manifest.json        # Manifest V3 definition.
 │     ├─ preferences.html     # Preferences shell loaded by Chrome.
 │     ├─ preferences-react-root.tsx # Entry point that mounts the React preferences experience.
 │     ├─ preferences/         # React preferences application (components, hooks, services).
-│     ├─ popup.html           # Popup shell loaded by Chrome.
-│     ├─ popup-react-root.tsx  # Entry point that mounts the React popup experience.
-│     ├─ popup/               # React popup application (components, hooks, services).
 │     ├─ insights.html        # Activity insights shell loaded by Chrome.
 │     ├─ insights-react-root.tsx # Entry point that mounts the React insights experience.
 │     ├─ insights/            # React insights dashboard (components, hooks, utilities).

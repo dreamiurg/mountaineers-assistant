@@ -486,16 +486,6 @@ test.describe('Mountaineers Assistant extension snapshots', () => {
     }, overrides);
   };
 
-  test('popup renders cached snapshot', async ({ context, extensionId }) => {
-    const page = await context.newPage();
-    await page.setViewportSize({ width: 420, height: 640 });
-    await page.goto(`chrome-extension://${extensionId}/popup.html`);
-    await page.waitForSelector('text=Mountaineers Assistant', { state: 'visible' });
-    await page.waitForSelector('text=Last refresh completed', { state: 'visible' });
-    await expect(page).toHaveScreenshot('popup.png', { fullPage: true });
-    await page.close();
-  });
-
   test('preferences render seeded cache view', async ({ context, extensionId }) => {
     const page = await context.newPage();
     await page.setViewportSize({ width: 1280, height: 720 });
