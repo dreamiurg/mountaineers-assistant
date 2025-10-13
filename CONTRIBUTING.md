@@ -183,22 +183,23 @@ mountaineers-assistant/
 3. **Test your changes**
 
    ```bash
-   npm run typecheck          # TypeScript validation
-   npm run lint               # Code formatting check
-   npm test                   # Unit tests
-   npm run test:extension     # All Playwright E2E tests
+   npm run typecheck    # TypeScript validation
+   npm run lint         # Code formatting check
+   npm test             # All tests (unit + E2E)
    ```
 
    **Test Organization:**
-   - `tests/unit/` - Unit tests with Vitest
+   - `tests/unit/` - Unit tests with Node.js test runner
    - `tests/e2e/` - Playwright E2E tests
      - `*-visual.spec.ts` - Visual regression tests (snapshot comparisons)
      - `*.spec.ts` (without -visual) - Behavioral/functional tests
 
-   To run only behavioral tests (skip snapshots):
+   **Run specific test suites:**
 
    ```bash
-   npx playwright test --grep-invert visual
+   npm run test:unit              # Unit tests only
+   npm run test:extension         # E2E tests only
+   npx playwright test --grep-invert visual  # Behavioral E2E only (skip snapshots)
    ```
 
 4. **Commit your changes**

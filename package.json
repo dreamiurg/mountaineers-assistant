@@ -20,6 +20,8 @@
     "typecheck": "tsc --noEmit",
     "storybook": "storybook dev -p 6006",
     "storybook:build": "storybook build",
+    "test": "npx tsx --test tests/unit/*.test.ts && npm run test:extension",
+    "test:unit": "npx tsx --test tests/unit/*.test.ts",
     "test:dashboards": "node scripts/snapshot-dashboards.js",
     "test:extension": "playwright test --project=chromium-extension",
     "test:extension:update": "playwright test --project=chromium-extension --update-snapshots",
