@@ -281,30 +281,46 @@ npm run typecheck   # Validate TypeScript
 
 ## Release Process
 
-This project uses a two-phase release workflow managed by npm scripts.
+This project uses a three-phase release workflow managed by npm scripts.
 
-### Phase 1: Prepare Release
+### Phase 1: Bump Version
 
-Create a release branch and PR:
+**From main branch**, create a release branch and bump version:
 
 ```bash
-npm run release:prepare 0.2.0
+npm run release:bump 0.2.0
 ```
 
 This script:
 
-1. Creates `release/v0.2.0` branch
-2. Bumps version in `package.json` and `manifest.json`
-3. Creates new section for the release in `CHANGELOG.md` and populates it based on commit log
-4. Commits changes
-5. Pushes branch
-6. Creates PR to main
+1. Validates you're on `main` branch with a clean working tree
+2. Creates `release/v0.2.0` branch
+3. Bumps version in `package.json`, `package-lock.json`, and `manifest.json`
+4. Updates `CHANGELOG.md` by prepending new section (preserves existing history)
+5. Shows you the changes for review
+
+**Note:** This script does NOT commit or push - you review changes first.
+
+### Phase 2: Submit Release PR
+
+**From the release branch**, commit and create PR:
+
+```bash
+npm run release:submit
+```
+
+This script:
+
+1. Validates you're on a `release/v*` branch
+2. Stages and commits release files: `package.json`, `package-lock.json`, `manifest.json`, `CHANGELOG.md`
+3. Pushes the release branch to origin
+4. Creates a pull request to `main` with changelog as description
 
 **Next:** Review the PR, ensure CI passes, then merge on GitHub.
 
-### Phase 2: Publish Release
+### Phase 3: Publish Release
 
-After PR is merged, publish the release:
+**After PR is merged**, publish the release from main:
 
 ```bash
 git checkout main
@@ -314,10 +330,11 @@ npm run release:publish 0.2.0
 
 This script:
 
-1. Creates and pushes git tag `v0.2.0`
-2. Builds production bundle
-3. Packages extension as ZIP
-4. Creates GitHub release with ZIP attachment
+1. Validates you're on `main` branch
+2. Creates and pushes git tag `v0.2.0`
+3. Builds production bundle
+4. Packages extension as ZIP
+5. Creates GitHub release with ZIP attachment and changelog notes
 
 **Final step:** Upload ZIP to [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole).
 
