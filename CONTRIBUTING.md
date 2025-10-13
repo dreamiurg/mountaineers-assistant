@@ -318,9 +318,20 @@ This script:
 
 **Next:** Review the PR, ensure CI passes, then merge on GitHub.
 
-### Phase 3: Publish Release
+### Phase 3: Publish Release (Automatic)
 
-**After PR is merged**, publish the release from main:
+**After PR is merged**, the release is published automatically by GitHub Actions.
+
+The [Release workflow](.github/workflows/release.yml) automatically:
+
+1. Detects the merged release PR (`release/v*` branch)
+2. Extracts version from branch name
+3. Creates and pushes git tag `v0.2.0`
+4. Builds production bundle
+5. Packages extension as ZIP
+6. Creates GitHub release with ZIP attachment and changelog notes
+
+**Manual fallback** (if GitHub Actions fails):
 
 ```bash
 git checkout main
@@ -328,15 +339,9 @@ git pull
 npm run release:publish 0.2.0
 ```
 
-This script:
+This runs the same steps manually.
 
-1. Validates you're on `main` branch
-2. Creates and pushes git tag `v0.2.0`
-3. Builds production bundle
-4. Packages extension as ZIP
-5. Creates GitHub release with ZIP attachment and changelog notes
-
-**Final step:** Upload ZIP to [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole).
+**Final step:** Download ZIP from the GitHub Release and upload to [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole).
 
 ### Version Numbering
 
