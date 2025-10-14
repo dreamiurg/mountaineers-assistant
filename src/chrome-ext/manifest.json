@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Mountaineers Assistant",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Enhance your Mountaineers browsing experience with personalized activity insights.",
   "permissions": ["storage", "offscreen", "tabs"],
   "host_permissions": ["https://www.mountaineers.org/*"],
