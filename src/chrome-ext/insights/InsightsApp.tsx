@@ -353,7 +353,7 @@ const InsightsApp = () => {
                   <span className="font-medium text-slate-900">{coverageRange}</span>
                 </p>
                 <p className="mt-1">
-                  Last sync: <span className="font-medium text-slate-900">{lastUpdated}</span>
+                  Last updated: <span className="font-medium text-slate-900">{lastUpdated}</span>
                 </p>
               </div>
               <button

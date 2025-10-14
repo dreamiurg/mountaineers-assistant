@@ -16,6 +16,20 @@ function mountReactRoot(): void {
     return;
   }
 
+  // Configure Highcharts to disable accessibility warning
+  const highcharts = (
+    window as typeof window & {
+      Highcharts?: { setOptions: (options: { accessibility: { enabled: boolean } }) => void };
+    }
+  ).Highcharts;
+  if (highcharts) {
+    highcharts.setOptions({
+      accessibility: {
+        enabled: false,
+      },
+    });
+  }
+
   const root = createRoot(container);
   root.render(
     <StrictMode>

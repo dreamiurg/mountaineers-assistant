@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { ExtensionCache, RefreshSummary } from '../../shared/types';
+import type { ExtensionCache, RefreshProgress, RefreshSummary } from '../../shared/types';
 import {
   DEFAULT_DISPLAY_SETTINGS,
   buildSummary,
@@ -347,10 +347,23 @@ export const useInsightsDashboard = (): InsightsState => {
     const messageListener = (message: unknown) => {
       if (!message || typeof message !== 'object') return;
 
-      const payload = message as { type?: string; stage?: string; inProgress?: boolean };
+      const payload = message as {
+        type?: string;
+        stage?: string;
+        inProgress?: boolean;
+        progress?: RefreshProgress;
+        total?: number;
+        completed?: number;
+        activityTitle?: string;
+        activityUid?: string;
+      };
 
       if (payload.type === REFRESH_PROGRESS_MESSAGE) {
-        const stage = payload.stage || '';
+        const stage = payload.stage || (payload.progress?.stage ?? '');
+        // Handle both flat properties (from collector) and nested progress object (from background)
+        const total = payload.progress?.total ?? payload.total;
+        const completed = payload.progress?.completed ?? payload.completed;
+        const activityTitle = payload.progress?.activityTitle ?? payload.activityTitle;
         let message = '';
 
         switch (stage) {
@@ -359,15 +372,32 @@ export const useInsightsDashboard = (): InsightsState => {
             message = 'Refreshing list of activities…';
             break;
           case 'activities-collected':
-            message = 'Caching activity details…';
+            if (total) {
+              message = `Found ${total} new ${total === 1 ? 'activity' : 'activities'} to fetch`;
+            } else {
+              message = 'Caching activity details…';
+            }
             break;
           case 'loading-details':
           case 'loading-roster':
           case 'processing':
-            message = 'Caching activity data…';
+            if (total && total > 0) {
+              const current = (completed ?? 0) + 1;
+              if (activityTitle) {
+                message = `Processing ${current} of ${total}: ${activityTitle}`;
+              } else {
+                message = `Processing ${current} of ${total}`;
+              }
+            } else {
+              message = 'Caching activity data…';
+            }
             break;
           case 'finalizing':
-            message = 'Wrapping up…';
+            if (total) {
+              message = `Finalizing ${total} ${total === 1 ? 'activity' : 'activities'}…`;
+            } else {
+              message = 'Wrapping up…';
+            }
             break;
           case 'no-new-activities':
             message = 'No new activities found.';
