@@ -11,6 +11,7 @@ import {
   initials,
   titleCase,
 } from './utils';
+import { Footer } from '../components/Footer';
 
 const LoadingCard = ({ message }: { message: string }) => (
   <div className="glass-card flex items-center gap-4 rounded-2xl px-5 py-6 text-slate-500">
@@ -644,6 +645,8 @@ const InsightsApp = () => {
             </section>
           </div>
         )}
+
+        <Footer />
       </div>
     </div>
   );
