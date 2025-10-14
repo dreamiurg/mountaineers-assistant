@@ -124,7 +124,7 @@ function sendProgressUpdate(update: {
   try {
     chrome.runtime.sendMessage({
       type: PROGRESS_MESSAGE,
-      origin: 'offscreen',
+      origin: 'collector',
       ...update,
       timestamp: Date.now(),
     });
