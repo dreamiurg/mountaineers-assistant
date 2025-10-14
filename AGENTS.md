@@ -16,17 +16,16 @@ Guidance for future contributors, automations, or agents working on **Mountainee
 
 - **Platform:** Chrome Extension Manifest V3
 - **Language:** TypeScript targeting modern Chrome (ES2021)
-- **UI:** Tailwind CSS with React powering popup, preferences, and insights dashboards (Storybook mirrors these surfaces)
+- **UI:** Tailwind CSS with React powering preferences and insights dashboards (Storybook mirrors these surfaces)
 - **Storage:** `chrome.storage.local`
 - **Build tooling:** Vite for bundling, Tailwind CLI (via `tailwindcss` npm package), Prettier for formatting, ESLint for linting
 - **Package manager:** npm
 
 ## Architecture Overview
 
-- `background.ts` listens for popup messages and injects `collect.ts` into the active mountaineers.org tab.
+- `background.ts` listens for messages and injects `collect.ts` into the active mountaineers.org tab.
 - `collect.ts` fetches the JSON activities endpoint, walks roster pages, and returns normalized payloads.
-- The React popup (under `popup/`) surfaces counts and kicks off refreshes.
-- The React preferences experience (under `preferences/`) exposes cache controls and preferences, while the React insights dashboard (under `insights/`) renders derived metrics for deeper inspection.
+- The React preferences experience (under `preferences/`) exposes cache controls and preferences, while the React insights dashboard (under `insights/`) renders derived metrics and handles data refreshes.
 - Data never leaves the browser; network calls target mountaineers.org using the current session.
 
 ## Directory Layout
@@ -40,9 +39,6 @@ src/
    ├─ preferences.html     # preferences shell loaded by Chrome
    ├─ preferences-react-root.tsx # Entry point that mounts the React preferences app
    ├─ preferences/         # React preferences UI (components, hooks, services)
-   ├─ popup.html           # quick status shell for the popup
-   ├─ popup-react-root.tsx  # Entry point that mounts the React popup
-   ├─ popup/               # React popup UI (components, hooks, services)
    ├─ insights.html        # insights shell loaded by Chrome
    ├─ insights-react-root.tsx # Entry point that mounts the React insights dashboard
    ├─ insights/            # React insights UI (components, hooks, utilities)

@@ -16,11 +16,6 @@ const clone = <T>(value: T): T => {
 export interface ChromeMockConfig {
   data?: ExtensionCache | null;
   settings?: ExtensionSettings;
-  popupSummary?: {
-    activityCount: number;
-    lastUpdated: string | null;
-    newActivities: number;
-  };
   tabsUrl?: string;
   progressUpdates?: ProgressUpdateConfig[];
 }
@@ -42,7 +37,6 @@ const defaultSettings: ExtensionSettings = {
 export const createChromeMock = ({
   data,
   settings,
-  popupSummary,
   tabsUrl = 'https://www.mountaineers.org/my-dashboard',
   progressUpdates = [],
 }: ChromeMockConfig = {}) => {
@@ -113,13 +107,11 @@ export const createChromeMock = ({
       if (payload?.type === 'start-refresh') {
         clearScheduledTimers();
 
-        const summary =
-          popupSummary ??
-          ({
-            activityCount: currentData?.activities?.length ?? 0,
-            lastUpdated: currentData?.lastUpdated ?? new Date().toISOString(),
-            newActivities: payload.limit ? Math.min(payload.limit, 3) : 0,
-          } as const);
+        const summary = {
+          activityCount: currentData?.activities?.length ?? 0,
+          lastUpdated: currentData?.lastUpdated ?? new Date().toISOString(),
+          newActivities: payload.limit ? Math.min(payload.limit, 3) : 0,
+        } as const;
 
         broadcastRuntimeMessage({
           type: 'refresh-status-changed',
