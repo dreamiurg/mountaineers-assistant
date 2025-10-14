@@ -22,7 +22,7 @@ All activity data and preferences remain on your device in Chrome’s `chrome.st
 ## Required Browser Permissions
 
 - `storage`: Needed to keep a local cache of your activity history and your preferences.
-- `scripting`: Allows the background service worker to inject the bundled `collect` script into Mountaineers.org pages when you ask for a refresh, so the script can make authenticated fetches within the page context.
+- `offscreen`: Allows the extension to run data collection in a background document context to fetch your activity data from Mountaineers.org while keeping the main extension responsive.
 - `tabs`: Used only to confirm that the active tab is on Mountaineers.org before running a refresh and to open extension pages (such as the insights dashboard) in new tabs at your request.
 - `https://www.mountaineers.org/*`: Grants access to Mountaineers.org pages so the extension can fetch your activity data while you are signed in.
 
@@ -37,8 +37,8 @@ The extension only runs when you open the preferences or insights screen, or whe
 
 ## Changes to This Policy
 
-We may update this policy as the extension evolves. Significant changes will be noted in the project README or release notes.
+We may update this policy as the extension evolves. Significant changes will be noted in the [project README](https://github.com/dreamiurg/mountaineers-assistant#readme) or release notes.
 
 ## Contact
 
-Have questions about privacy or want to report an issue? Open an issue in the Mountaineers Assistant repository or contact the maintainers through the project’s support channels.
+Have questions about privacy or want to report an issue? [Open an issue](https://github.com/dreamiurg/mountaineers-assistant/issues) in the Mountaineers Assistant repository or contact the maintainers through the project's support channels.
