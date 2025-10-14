@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePreferencesController } from './hooks/usePreferencesController';
+import { Footer } from '../components/Footer';
 
 export const PreferencesApp = () => {
   const {
@@ -214,6 +215,8 @@ export const PreferencesApp = () => {
             </pre>
           </article>
         </section>
+
+        <Footer />
       </div>
     </main>
   );
