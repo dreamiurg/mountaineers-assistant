@@ -346,14 +346,14 @@ const InsightsApp = () => {
               </div>
               <p className="max-w-3xl text-sm text-slate-600">{summary}</p>
             </div>
-            <div className="glass-card space-y-3 rounded-xl px-4 py-3 text-sm">
+            <div className="glass-card w-80 space-y-3 rounded-xl px-5 py-4 text-sm">
               <div className="text-slate-600">
                 <p>
                   Dataset coverage:{' '}
                   <span className="font-medium text-slate-900">{coverageRange}</span>
                 </p>
                 <p className="mt-1">
-                  Last sync: <span className="font-medium text-slate-900">{lastUpdated}</span>
+                  Last updated: <span className="font-medium text-slate-900">{lastUpdated}</span>
                 </p>
               </div>
               <button
@@ -390,14 +390,26 @@ const InsightsApp = () => {
               </button>
               {statusMessage && (
                 <p
-                  className={`text-xs ${
+                  className={`overflow-hidden text-ellipsis text-xs ${
                     statusMessage.toLowerCase().includes('error') ||
                     statusMessage.toLowerCase().includes('log in')
                       ? 'text-rose-600'
                       : 'text-slate-600'
                   }`}
+                  title={statusMessage}
                 >
-                  {statusMessage}
+                  {statusMessage.toLowerCase().includes('log in to mountaineers') ? (
+                    <a
+                      href="https://www.mountaineers.org/login"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline hover:text-rose-700"
+                    >
+                      {statusMessage}
+                    </a>
+                  ) : (
+                    statusMessage
+                  )}
                 </p>
               )}
             </div>
@@ -473,7 +485,7 @@ const InsightsApp = () => {
         {loading && <LoadingCard message={statusMessage} />}
         {error && !loading && <EmptyState message={error} />}
         {empty && !loading && !error && (
-          <EmptyState message="Open the extension popup and run a refresh to populate insights." />
+          <EmptyState message="Use the 'Fetch New Activities' button above to populate insights." />
         )}
 
         {!loading && !error && !empty && view && (

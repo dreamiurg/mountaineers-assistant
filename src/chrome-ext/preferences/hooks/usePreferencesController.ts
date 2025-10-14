@@ -85,7 +85,7 @@ export const usePreferencesController = (): PreferencesControllerState &
 
       if (!payload) {
         setStatusMessage(
-          'No cached data found yet. Refresh activities from the popup to populate this view.'
+          'No cached data found yet. Refresh activities from the Insights tab to populate this view.'
         );
         setCacheContent('// cache empty');
         return null;

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { ExtensionCache, RefreshSummary } from '../../shared/types';
+import type { ExtensionCache, RefreshProgress, RefreshSummary } from '../../shared/types';
 import {
   DEFAULT_DISPLAY_SETTINGS,
   buildSummary,
@@ -15,6 +15,7 @@ const SETTINGS_KEY = 'mountaineersAssistantSettings';
 const REFRESH_MESSAGE = 'start-refresh';
 const REFRESH_PROGRESS_MESSAGE = 'refresh-progress';
 const REFRESH_STATUS_CHANGE_MESSAGE = 'refresh-status-changed';
+const REFRESH_STATUS_REQUEST_MESSAGE = 'get-refresh-status';
 
 type ReadyPayload = {
   filterOptions: PreparedData['filterOptions'] | null;
@@ -220,7 +221,7 @@ export const useInsightsDashboard = (): InsightsState => {
         if (!data) {
           setEmpty(true);
           setStatusMessage(
-            'No cached data available. Open the extension popup and run a refresh first.'
+            'No cached data available. Use the Fetch New Activities button to get started.'
           );
           resolveReady({ filterOptions: null, empty: true });
           setFilterOptions({ activityTypes: [], categories: [], roles: [], partners: [] });
@@ -247,7 +248,7 @@ export const useInsightsDashboard = (): InsightsState => {
         if (!prepared.activities.length) {
           setEmpty(true);
           setStatusMessage(
-            'No cached activities yet. Open the extension popup to fetch your history.'
+            'No cached activities yet. Use the Fetch New Activities button to fetch your history.'
           );
           resolveReady({ filterOptions: prepared.filterOptions, empty: true });
           setLoading(false);
@@ -318,24 +319,60 @@ export const useInsightsDashboard = (): InsightsState => {
     setFilters({ ...INITIAL_FILTERS });
   }, []);
 
-  // Load fetch limit from settings
+  // Load fetch limit from settings and query refresh status
   useEffect(() => {
     let isMounted = true;
 
-    const loadFetchLimit = async () => {
+    const initialize = async () => {
       try {
+        // Load fetch limit
         const stored = await chrome.storage.local.get(SETTINGS_KEY);
         if (!isMounted) return;
 
         const limit = stored?.[SETTINGS_KEY]?.fetchLimit;
         const parsed = typeof limit === 'number' && limit > 0 ? limit : null;
         setFetchLimit(parsed);
+
+        // Query current refresh status
+        const response = await chrome.runtime.sendMessage({
+          type: REFRESH_STATUS_REQUEST_MESSAGE,
+        });
+
+        if (!isMounted) return;
+
+        if (response?.success && response.inProgress) {
+          setIsLoading(true);
+          if (response.progress) {
+            // Update status message based on current progress
+            const progress = response.progress as RefreshProgress;
+            const stage = progress.stage || '';
+            let message = 'Refresh in progress…';
+
+            if (stage === 'processing' && progress.total && progress.total > 0) {
+              const current = (progress.completed ?? 0) + 1;
+              const title = progress.activityTitle;
+              if (title) {
+                message = `Processing ${current} of ${progress.total}: ${title}`;
+              } else {
+                message = `Processing ${current} of ${progress.total}`;
+              }
+            } else if (stage === 'activities-collected' && progress.total) {
+              message = `Found ${progress.total} new ${progress.total === 1 ? 'activity' : 'activities'} to fetch`;
+            } else if (stage === 'finalizing' && progress.total) {
+              message = `Finalizing ${progress.total} ${progress.total === 1 ? 'activity' : 'activities'}…`;
+            }
+
+            setStatusMessage(message);
+          } else {
+            setStatusMessage('Refresh in progress…');
+          }
+        }
       } catch (error) {
-        console.error('Failed to load fetch limit', error);
+        console.error('Failed to initialize insights dashboard', error);
       }
     };
 
-    loadFetchLimit();
+    initialize();
 
     return () => {
       isMounted = false;
@@ -347,10 +384,23 @@ export const useInsightsDashboard = (): InsightsState => {
     const messageListener = (message: unknown) => {
       if (!message || typeof message !== 'object') return;
 
-      const payload = message as { type?: string; stage?: string; inProgress?: boolean };
+      const payload = message as {
+        type?: string;
+        stage?: string;
+        inProgress?: boolean;
+        progress?: RefreshProgress;
+        total?: number;
+        completed?: number;
+        activityTitle?: string;
+        activityUid?: string;
+      };
 
       if (payload.type === REFRESH_PROGRESS_MESSAGE) {
-        const stage = payload.stage || '';
+        const stage = payload.stage || (payload.progress?.stage ?? '');
+        // Handle both flat properties (from collector) and nested progress object (from background)
+        const total = payload.progress?.total ?? payload.total;
+        const completed = payload.progress?.completed ?? payload.completed;
+        const activityTitle = payload.progress?.activityTitle ?? payload.activityTitle;
         let message = '';
 
         switch (stage) {
@@ -359,15 +409,32 @@ export const useInsightsDashboard = (): InsightsState => {
             message = 'Refreshing list of activities…';
             break;
           case 'activities-collected':
-            message = 'Caching activity details…';
+            if (total) {
+              message = `Found ${total} new ${total === 1 ? 'activity' : 'activities'} to fetch`;
+            } else {
+              message = 'Caching activity details…';
+            }
             break;
           case 'loading-details':
           case 'loading-roster':
           case 'processing':
-            message = 'Caching activity data…';
+            if (total && total > 0) {
+              const current = (completed ?? 0) + 1;
+              if (activityTitle) {
+                message = `Processing ${current} of ${total}: ${activityTitle}`;
+              } else {
+                message = `Processing ${current} of ${total}`;
+              }
+            } else {
+              message = 'Caching activity data…';
+            }
             break;
           case 'finalizing':
-            message = 'Wrapping up…';
+            if (total) {
+              message = `Finalizing ${total} ${total === 1 ? 'activity' : 'activities'}…`;
+            } else {
+              message = 'Wrapping up…';
+            }
             break;
           case 'no-new-activities':
             message = 'No new activities found.';

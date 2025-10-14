@@ -1,7 +1,5 @@
 # Mountaineers Assistant Privacy Policy
 
-_Last updated: 2025-10-09_
-
 Mountaineers Assistant is a Chrome extension that helps members review their Mountaineers.org activity history without leaving the site. This privacy policy explains what information the extension accesses, how that information is handled, and the choices available to you.
 
 ## Data We Access
@@ -13,7 +11,7 @@ The extension does **not** collect credentials, payment details, or content from
 
 ## How We Use Your Data
 
-- **Generate on-page insights.** Retrieved activity data is processed locally to display counts, trends, and filters in the popup and insights dashboard.
+- **Generate on-page insights.** Retrieved activity data is processed locally to display counts, trends, and filters in the insights dashboard.
 - **Cache recent results.** Activity data is stored in `chrome.storage.local` so future visits load quickly without refetching from Mountaineers.org unless you request a refresh.
 - **Remember your settings.** Preference toggles are saved locally so the extension remembers your choices.
 
@@ -35,11 +33,11 @@ These permissions are scoped solely to support the features described above.
 - **Clear the cache:** Use the preferences page to clear saved activity data at any time.
 - **Remove the extension:** Uninstalling Mountaineers Assistant from Chrome deletes all data stored by the extension.
 
-The extension only runs when you open the popup, preferences, or insights screen, or when you request a data refresh.
+The extension only runs when you open the preferences or insights screen, or when you request a data refresh.
 
 ## Changes to This Policy
 
-We may update this policy as the extension evolves. Updates will be reflected in this document with a revised “Last updated” date. Significant changes will also be noted in the project README or release notes.
+We may update this policy as the extension evolves. Significant changes will be noted in the project README or release notes.
 
 ## Contact
 
