@@ -467,9 +467,14 @@ export const useInsightsDashboard = (): InsightsState => {
   useEffect(() => {
     const storageListener = (changes: { [key: string]: chrome.storage.StorageChange }) => {
       if (changes[STORAGE_KEY]) {
-        // Cache was updated, reload the page to show new data
-        // This is simpler and more reliable than trying to update Highcharts in-place
-        window.location.reload();
+        // Only reload if we're not currently in a refresh operation
+        // During refresh, incremental updates happen but we don't want to reload
+        // until the refresh is complete
+        if (!isLoading) {
+          // Cache was updated, reload the page to show new data
+          // This is simpler and more reliable than trying to update Highcharts in-place
+          window.location.reload();
+        }
       }
     };
 
@@ -478,7 +483,7 @@ export const useInsightsDashboard = (): InsightsState => {
     return () => {
       chrome.storage.onChanged.removeListener(storageListener);
     };
-  }, []);
+  }, [isLoading]);
 
   // Fetch activities function
   const fetchActivities = useCallback(async () => {
@@ -507,6 +512,9 @@ export const useInsightsDashboard = (): InsightsState => {
       setStatusMessage(`Cached ${newActivities} new activities.`);
       setRefreshSummary(response.summary);
       setIsLoading(false);
+
+      // Note: The storage change listener will reload the page automatically
+      // now that isLoading is false and the cache has been updated
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unexpected error.';
       setStatusMessage(message);
