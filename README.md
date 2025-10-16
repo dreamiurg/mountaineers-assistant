@@ -91,45 +91,6 @@ The extension requires these permissions:
 
 Want to contribute? See [CONTRIBUTING.md](CONTRIBUTING.md) for developer setup and guidelines.
 
-## Release workflow
-
-We manage releases with [`just`](https://just.systems/man/en/) recipes and shell scripts.
-
-1. **Prepare the release branch**
-
-   ```bash
-   just release-bump 0.2.4
-   # or just release-bump patch|minor|major to auto-increment from the current version
-   ```
-
-   - Ensures you are on `main` with a clean working tree
-   - Runs `npm run typecheck` from `main`
-   - Creates or switches to `release/v0.2.4` (or the computed version)
-   - Updates version metadata and regenerates `CHANGELOG.md`
-     with the latest commit titles
-
-2. **Commit and open the draft PR**
-
-   ```bash
-   just release-submit
-   ```
-
-   - Commits the staged release files
-   - Pushes the release branch
-   - Opens a draft PR populated with the changelog entry
-
-3. **Publish after the PR merges**
-
-   ```bash
-   just release-publish 0.2.4
-   ```
-
-   - Verifies `main` matches the merged release
-   - Builds the extension, creates `mountaineers-assistant-0.2.4.zip`, and tags the release
-   - Creates the GitHub release with the ZIP attached
-
-These recipes require the GitHub CLI (`gh`), `npm`, `jq`, and `zip`. Install `just` locally to run them.
-
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for a list of changes in each release.

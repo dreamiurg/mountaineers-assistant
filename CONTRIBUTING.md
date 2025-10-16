@@ -296,40 +296,50 @@ npm run typecheck   # Validate TypeScript
 
 ## Release Process
 
-This project uses a four-phase release workflow.
+We manage releases with [`just`](https://just.systems/man/en/) recipes and shell scripts.
 
-### Phase 1: Bump Version
-
-**From main branch**, create a release branch and bump version:
+**Prerequisites:** Install `just` locally along with `gh` (GitHub CLI), `npm`, `jq`, and `zip`.
 
 ```bash
-npm run release:bump 0.2.0
+# Install just (macOS)
+brew install just
+
+# Install GitHub CLI (if not already installed)
+brew install gh
+```
+
+### Phase 1: Prepare the Release Branch
+
+**From the main branch**, create a release branch and bump version:
+
+```bash
+just release-bump 0.2.4
+# or just release-bump patch|minor|major to auto-increment from the current version
 ```
 
 This script:
 
-1. Validates you're on `main` branch with a clean working tree
-2. Creates `release/v0.2.0` branch
-3. Bumps version in `package.json`, `package-lock.json`, and `manifest.json`
-4. Updates `CHANGELOG.md` by prepending new section (preserves existing history)
-5. Shows you the changes for review
+- Ensures you are on `main` with a clean working tree
+- Runs `npm run typecheck` from `main`
+- Creates or switches to `release/v0.2.4` (or the computed version)
+- Updates version metadata in `package.json`, `package-lock.json`, and `manifest.json`
+- Regenerates `CHANGELOG.md` with the latest commit titles
 
-**Note:** This script does NOT commit or push - you review changes first.
+**Note:** Changes are staged but not committed - review them first.
 
-### Phase 2: Submit Release PR
+### Phase 2: Commit and Open the Draft PR
 
 **From the release branch**, commit and create PR:
 
 ```bash
-npm run release:submit
+just release-submit
 ```
 
 This script:
 
-1. Validates you're on a `release/v*` branch
-2. Stages and commits release files: `package.json`, `package-lock.json`, `manifest.json`, `CHANGELOG.md`
-3. Pushes the release branch to origin
-4. Creates a pull request to `main` with changelog as description
+- Commits the staged release files
+- Pushes the release branch
+- Opens a draft PR populated with the changelog entry
 
 **Next:** Review the PR, ensure CI passes, then merge on GitHub.
 
@@ -341,7 +351,7 @@ The [Release workflow](.github/workflows/release.yml) automatically:
 
 1. Detects the merged release PR (`release/v*` branch)
 2. Extracts version from branch name
-3. Creates and pushes git tag `v0.2.0`
+3. Creates and pushes git tag
 4. Builds production bundle
 5. Packages extension as ZIP
 6. Creates GitHub release with ZIP attachment and changelog notes
@@ -351,10 +361,10 @@ The [Release workflow](.github/workflows/release.yml) automatically:
 ```bash
 git checkout main
 git pull
-npm run release:publish 0.2.0
+just release-publish 0.2.4
 ```
 
-This runs the same steps manually.
+This verifies `main` matches the merged release, builds the extension, creates `mountaineers-assistant-0.2.4.zip`, tags the release, and creates the GitHub release with the ZIP attached.
 
 **Next:** Phase 4 - Manual upload to Chrome Web Store.
 
