@@ -4,11 +4,13 @@ set -euo pipefail
 REPO_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 cd "$REPO_ROOT"
 
+# usage prints the required command-line usage for the script to stderr and exits with status 1.
 usage() {
   echo "Usage: $0 <version>" >&2
   exit 1
 }
 
+# need verifies that each command name passed as an argument exists in PATH and prints an error and exits with status 1 if any are missing.
 need() {
   for cmd in "$@"; do
     if ! command -v "$cmd" >/dev/null 2>&1; then

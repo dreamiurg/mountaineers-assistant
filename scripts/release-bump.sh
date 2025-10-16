@@ -4,11 +4,13 @@ set -euo pipefail
 REPO_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 cd "$REPO_ROOT"
 
+# usage prints the usage message showing the accepted version argument and exits with status 1.
 usage() {
   echo "Usage: $0 <version|patch|minor|major>" >&2
   exit 1
 }
 
+# need checks that each provided command is available in PATH and exits with code 1 if any are missing.
 need() {
   for cmd in "$@"; do
     if ! command -v "$cmd" >/dev/null 2>&1; then

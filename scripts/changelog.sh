@@ -4,6 +4,7 @@ set -euo pipefail
 REPO_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 cd "$REPO_ROOT"
 
+# usage prints usage information for changelog.sh to stderr and exits with status 1.
 usage() {
   cat <<'USAGE' >&2
 Usage: changelog.sh <update|extract> [options]

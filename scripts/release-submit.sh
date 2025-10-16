@@ -4,6 +4,7 @@ set -euo pipefail
 REPO_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 cd "$REPO_ROOT"
 
+# need verifies that each provided command is available on PATH and exits with status 1 while printing an error for the first missing command.
 need() {
   for cmd in "$@"; do
     if ! command -v "$cmd" >/dev/null 2>&1; then
