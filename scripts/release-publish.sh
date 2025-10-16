@@ -61,7 +61,7 @@ if git rev-parse --verify --quiet "$TAG"; then
   echo "Tag $TAG already exists" >&2
   exit 1
 fi
-if git ls-remote --tags origin "$TAG" >/dev/null 2>&1; then
+if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
   echo "Tag $TAG already exists on origin" >&2
   exit 1
 fi
@@ -78,9 +78,12 @@ fi
 ZIP="mountaineers-assistant-$VERSION.zip"
 rm -f "$ZIP"
 (
-  cd "$DIST"
+  cd "$DIST" || exit 1
   zip -qr "../$ZIP" .
-)
+) || {
+  echo "Failed during ZIP creation" >&2
+  exit 1
+}
 
 if [[ ! -f $ZIP ]]; then
   echo "Failed to create $ZIP" >&2
