@@ -262,7 +262,9 @@ extensionTest.describe('Fetch Activities Workflow', () => {
 
     // Click button twice rapidly
     await fetchButton.click();
-    await page.waitForTimeout(100); // Small delay
+
+    // Wait for button to become disabled (indicating first fetch is processing)
+    await expect(fetchButton).toBeDisabled({ timeout: 1000 });
 
     // Try to click again
     const clickPromise = fetchButton.click({ timeout: 1000 }).catch(() => {
@@ -311,9 +313,8 @@ extensionTest.describe('Fetch Activities Workflow', () => {
       // Wait for page to load
       await page.waitForLoadState('networkidle');
 
-      // Verify that pre-populated data is visible
-      // (The insights page should show the cached activity)
-      await page.waitForTimeout(1000); // Allow time for data to render
+      // Wait for insights dashboard to render (indicates data has been processed)
+      await page.waitForSelector('text=Activity Insights Dashboard', { state: 'visible' });
 
       // Check that the page loaded successfully with data
       const pageContent = await page.textContent('body');
@@ -337,8 +338,8 @@ extensionTest.describe('Fetch Activities Workflow', () => {
       await expect(fetchButton).toBeVisible({ timeout: 10000 });
       await fetchButton.click();
 
-      // Wait for error to appear
-      await page.waitForTimeout(5000);
+      // Wait for button to be re-enabled (indicates fetch completed/failed)
+      await expect(fetchButton).toBeEnabled({ timeout: 30000 });
 
       // Look for link to mountaineers.org
       const loginLink = page.locator('a[href*="mountaineers.org"]').first();
@@ -374,8 +375,8 @@ extensionTest.describe('Offscreen Document Lifecycle', () => {
       await expect(fetchButton).toBeVisible({ timeout: 10000 });
       await fetchButton.click();
 
-      // Wait a bit for offscreen document to be created
-      await page.waitForTimeout(2000);
+      // Wait for button state to change (indicates fetch has started)
+      await expect(fetchButton).toBeDisabled({ timeout: 5000 });
 
       // Check if offscreen document was created by examining contexts
       if (serviceWorker) {
@@ -418,9 +419,6 @@ extensionTest.describe('Offscreen Document Lifecycle', () => {
 
       // Wait for first fetch to complete or fail
       await expect(fetchButton).toBeEnabled({ timeout: 30000 });
-
-      // Small delay before second fetch
-      await page.waitForTimeout(500);
 
       // Second fetch - this verifies offscreen document is reused
       // (if it had to be recreated, we'd see longer delays or errors)
