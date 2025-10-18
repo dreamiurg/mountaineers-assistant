@@ -1,38 +1,38 @@
-import { test as base, chromium, type BrowserContext } from '@playwright/test';
-import fs from 'node:fs/promises';
-import path from 'node:path';
+import fs from 'node:fs/promises'
+import path from 'node:path'
+import { type BrowserContext, test as base, chromium } from '@playwright/test'
 
-const STORAGE_KEY = 'mountaineersAssistantData';
-const SETTINGS_KEY = 'mountaineersAssistantSettings';
-const ACTIVE_TAB_URL = 'https://www.mountaineers.org/my-dashboard';
+const STORAGE_KEY = 'mountaineersAssistantData'
+const SETTINGS_KEY = 'mountaineersAssistantSettings'
+const ACTIVE_TAB_URL = 'https://www.mountaineers.org/my-dashboard'
 
 export interface ExtensionHarness {
-  context: BrowserContext;
-  extensionId: string;
+  context: BrowserContext
+  extensionId: string
   summary: {
-    activityCount: number;
-    lastUpdated: string | null;
-    newActivities: number;
-  };
+    activityCount: number
+    lastUpdated: string | null
+    newActivities: number
+  }
 }
 
 interface SampleData {
-  activities?: unknown[];
-  people?: unknown[];
-  rosterEntries?: unknown[];
-  lastUpdated?: string | null;
-  currentUserUid?: string | null;
+  activities?: unknown[]
+  people?: unknown[]
+  rosterEntries?: unknown[]
+  lastUpdated?: string | null
+  currentUserUid?: string | null
 }
 
-const repoRoot = process.cwd();
-const distDir = path.resolve(repoRoot, 'dist');
-const sampleDataPath = path.resolve(repoRoot, 'src', 'data', 'sample-activities.json');
+const repoRoot = process.cwd()
+const distDir = path.resolve(repoRoot, 'dist')
+const sampleDataPath = path.resolve(repoRoot, 'src', 'data', 'sample-activities.json')
 
 export const test = base.extend<ExtensionHarness>({
   context: async ({}, use) => {
-    const tempRoot = path.resolve(repoRoot, '.playwright-tmp');
-    await fs.mkdir(tempRoot, { recursive: true });
-    const userDataDir = await fs.mkdtemp(path.join(tempRoot, 'chromium-'));
+    const tempRoot = path.resolve(repoRoot, '.playwright-tmp')
+    await fs.mkdir(tempRoot, { recursive: true })
+    const userDataDir = await fs.mkdtemp(path.join(tempRoot, 'chromium-'))
     const context = await chromium.launchPersistentContext(userDataDir, {
       channel: 'chromium',
       headless: true,
@@ -43,10 +43,10 @@ export const test = base.extend<ExtensionHarness>({
         '--disable-sync',
         '--disable-features=DialMediaRouteProvider',
       ],
-    });
+    })
 
     await context.route('**/*', (route) => {
-      const url = route.request().url();
+      const url = route.request().url()
       if (
         url.startsWith('chrome-extension://') ||
         url.startsWith('devtools://') ||
@@ -54,45 +54,45 @@ export const test = base.extend<ExtensionHarness>({
         url.startsWith('data:') ||
         url.startsWith('file:')
       ) {
-        route.continue();
-        return;
+        route.continue()
+        return
       }
-      route.abort();
-    });
+      route.abort()
+    })
 
     try {
-      await use(context);
+      await use(context)
     } finally {
-      await context.close();
-      await fs.rm(userDataDir, { recursive: true, force: true }).catch(() => {});
+      await context.close()
+      await fs.rm(userDataDir, { recursive: true, force: true }).catch(() => {})
     }
   },
   extensionId: [
     async ({ context }, use) => {
-      let [serviceWorker] = context.serviceWorkers();
+      let [serviceWorker] = context.serviceWorkers()
       if (!serviceWorker) {
-        serviceWorker = await context.waitForEvent('serviceworker');
+        serviceWorker = await context.waitForEvent('serviceworker')
       }
-      const extensionUrl = new URL(serviceWorker.url());
-      const extensionId = extensionUrl.hostname;
-      await use(extensionId);
+      const extensionUrl = new URL(serviceWorker.url())
+      const extensionId = extensionUrl.hostname
+      await use(extensionId)
     },
     { auto: true },
   ],
   summary: [
     async ({ context }, use) => {
-      const rawData = await fs.readFile(sampleDataPath, 'utf-8');
-      const fixture = JSON.parse(rawData) as SampleData;
-      const activities = Array.isArray(fixture.activities) ? fixture.activities : [];
-      const people = Array.isArray(fixture.people) ? fixture.people : [];
-      const rosterEntries = Array.isArray(fixture.rosterEntries) ? fixture.rosterEntries : [];
-      const lastUpdated = typeof fixture.lastUpdated === 'string' ? fixture.lastUpdated : null;
+      const rawData = await fs.readFile(sampleDataPath, 'utf-8')
+      const fixture = JSON.parse(rawData) as SampleData
+      const activities = Array.isArray(fixture.activities) ? fixture.activities : []
+      const people = Array.isArray(fixture.people) ? fixture.people : []
+      const rosterEntries = Array.isArray(fixture.rosterEntries) ? fixture.rosterEntries : []
+      const lastUpdated = typeof fixture.lastUpdated === 'string' ? fixture.lastUpdated : null
       const currentUserUid =
-        typeof fixture.currentUserUid === 'string' ? fixture.currentUserUid : null;
+        typeof fixture.currentUserUid === 'string' ? fixture.currentUserUid : null
 
-      let [serviceWorker] = context.serviceWorkers();
+      let [serviceWorker] = context.serviceWorkers()
       if (!serviceWorker) {
-        serviceWorker = await context.waitForEvent('serviceworker');
+        serviceWorker = await context.waitForEvent('serviceworker')
       }
 
       await serviceWorker.evaluate(
@@ -101,12 +101,12 @@ export const test = base.extend<ExtensionHarness>({
             await chrome.storage.local.set({
               [storageKey]: cache,
               [settingsKey]: settings,
-            });
+            })
           } catch (error) {
             console.error(
               'Mountaineers Assistant test harness failed to seed storage:',
               error instanceof Error ? error.message : String(error)
-            );
+            )
           }
         },
         {
@@ -124,7 +124,7 @@ export const test = base.extend<ExtensionHarness>({
             fetchLimit: 25,
           },
         }
-      );
+      )
       await context.addInitScript(
         ({
           activeTabUrl,
@@ -135,27 +135,27 @@ export const test = base.extend<ExtensionHarness>({
           settingsKey,
         }) => {
           const applyStubs = () => {
-            const chromeApi = (globalThis as typeof globalThis & { chrome?: typeof chrome }).chrome;
+            const chromeApi = (globalThis as typeof globalThis & { chrome?: typeof chrome }).chrome
             if (!chromeApi) {
-              return false;
+              return false
             }
 
             const clone = <T>(value: T): T => {
               if (typeof structuredClone === 'function') {
-                return structuredClone(value);
+                return structuredClone(value)
               }
-              return JSON.parse(JSON.stringify(value));
-            };
+              return JSON.parse(JSON.stringify(value))
+            }
 
-            type CacheState = typeof cachePayload | null;
-            type SettingsState = typeof settingsPayload;
+            type CacheState = typeof cachePayload | null
+            type SettingsState = typeof settingsPayload
 
-            let cacheState: CacheState = clone(cachePayload);
-            let settingsState: SettingsState = clone(settingsPayload);
+            let cacheState: CacheState = clone(cachePayload)
+            let settingsState: SettingsState = clone(settingsPayload)
 
             const storageListeners: Array<
               Parameters<typeof chrome.storage.onChanged.addListener>[0]
-            > = [];
+            > = []
 
             if (
               chromeApi.storage?.onChanged?.addListener &&
@@ -163,43 +163,43 @@ export const test = base.extend<ExtensionHarness>({
             ) {
               const originalAdd = chromeApi.storage.onChanged.addListener.bind(
                 chromeApi.storage.onChanged
-              );
+              )
               const wrappedAdd = (
                 listener: Parameters<typeof chrome.storage.onChanged.addListener>[0]
               ) => {
-                storageListeners.push(listener);
-                return originalAdd(listener);
-              };
+                storageListeners.push(listener)
+                return originalAdd(listener)
+              }
               Object.defineProperty(wrappedAdd, '__maStubbed', {
                 value: true,
                 configurable: false,
                 enumerable: false,
                 writable: false,
-              });
+              })
               Object.defineProperty(chromeApi.storage.onChanged, 'addListener', {
                 configurable: true,
                 value: wrappedAdd,
-              });
+              })
             }
 
             const emitStorageChange = (key: string, newValue: unknown, oldValue: unknown) => {
               if (!storageListeners.length) {
-                return;
+                return
               }
               const change = {
                 [key]: {
                   newValue,
                   oldValue,
                 },
-              } as Record<string, chrome.storage.StorageChange>;
+              } as Record<string, chrome.storage.StorageChange>
               for (const listener of storageListeners) {
                 try {
-                  listener(change, 'local');
+                  listener(change, 'local')
                 } catch (error) {
-                  console.warn('Mountaineers Assistant test stub: storage listener error', error);
+                  console.warn('Mountaineers Assistant test stub: storage listener error', error)
                 }
               }
-            };
+            }
 
             const stubTab = {
               id: 1,
@@ -210,215 +210,215 @@ export const test = base.extend<ExtensionHarness>({
               pinned: false,
               incognito: false,
               url: activeTabUrl,
-            } as unknown as chrome.tabs.Tab;
+            } as unknown as chrome.tabs.Tab
 
             if (
               chromeApi.tabs?.query &&
               !(chromeApi.tabs.query as { __maStubbed?: boolean }).__maStubbed
             ) {
-              const originalQuery = chromeApi.tabs.query.bind(chromeApi.tabs);
+              const originalQuery = chromeApi.tabs.query.bind(chromeApi.tabs)
               const stubbedQuery = ((
                 queryInfo: chrome.tabs.QueryInfo,
                 callback?: (result: chrome.tabs.Tab[]) => void
               ) => {
                 if (queryInfo?.active && queryInfo.currentWindow) {
-                  const result = [stubTab];
+                  const result = [stubTab]
                   if (typeof callback === 'function') {
-                    callback(result);
-                    return;
+                    callback(result)
+                    return
                   }
-                  return Promise.resolve(result);
+                  return Promise.resolve(result)
                 }
-                return originalQuery(queryInfo, callback as (result: chrome.tabs.Tab[]) => void);
-              }) as unknown as typeof chrome.tabs.query;
+                return originalQuery(queryInfo, callback as (result: chrome.tabs.Tab[]) => void)
+              }) as unknown as typeof chrome.tabs.query
               Object.defineProperty(stubbedQuery, '__maStubbed', {
                 value: true,
                 configurable: false,
                 enumerable: false,
                 writable: false,
-              });
+              })
               Object.defineProperty(chromeApi.tabs, 'query', {
                 configurable: true,
                 value: stubbedQuery,
-              });
+              })
             }
 
             if (
               chromeApi.runtime?.sendMessage &&
               !(chromeApi.runtime.sendMessage as { __maStubbed?: boolean }).__maStubbed
             ) {
-              const originalSendMessage = chromeApi.runtime.sendMessage.bind(chromeApi.runtime);
+              const originalSendMessage = chromeApi.runtime.sendMessage.bind(chromeApi.runtime)
               const stubbedSendMessage = ((
                 message: unknown,
                 optionsOrCallback?: chrome.runtime.MessageOptions | ((response: unknown) => void),
                 maybeCallback?: (response: unknown) => void
               ) => {
                 const callback =
-                  typeof optionsOrCallback === 'function' ? optionsOrCallback : maybeCallback;
-                const payload = message as { type?: string; limit?: number | null } | undefined;
+                  typeof optionsOrCallback === 'function' ? optionsOrCallback : maybeCallback
+                const payload = message as { type?: string; limit?: number | null } | undefined
                 if (payload?.type === 'get-refresh-status') {
-                  callback?.({ success: true, inProgress: false });
-                  return undefined;
+                  callback?.({ success: true, inProgress: false })
+                  return undefined
                 }
                 if (payload?.type === 'start-refresh') {
                   callback?.({
                     success: true,
                     summary: summaryPayload,
-                  });
-                  return undefined;
+                  })
+                  return undefined
                 }
                 return originalSendMessage(
                   message,
                   optionsOrCallback as never,
                   maybeCallback as never
-                );
-              }) as unknown as typeof chrome.runtime.sendMessage;
+                )
+              }) as unknown as typeof chrome.runtime.sendMessage
               Object.defineProperty(stubbedSendMessage, '__maStubbed', {
                 value: true,
                 configurable: false,
                 enumerable: false,
                 writable: false,
-              });
+              })
               Object.defineProperty(chromeApi.runtime, 'sendMessage', {
                 configurable: true,
                 value: stubbedSendMessage,
-              });
+              })
             }
 
             if (
               chromeApi.storage?.local &&
               !(chromeApi.storage.local.get as { __maStubbed?: boolean }).__maStubbed
             ) {
-              const originalGet = chromeApi.storage.local.get.bind(chromeApi.storage.local);
-              const originalSet = chromeApi.storage.local.set.bind(chromeApi.storage.local);
-              const originalRemove = chromeApi.storage.local.remove.bind(chromeApi.storage.local);
-              const originalClear = chromeApi.storage.local.clear.bind(chromeApi.storage.local);
+              const _originalGet = chromeApi.storage.local.get.bind(chromeApi.storage.local)
+              const originalSet = chromeApi.storage.local.set.bind(chromeApi.storage.local)
+              const originalRemove = chromeApi.storage.local.remove.bind(chromeApi.storage.local)
+              const _originalClear = chromeApi.storage.local.clear.bind(chromeApi.storage.local)
 
               const resolveKeys = (
                 keys?: string | string[] | Record<string, unknown> | null
               ): string[] => {
                 if (!keys) {
-                  return [storageKey, settingsKey];
+                  return [storageKey, settingsKey]
                 }
                 if (typeof keys === 'string') {
-                  return [keys];
+                  return [keys]
                 }
                 if (Array.isArray(keys)) {
-                  return keys;
+                  return keys
                 }
-                return Object.keys(keys);
-              };
+                return Object.keys(keys)
+              }
 
               const stubbedGet = ((keys?: string | string[] | Record<string, unknown> | null) => {
-                const requested = resolveKeys(keys);
-                const result: Record<string, unknown> = {};
+                const requested = resolveKeys(keys)
+                const result: Record<string, unknown> = {}
                 for (const key of requested) {
                   if (key === storageKey) {
-                    result[key] = clone(cacheState);
+                    result[key] = clone(cacheState)
                   } else if (key === settingsKey) {
-                    result[key] = clone(settingsState);
+                    result[key] = clone(settingsState)
                   }
                 }
 
                 if (typeof keys === 'object' && keys !== null && !Array.isArray(keys)) {
                   for (const [fallbackKey, fallbackValue] of Object.entries(keys)) {
                     if (!(fallbackKey in result)) {
-                      result[fallbackKey] = fallbackValue;
+                      result[fallbackKey] = fallbackValue
                     }
                   }
                 }
 
-                return Promise.resolve(result);
-              }) as unknown as typeof chrome.storage.local.get;
+                return Promise.resolve(result)
+              }) as unknown as typeof chrome.storage.local.get
 
               const stubbedSet = ((items: Record<string, unknown>) => {
-                const updated: string[] = [];
+                const updated: string[] = []
                 if (storageKey in items) {
-                  const previous = clone(cacheState);
-                  const nextValue = items[storageKey] as CacheState;
-                  cacheState = nextValue == null ? null : clone(nextValue);
-                  emitStorageChange(storageKey, clone(cacheState), previous);
-                  updated.push(storageKey);
+                  const previous = clone(cacheState)
+                  const nextValue = items[storageKey] as CacheState
+                  cacheState = nextValue == null ? null : clone(nextValue)
+                  emitStorageChange(storageKey, clone(cacheState), previous)
+                  updated.push(storageKey)
                 }
                 if (settingsKey in items) {
-                  const previous = clone(settingsState);
-                  const nextSettings = items[settingsKey] as Partial<SettingsState> | undefined;
+                  const previous = clone(settingsState)
+                  const nextSettings = items[settingsKey] as Partial<SettingsState> | undefined
                   settingsState = {
                     ...clone(settingsPayload),
                     ...(nextSettings ? clone(nextSettings) : {}),
-                  };
-                  emitStorageChange(settingsKey, clone(settingsState), previous);
-                  updated.push(settingsKey);
+                  }
+                  emitStorageChange(settingsKey, clone(settingsState), previous)
+                  updated.push(settingsKey)
                 }
                 if (!updated.length) {
-                  return originalSet(items);
+                  return originalSet(items)
                 }
-                return Promise.resolve();
-              }) as unknown as typeof chrome.storage.local.set;
+                return Promise.resolve()
+              }) as unknown as typeof chrome.storage.local.set
 
               const stubbedRemove = ((keys: string | string[]) => {
-                const requested = resolveKeys(keys);
-                let touched = false;
+                const requested = resolveKeys(keys)
+                let touched = false
                 if (requested.includes(storageKey)) {
-                  const previous = clone(cacheState);
-                  cacheState = null;
-                  emitStorageChange(storageKey, null, previous);
-                  touched = true;
+                  const previous = clone(cacheState)
+                  cacheState = null
+                  emitStorageChange(storageKey, null, previous)
+                  touched = true
                 }
                 if (requested.includes(settingsKey)) {
-                  const previous = clone(settingsState);
-                  settingsState = clone(settingsPayload);
-                  emitStorageChange(settingsKey, clone(settingsState), previous);
-                  touched = true;
+                  const previous = clone(settingsState)
+                  settingsState = clone(settingsPayload)
+                  emitStorageChange(settingsKey, clone(settingsState), previous)
+                  touched = true
                 }
                 if (!touched) {
-                  return originalRemove(keys);
+                  return originalRemove(keys)
                 }
-                return Promise.resolve();
-              }) as unknown as typeof chrome.storage.local.remove;
+                return Promise.resolve()
+              }) as unknown as typeof chrome.storage.local.remove
 
               const stubbedClear = (() => {
-                const prevCache = clone(cacheState);
-                const prevSettings = clone(settingsState);
-                cacheState = null;
-                settingsState = clone(settingsPayload);
-                emitStorageChange(storageKey, null, prevCache);
-                emitStorageChange(settingsKey, clone(settingsState), prevSettings);
-                return Promise.resolve();
-              }) as unknown as typeof chrome.storage.local.clear;
+                const prevCache = clone(cacheState)
+                const prevSettings = clone(settingsState)
+                cacheState = null
+                settingsState = clone(settingsPayload)
+                emitStorageChange(storageKey, null, prevCache)
+                emitStorageChange(settingsKey, clone(settingsState), prevSettings)
+                return Promise.resolve()
+              }) as unknown as typeof chrome.storage.local.clear
 
               Object.defineProperty(stubbedGet, '__maStubbed', {
                 value: true,
                 configurable: false,
                 enumerable: false,
                 writable: false,
-              });
+              })
 
               Object.assign(chromeApi.storage.local, {
                 get: stubbedGet,
                 set: stubbedSet,
                 remove: stubbedRemove,
                 clear: stubbedClear,
-              });
+              })
             }
 
-            return true;
-          };
+            return true
+          }
 
           if (!applyStubs()) {
-            let attempts = 0;
-            const maxAttempts = 100; // 1 second total (100 * 10ms)
+            let attempts = 0
+            const maxAttempts = 100 // 1 second total (100 * 10ms)
             const interval = setInterval(() => {
-              attempts++;
+              attempts++
               if (applyStubs()) {
-                clearInterval(interval);
+                clearInterval(interval)
               } else if (attempts >= maxAttempts) {
-                clearInterval(interval);
+                clearInterval(interval)
                 console.error(
                   'Mountaineers Assistant test harness: Chrome API not available after timeout'
-                );
+                )
               }
-            }, 10);
+            }, 10)
           }
         },
         {
@@ -442,14 +442,14 @@ export const test = base.extend<ExtensionHarness>({
           storageKey: STORAGE_KEY,
           settingsKey: SETTINGS_KEY,
         }
-      );
+      )
 
       await use({
         activityCount: activities.length,
         lastUpdated,
         newActivities: 0,
-      });
+      })
     },
     { auto: true },
   ],
-});
+})

@@ -1,4 +1,4 @@
-const path = require('node:path');
+const path = require('node:path')
 
 /** @type {import('@storybook/react-webpack5').StorybookConfig} */
 const config = {
@@ -12,13 +12,13 @@ const config = {
     autodocs: 'tag',
   },
   webpackFinal: async (config) => {
-    config.resolve = config.resolve || {};
+    config.resolve = config.resolve || {}
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
       '@': path.resolve(__dirname, '..', 'src'),
-    };
-    config.module = config.module || {};
-    config.module.rules = config.module.rules || [];
+    }
+    config.module = config.module || {}
+    config.module.rules = config.module.rules || []
     config.module.rules.push({
       test: /\.(ts|tsx)$/,
       exclude: /node_modules/,
@@ -31,14 +31,10 @@ const config = {
           ],
         },
       },
-    });
-    config.resolve.extensions = [
-      ...(config.resolve.extensions || []),
-      '.ts',
-      '.tsx',
-    ];
-    return config;
+    })
+    config.resolve.extensions = [...(config.resolve.extensions || []), '.ts', '.tsx']
+    return config
   },
-};
+}
 
-module.exports = config;
+module.exports = config

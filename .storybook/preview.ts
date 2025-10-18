@@ -1,7 +1,7 @@
-import type { Preview } from '@storybook/react';
+import type { Preview } from '@storybook/react'
 
-import '../src/chrome-ext/tailwind.css';
-import '../src/chrome-ext/insights.css';
+import '../src/chrome-ext/tailwind.css'
+import '../src/chrome-ext/insights.css'
 
 const preview: Preview = {
   parameters: {
@@ -20,6 +20,6 @@ const preview: Preview = {
       },
     },
   },
-};
+}
 
-export default preview;
+export default preview

@@ -1,8 +1,9 @@
-import { useMemo, useRef, useEffect } from 'react';
-import { useInsightsDashboard } from './hooks/useInsightsDashboard';
-import type { Options as HighchartsOptions } from 'highcharts';
-import type { DistributionEntry, PartnerEntry, TimelineView } from './types';
-import ChoicesMultiSelect from './components/ChoicesMultiSelect';
+import type { Options as HighchartsOptions } from 'highcharts'
+import { useEffect, useMemo, useRef } from 'react'
+import { Footer } from '../components/Footer'
+import ChoicesMultiSelect from './components/ChoicesMultiSelect'
+import { useInsightsDashboard } from './hooks/useInsightsDashboard'
+import type { DistributionEntry, PartnerEntry, TimelineView } from './types'
 import {
   formatDate,
   formatDateRange,
@@ -10,8 +11,7 @@ import {
   getActivityTypeColors,
   initials,
   titleCase,
-} from './utils';
-import { Footer } from '../components/Footer';
+} from './utils'
 
 const LoadingCard = ({ message }: { message: string }) => (
   <div className="glass-card flex items-center gap-4 rounded-2xl px-5 py-6 text-slate-500">
@@ -33,23 +33,23 @@ const LoadingCard = ({ message }: { message: string }) => (
       <p className="text-sm text-slate-500">{message}</p>
     </div>
   </div>
-);
+)
 
 const EmptyState = ({ message }: { message: string }) => (
   <div className="glass-card rounded-2xl px-5 py-16 text-center text-slate-600">
     <p className="text-xl font-medium text-slate-900">No activities available yet</p>
     <p className="mt-2 text-sm text-slate-500">{message}</p>
   </div>
-);
+)
 
 const TimelineChart = ({ data }: { data: TimelineView }) => {
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null)
   const highcharts = (window as typeof window & { Highcharts?: typeof import('highcharts') })
-    .Highcharts;
+    .Highcharts
 
   useEffect(() => {
     if (!containerRef.current || !highcharts) {
-      return;
+      return
     }
 
     if (!data.categories.length) {
@@ -59,10 +59,10 @@ const TimelineChart = ({ data }: { data: TimelineView }) => {
           style: { color: '#64748b', fontFamily: 'Inter, sans-serif' },
         },
         credits: { enabled: false },
-      } as unknown as HighchartsOptions);
+      } as unknown as HighchartsOptions)
       return () => {
-        chart.destroy();
-      };
+        chart.destroy()
+      }
     }
 
     const chart = highcharts.chart(containerRef.current, {
@@ -96,19 +96,19 @@ const TimelineChart = ({ data }: { data: TimelineView }) => {
         formatter() {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const points = (this as any).points as Array<{
-            y: number;
-            series: { name: string; color: string };
-          }>;
-          const total = points.reduce((sum, point) => sum + (point.y || 0), 0);
+            y: number
+            series: { name: string; color: string }
+          }>
+          const total = points.reduce((sum, point) => sum + (point.y || 0), 0)
           const parts = points
             .filter((point) => point.y)
             .map(
               (point) =>
                 `<span style="color:${point.series.color}">●</span> ${point.series.name}: <b>${point.y}</b>`
-            );
-          parts.push(`<span style="color:#0f172a">Total: <b>${total}</b></span>`);
+            )
+          parts.push(`<span style="color:#0f172a">Total: <b>${total}</b></span>`)
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          return `<span style="font-size:12px">${(this as any).x}</span><br/>${parts.join('<br/>')}`;
+          return `<span style="font-size:12px">${(this as any).x}</span><br/>${parts.join('<br/>')}`
         },
       },
       legend: {
@@ -131,15 +131,15 @@ const TimelineChart = ({ data }: { data: TimelineView }) => {
         name: series.name,
         data: series.data,
       })),
-    } as unknown as HighchartsOptions);
+    } as unknown as HighchartsOptions)
 
     return () => {
-      chart.destroy();
-    };
-  }, [data, highcharts]);
+      chart.destroy()
+    }
+  }, [data, highcharts])
 
-  return <div ref={containerRef} className="absolute inset-0" />;
-};
+  return <div ref={containerRef} className="absolute inset-0" />
+}
 
 const DistributionChart = ({
   entries,
@@ -147,18 +147,18 @@ const DistributionChart = ({
   emptyMessage,
   colors,
 }: {
-  entries: DistributionEntry[];
-  label: string;
-  emptyMessage: string;
-  colors?: string[];
+  entries: DistributionEntry[]
+  label: string
+  emptyMessage: string
+  colors?: string[]
 }) => {
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null)
   const highcharts = (window as typeof window & { Highcharts?: typeof import('highcharts') })
-    .Highcharts;
+    .Highcharts
 
   useEffect(() => {
     if (!containerRef.current || !highcharts) {
-      return;
+      return
     }
 
     if (!entries.length) {
@@ -168,8 +168,8 @@ const DistributionChart = ({
           style: { color: '#64748b', fontFamily: 'Inter, sans-serif' },
         },
         credits: { enabled: false },
-      } as unknown as HighchartsOptions);
-      return () => chart.destroy();
+      } as unknown as HighchartsOptions)
+      return () => chart.destroy()
     }
 
     const chart = highcharts.chart(containerRef.current, {
@@ -204,13 +204,13 @@ const DistributionChart = ({
           data: entries.map((entry) => ({ name: entry.label, y: entry.value })),
         },
       ],
-    } as unknown as HighchartsOptions);
+    } as unknown as HighchartsOptions)
 
-    return () => chart.destroy();
-  }, [entries, highcharts, label, emptyMessage, colors]);
+    return () => chart.destroy()
+  }, [entries, highcharts, label, emptyMessage, colors])
 
-  return <div ref={containerRef} className="absolute inset-0" />;
-};
+  return <div ref={containerRef} className="absolute inset-0" />
+}
 
 const DistributionList = ({ entries }: { entries: DistributionEntry[] }) => (
   <ul className="space-y-2 text-sm text-slate-600">
@@ -223,7 +223,7 @@ const DistributionList = ({ entries }: { entries: DistributionEntry[] }) => (
       </li>
     ))}
   </ul>
-);
+)
 
 const PartnerRow = ({ partner, showAvatars }: { partner: PartnerEntry; showAvatars: boolean }) => (
   <tr className="table-row border-b border-slate-200 last:border-b-0">
@@ -259,21 +259,21 @@ const PartnerRow = ({ partner, showAvatars }: { partner: PartnerEntry; showAvata
     <td className="py-3 pr-4 text-slate-700">{formatNumber(partner.count)}</td>
     <td className="py-3 pr-4 text-slate-500">{formatDate(partner.lastDate)}</td>
   </tr>
-);
+)
 
 const PartnersTable = ({
   partners,
   showAvatars,
 }: {
-  partners: PartnerEntry[];
-  showAvatars: boolean;
+  partners: PartnerEntry[]
+  showAvatars: boolean
 }) => {
   if (!partners.length) {
     return (
       <div className="py-6 text-sm text-slate-500">
         Roster insights will appear once activities include partner data.
       </div>
-    );
+    )
   }
 
   return (
@@ -299,8 +299,8 @@ const PartnersTable = ({
         </tbody>
       </table>
     </div>
-  );
-};
+  )
+}
 
 const InsightsApp = () => {
   const {
@@ -320,15 +320,15 @@ const InsightsApp = () => {
     fetchLimit,
     refreshSummary,
     fullDateRange,
-  } = useInsightsDashboard();
+  } = useInsightsDashboard()
 
-  const filterDisabled = empty || !view;
+  const filterDisabled = empty || !view
 
   const coverageRange = useMemo(
     () => formatDateRange(fullDateRange.earliest, fullDateRange.latest),
     [fullDateRange]
-  );
-  const lastUpdated = useMemo(() => formatDate(view?.meta.lastUpdated ?? null), [view]);
+  )
+  const lastUpdated = useMemo(() => formatDate(view?.meta.lastUpdated ?? null), [view])
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
@@ -475,8 +475,8 @@ const InsightsApp = () => {
                   : undefined
               }
               formatter={(uid) => {
-                const partner = filterOptions.partners.find((p) => p.uid === uid);
-                return partner?.name ?? uid;
+                const partner = filterOptions.partners.find((p) => p.uid === uid)
+                return partner?.name ?? uid
               }}
             />
           </form>
@@ -661,7 +661,7 @@ const InsightsApp = () => {
         <Footer />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default InsightsApp;
+export default InsightsApp

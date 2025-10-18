@@ -1,10 +1,10 @@
-const { resolve } = require('node:path');
-const { defineConfig } = require('vite');
-const { viteStaticCopy } = require('vite-plugin-static-copy');
-const reactPlugin = require('@vitejs/plugin-react');
-const packageJson = require('./package.json');
+const { resolve } = require('node:path')
+const { defineConfig } = require('vite')
+const { viteStaticCopy } = require('vite-plugin-static-copy')
+const reactPlugin = require('@vitejs/plugin-react')
+const packageJson = require('./package.json')
 
-const chromeExtensionRoot = resolve(__dirname, 'src/chrome-ext');
+const chromeExtensionRoot = resolve(__dirname, 'src/chrome-ext')
 
 module.exports = defineConfig({
   root: chromeExtensionRoot,
@@ -44,9 +44,9 @@ module.exports = defineConfig({
         chunkFileNames: 'chunks/[name].js',
         assetFileNames: (assetInfo) => {
           if (assetInfo && assetInfo.name) {
-            return assetInfo.name;
+            return assetInfo.name
           }
-          return '[name][extname]';
+          return '[name][extname]'
         },
       },
     },
@@ -54,4 +54,4 @@ module.exports = defineConfig({
   server: {
     open: false,
   },
-});
+})

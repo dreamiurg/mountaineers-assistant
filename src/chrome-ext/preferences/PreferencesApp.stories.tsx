@@ -1,9 +1,9 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import PreferencesApp from './PreferencesApp';
-import '../preferences.css';
-import sampleData from '../../data/sample-activities.json';
-import type { ExtensionCache, ExtensionSettings } from '../shared/types';
-import { createChromeMock } from '../stories/chromeMock';
+import type { Meta, StoryObj } from '@storybook/react'
+import PreferencesApp from './PreferencesApp'
+import '../preferences.css'
+import sampleData from '../../data/sample-activities.json'
+import type { ExtensionCache, ExtensionSettings } from '../shared/types'
+import { createChromeMock } from '../stories/chromeMock'
 
 const meta: Meta<typeof PreferencesApp> = {
   title: 'Pages/Preferences',
@@ -19,16 +19,16 @@ const meta: Meta<typeof PreferencesApp> = {
           showAvatars: true,
           fetchLimit: 5,
         } as ExtensionSettings,
-      });
-      return <Story />;
+      })
+      return <Story />
     },
   ],
-};
+}
 
-export default meta;
+export default meta
 
-type Story = StoryObj<typeof PreferencesApp>;
+type Story = StoryObj<typeof PreferencesApp>
 
 export const Default: Story = {
   render: () => <PreferencesApp />,
-};
+}
