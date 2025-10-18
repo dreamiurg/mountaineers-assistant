@@ -3,22 +3,22 @@
  * Tests the complete workflow of fetching activities using the offscreen document
  */
 
-import { test, expect, chromium, type BrowserContext } from '@playwright/test';
-import path from 'node:path';
-import fs from 'node:fs/promises';
+import fs from 'node:fs/promises'
+import path from 'node:path'
+import { type BrowserContext, chromium, expect, test } from '@playwright/test'
 
-const repoRoot = process.cwd();
-const distDir = path.resolve(repoRoot, 'dist');
+const repoRoot = process.cwd()
+const distDir = path.resolve(repoRoot, 'dist')
 
 // Fixture to set up extension context
 const extensionTest = test.extend<{
-  context: BrowserContext;
-  extensionId: string;
+  context: BrowserContext
+  extensionId: string
 }>({
   context: async ({}, use) => {
-    const tempRoot = path.resolve(repoRoot, '.playwright-tmp');
-    await fs.mkdir(tempRoot, { recursive: true });
-    const userDataDir = await fs.mkdtemp(path.join(tempRoot, 'chromium-fetch-test-'));
+    const tempRoot = path.resolve(repoRoot, '.playwright-tmp')
+    await fs.mkdir(tempRoot, { recursive: true })
+    const userDataDir = await fs.mkdtemp(path.join(tempRoot, 'chromium-fetch-test-'))
 
     const context = await chromium.launchPersistentContext(userDataDir, {
       channel: 'chromium',
@@ -30,11 +30,11 @@ const extensionTest = test.extend<{
         '--disable-sync',
         '--disable-features=DialMediaRouteProvider',
       ],
-    });
+    })
 
     // Block network requests to mountaineers.org (we expect auth failures)
     await context.route('**/*', (route) => {
-      const url = route.request().url();
+      const url = route.request().url()
       if (
         url.startsWith('chrome-extension://') ||
         url.startsWith('devtools://') ||
@@ -42,116 +42,116 @@ const extensionTest = test.extend<{
         url.startsWith('data:') ||
         url.startsWith('file:')
       ) {
-        route.continue();
-        return;
+        route.continue()
+        return
       }
       // Abort all other requests
-      route.abort();
-    });
+      route.abort()
+    })
 
     try {
-      await use(context);
+      await use(context)
     } finally {
-      await context.close();
-      await fs.rm(userDataDir, { recursive: true, force: true }).catch(() => {});
+      await context.close()
+      await fs.rm(userDataDir, { recursive: true, force: true }).catch(() => {})
     }
   },
   extensionId: [
     async ({ context }, use) => {
-      let [serviceWorker] = context.serviceWorkers();
+      let [serviceWorker] = context.serviceWorkers()
       if (!serviceWorker) {
-        serviceWorker = await context.waitForEvent('serviceworker');
+        serviceWorker = await context.waitForEvent('serviceworker')
       }
-      const extensionUrl = new URL(serviceWorker.url());
-      const extensionId = extensionUrl.hostname;
-      await use(extensionId);
+      const extensionUrl = new URL(serviceWorker.url())
+      const extensionId = extensionUrl.hostname
+      await use(extensionId)
     },
     { auto: true },
   ],
-});
+})
 
 extensionTest.describe('Fetch Activities Workflow', () => {
   extensionTest(
     'should open insights page when extension icon is clicked',
     async ({ context, extensionId }) => {
       // Navigate to insights page directly (simulates icon click)
-      const page = await context.newPage();
-      await page.goto(`chrome-extension://${extensionId}/insights.html`);
+      const page = await context.newPage()
+      await page.goto(`chrome-extension://${extensionId}/insights.html`)
 
       // Verify page loaded
-      await expect(page).toHaveTitle(/Mountaineers/i);
+      await expect(page).toHaveTitle(/Mountaineers/i)
 
       // Verify fetch button exists
-      const fetchButton = page.locator('[data-testid="fetch-button"]');
-      await expect(fetchButton).toBeVisible({ timeout: 10000 });
+      const fetchButton = page.locator('[data-testid="fetch-button"]')
+      await expect(fetchButton).toBeVisible({ timeout: 10000 })
 
-      await page.close();
+      await page.close()
     }
-  );
+  )
 
   extensionTest('should show fetch button on insights page', async ({ context, extensionId }) => {
-    const page = await context.newPage();
-    await page.goto(`chrome-extension://${extensionId}/insights.html`);
+    const page = await context.newPage()
+    await page.goto(`chrome-extension://${extensionId}/insights.html`)
 
     // Wait for page to load
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('networkidle')
 
     // Verify fetch button exists and has correct text
-    const fetchButton = page.locator('[data-testid="fetch-button"]');
-    await expect(fetchButton).toBeVisible({ timeout: 10000 });
-    await expect(fetchButton).toContainText(/Fetch New Activities/i);
+    const fetchButton = page.locator('[data-testid="fetch-button"]')
+    await expect(fetchButton).toBeVisible({ timeout: 10000 })
+    await expect(fetchButton).toContainText(/Fetch New Activities/i)
 
-    await page.close();
-  });
+    await page.close()
+  })
 
   extensionTest(
     'should show fetch limit in button label when set',
     async ({ context, extensionId }) => {
       // Set fetch limit in storage
-      const [serviceWorker] = context.serviceWorkers();
+      const [serviceWorker] = context.serviceWorkers()
       if (serviceWorker) {
         await serviceWorker.evaluate(async () => {
           await chrome.storage.local.set({
             mountaineersAssistantSettings: {
               fetchLimit: 10,
             },
-          });
-        });
+          })
+        })
       }
 
-      const page = await context.newPage();
-      await page.goto(`chrome-extension://${extensionId}/insights.html`);
+      const page = await context.newPage()
+      await page.goto(`chrome-extension://${extensionId}/insights.html`)
 
       // Wait for page to load and fetch limit to be displayed
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('networkidle')
 
       // Verify button shows limit
-      const fetchButton = page.locator('[data-testid="fetch-button"]');
-      await expect(fetchButton).toBeVisible({ timeout: 10000 });
+      const fetchButton = page.locator('[data-testid="fetch-button"]')
+      await expect(fetchButton).toBeVisible({ timeout: 10000 })
 
       // Button text should include the limit
-      const buttonText = await fetchButton.textContent();
+      const buttonText = await fetchButton.textContent()
       if (buttonText && buttonText.includes('limit')) {
-        expect(buttonText).toContain('10');
+        expect(buttonText).toContain('10')
       }
 
-      await page.close();
+      await page.close()
     }
-  );
+  )
 
   extensionTest(
     'should show authentication error when not logged in',
     async ({ context, extensionId }) => {
-      const page = await context.newPage();
-      await page.goto(`chrome-extension://${extensionId}/insights.html`);
+      const page = await context.newPage()
+      await page.goto(`chrome-extension://${extensionId}/insights.html`)
 
       // Wait for page to load
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('networkidle')
 
       // Click fetch button
-      const fetchButton = page.locator('[data-testid="fetch-button"]');
-      await expect(fetchButton).toBeVisible({ timeout: 10000 });
-      await fetchButton.click();
+      const fetchButton = page.locator('[data-testid="fetch-button"]')
+      await expect(fetchButton).toBeVisible({ timeout: 10000 })
+      await fetchButton.click()
 
       // Should show error message (with longer timeout as fetch may take time)
       // The error might be about authentication or network failure
@@ -161,62 +161,62 @@ extensionTest.describe('Fetch Activities Workflow', () => {
         page.locator('text=/failed/i'),
         page.locator('text=/Unable to locate/i'),
         page.locator('text=/timed out/i'),
-      ];
+      ]
 
       // Wait for any error indicator to appear
-      let errorFound = false;
+      let errorFound = false
       for (const indicator of errorIndicators) {
         try {
-          await indicator.waitFor({ state: 'visible', timeout: 30000 });
-          errorFound = true;
-          break;
+          await indicator.waitFor({ state: 'visible', timeout: 30000 })
+          errorFound = true
+          break
         } catch {
           // Try next indicator
-          continue;
+          continue
         }
       }
 
       // If no specific error found, at least button should be re-enabled
       if (!errorFound) {
-        await expect(fetchButton).toBeEnabled({ timeout: 30000 });
+        await expect(fetchButton).toBeEnabled({ timeout: 30000 })
       }
 
-      await page.close();
+      await page.close()
     }
-  );
+  )
 
   extensionTest(
     'should disable button while fetch is in progress',
     async ({ context, extensionId }) => {
-      const page = await context.newPage();
-      await page.goto(`chrome-extension://${extensionId}/insights.html`);
+      const page = await context.newPage()
+      await page.goto(`chrome-extension://${extensionId}/insights.html`)
 
       // Wait for page to load
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('networkidle')
 
       // Click fetch button
-      const fetchButton = page.locator('[data-testid="fetch-button"]');
-      await expect(fetchButton).toBeVisible({ timeout: 10000 });
-      await fetchButton.click();
+      const fetchButton = page.locator('[data-testid="fetch-button"]')
+      await expect(fetchButton).toBeVisible({ timeout: 10000 })
+      await fetchButton.click()
 
       // Button should be disabled immediately
-      await expect(fetchButton).toBeDisabled({ timeout: 5000 });
+      await expect(fetchButton).toBeDisabled({ timeout: 5000 })
 
-      await page.close();
+      await page.close()
     }
-  );
+  )
 
   extensionTest('should show progress messages during fetch', async ({ context, extensionId }) => {
-    const page = await context.newPage();
-    await page.goto(`chrome-extension://${extensionId}/insights.html`);
+    const page = await context.newPage()
+    await page.goto(`chrome-extension://${extensionId}/insights.html`)
 
     // Wait for page to load
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('networkidle')
 
     // Click fetch button
-    const fetchButton = page.locator('[data-testid="fetch-button"]');
-    await expect(fetchButton).toBeVisible({ timeout: 10000 });
-    await fetchButton.click();
+    const fetchButton = page.locator('[data-testid="fetch-button"]')
+    await expect(fetchButton).toBeVisible({ timeout: 10000 })
+    await fetchButton.click()
 
     // Should show some status message (starting, refreshing, error, etc.)
     // Status message location may vary, so we check multiple possible selectors
@@ -227,65 +227,65 @@ extensionTest.describe('Fetch Activities Workflow', () => {
       page.locator('text=/error/i'),
       page.locator('[class*="status"]'),
       page.locator('[class*="message"]'),
-    ];
+    ]
 
-    let statusFound = false;
+    let statusFound = false
     for (const indicator of statusIndicators) {
       try {
-        await indicator.waitFor({ state: 'visible', timeout: 15000 });
-        statusFound = true;
-        break;
+        await indicator.waitFor({ state: 'visible', timeout: 15000 })
+        statusFound = true
+        break
       } catch {
-        continue;
+        continue
       }
     }
 
     // Either we found a status message, or the button state changed
     if (!statusFound) {
       // At minimum, button should have changed state
-      const isDisabled = await fetchButton.isDisabled();
-      expect(isDisabled).toBeTruthy();
+      const isDisabled = await fetchButton.isDisabled()
+      expect(isDisabled).toBeTruthy()
     }
 
-    await page.close();
-  });
+    await page.close()
+  })
 
   extensionTest('should handle concurrent fetch requests', async ({ context, extensionId }) => {
-    const page = await context.newPage();
-    await page.goto(`chrome-extension://${extensionId}/insights.html`);
+    const page = await context.newPage()
+    await page.goto(`chrome-extension://${extensionId}/insights.html`)
 
     // Wait for page to load
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('networkidle')
 
-    const fetchButton = page.locator('[data-testid="fetch-button"]');
-    await expect(fetchButton).toBeVisible({ timeout: 10000 });
+    const fetchButton = page.locator('[data-testid="fetch-button"]')
+    await expect(fetchButton).toBeVisible({ timeout: 10000 })
 
     // Click button twice rapidly
-    await fetchButton.click();
+    await fetchButton.click()
 
     // Wait for button to become disabled (indicating first fetch is processing)
-    await expect(fetchButton).toBeDisabled({ timeout: 1000 });
+    await expect(fetchButton).toBeDisabled({ timeout: 1000 })
 
     // Try to click again
     const clickPromise = fetchButton.click({ timeout: 1000 }).catch(() => {
       // Expected to fail if button is disabled
-      return 'blocked';
-    });
+      return 'blocked'
+    })
 
-    const result = await clickPromise;
+    const result = await clickPromise
 
     // If we got blocked, that's good - button was disabled
     // If we didn't get blocked, check if second click was ignored
-    expect(result === 'blocked' || (await fetchButton.isDisabled())).toBeTruthy();
+    expect(result === 'blocked' || (await fetchButton.isDisabled())).toBeTruthy()
 
-    await page.close();
-  });
+    await page.close()
+  })
 
   extensionTest(
     'should persist cache data after successful fetch',
     async ({ context, extensionId }) => {
       // Pre-populate some cache data
-      const [serviceWorker] = context.serviceWorkers();
+      const [serviceWorker] = context.serviceWorkers()
       if (serviceWorker) {
         await serviceWorker.evaluate(async () => {
           await chrome.storage.local.set({
@@ -303,80 +303,80 @@ extensionTest.describe('Fetch Activities Workflow', () => {
               lastUpdated: new Date().toISOString(),
               currentUserUid: null,
             },
-          });
-        });
+          })
+        })
       }
 
-      const page = await context.newPage();
-      await page.goto(`chrome-extension://${extensionId}/insights.html`);
+      const page = await context.newPage()
+      await page.goto(`chrome-extension://${extensionId}/insights.html`)
 
       // Wait for page to load
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('networkidle')
 
       // Wait for insights dashboard to render (indicates data has been processed)
-      await page.waitForSelector('text=Activity Insights Dashboard', { state: 'visible' });
+      await page.waitForSelector('text=Activity Insights Dashboard', { state: 'visible' })
 
       // Check that the page loaded successfully with data
-      const pageContent = await page.textContent('body');
-      expect(pageContent).toBeTruthy();
+      const pageContent = await page.textContent('body')
+      expect(pageContent).toBeTruthy()
 
-      await page.close();
+      await page.close()
     }
-  );
+  )
 
   extensionTest(
     'should open mountaineers.org link from error message',
     async ({ context, extensionId }) => {
-      const page = await context.newPage();
-      await page.goto(`chrome-extension://${extensionId}/insights.html`);
+      const page = await context.newPage()
+      await page.goto(`chrome-extension://${extensionId}/insights.html`)
 
       // Wait for page to load
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('networkidle')
 
       // Click fetch button to trigger error
-      const fetchButton = page.locator('[data-testid="fetch-button"]');
-      await expect(fetchButton).toBeVisible({ timeout: 10000 });
-      await fetchButton.click();
+      const fetchButton = page.locator('[data-testid="fetch-button"]')
+      await expect(fetchButton).toBeVisible({ timeout: 10000 })
+      await fetchButton.click()
 
       // Wait for button to be re-enabled (indicates fetch completed/failed)
-      await expect(fetchButton).toBeEnabled({ timeout: 30000 });
+      await expect(fetchButton).toBeEnabled({ timeout: 30000 })
 
       // Look for link to mountaineers.org
-      const loginLink = page.locator('a[href*="mountaineers.org"]').first();
+      const loginLink = page.locator('a[href*="mountaineers.org"]').first()
 
       // If link exists, verify it opens in new tab
-      const linkCount = await loginLink.count();
+      const linkCount = await loginLink.count()
       if (linkCount > 0) {
-        await expect(loginLink).toHaveAttribute('target', '_blank');
-        await expect(loginLink).toHaveAttribute('rel', /noopener/);
+        await expect(loginLink).toHaveAttribute('target', '_blank')
+        await expect(loginLink).toHaveAttribute('rel', /noopener/)
       }
 
-      await page.close();
+      await page.close()
     }
-  );
-});
+  )
+})
 
 // Additional test suite for offscreen document lifecycle
 extensionTest.describe('Offscreen Document Lifecycle', () => {
   extensionTest(
     'should create offscreen document on first fetch',
     async ({ context, extensionId }) => {
-      const page = await context.newPage();
-      await page.goto(`chrome-extension://${extensionId}/insights.html`);
+      const page = await context.newPage()
+      await page.goto(`chrome-extension://${extensionId}/insights.html`)
 
       // Wait for page to load
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('networkidle')
 
       // Get service worker to check offscreen document creation
-      const [serviceWorker] = context.serviceWorkers();
+      const [serviceWorker] = context.serviceWorkers()
 
       // Click fetch button
-      const fetchButton = page.locator('[data-testid="fetch-button"]');
-      await expect(fetchButton).toBeVisible({ timeout: 10000 });
-      await fetchButton.click();
+      const fetchButton = page.locator('[data-testid="fetch-button"]')
+      await expect(fetchButton).toBeVisible({ timeout: 10000 })
+      await fetchButton.click()
 
       // Wait for button state to change (indicates fetch has started)
-      await expect(fetchButton).toBeDisabled({ timeout: 5000 });
+      await expect(fetchButton).toBeDisabled({ timeout: 5000 })
 
       // Check if offscreen document was created by examining contexts
       if (serviceWorker) {
@@ -384,58 +384,58 @@ extensionTest.describe('Offscreen Document Lifecycle', () => {
           try {
             return await chrome.runtime.getContexts({
               contextTypes: ['OFFSCREEN_DOCUMENT' as chrome.runtime.ContextType],
-            });
-          } catch (error) {
-            return [];
+            })
+          } catch (_error) {
+            return []
           }
-        });
+        })
 
         // We expect either an offscreen document was created, or the function was called
         // (might fail due to network/auth issues, but creation should be attempted)
-        expect(Array.isArray(contexts)).toBeTruthy();
+        expect(Array.isArray(contexts)).toBeTruthy()
       }
 
-      await page.close();
+      await page.close()
     }
-  );
+  )
 
   extensionTest(
     'should reuse offscreen document on subsequent fetches',
     async ({ context, extensionId }) => {
-      const page = await context.newPage();
-      await page.goto(`chrome-extension://${extensionId}/insights.html`);
+      const page = await context.newPage()
+      await page.goto(`chrome-extension://${extensionId}/insights.html`)
 
       // Wait for page to load
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('networkidle')
 
-      const fetchButton = page.locator('[data-testid="fetch-button"]');
-      await expect(fetchButton).toBeVisible({ timeout: 10000 });
+      const fetchButton = page.locator('[data-testid="fetch-button"]')
+      await expect(fetchButton).toBeVisible({ timeout: 10000 })
 
       // First fetch
-      await fetchButton.click();
+      await fetchButton.click()
 
       // Button should be disabled during first fetch
-      await expect(fetchButton).toBeDisabled({ timeout: 2000 });
+      await expect(fetchButton).toBeDisabled({ timeout: 2000 })
 
       // Wait for first fetch to complete or fail
-      await expect(fetchButton).toBeEnabled({ timeout: 30000 });
+      await expect(fetchButton).toBeEnabled({ timeout: 30000 })
 
       // Second fetch - this verifies offscreen document is reused
       // (if it had to be recreated, we'd see longer delays or errors)
-      await fetchButton.click();
+      await fetchButton.click()
 
       // The second fetch should work (button gets disabled, even briefly)
       // We check that the button state changes, indicating the fetch was triggered
       const wasDisabled = await fetchButton.evaluate((el) => {
         // Check immediately if button is disabled
-        return el.getAttribute('disabled') !== null;
-      });
+        return el.getAttribute('disabled') !== null
+      })
 
       // Either it's disabled now, or it completes so fast that by the time we check, it's done
       // Both cases are success - what matters is the click was processed
-      expect(wasDisabled !== undefined).toBeTruthy();
+      expect(wasDisabled !== undefined).toBeTruthy()
 
-      await page.close();
+      await page.close()
     }
-  );
-});
+  )
+})

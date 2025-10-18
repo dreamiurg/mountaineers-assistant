@@ -1,20 +1,20 @@
-import { useEffect, useRef } from 'react';
-import Choices from 'choices.js';
-import 'choices.js/public/assets/styles/choices.min.css';
+import Choices from 'choices.js'
+import { useEffect, useRef } from 'react'
+import 'choices.js/public/assets/styles/choices.min.css'
 
 interface ChoicesMultiSelectProps {
-  id: string;
-  label: string;
-  options: string[];
-  value: string[];
-  onChange: (next: string[]) => void;
-  formatter?: (option: string) => string;
-  disabled?: boolean;
-  helperText?: string;
+  id: string
+  label: string
+  options: string[]
+  value: string[]
+  onChange: (next: string[]) => void
+  formatter?: (option: string) => string
+  disabled?: boolean
+  helperText?: string
 }
 
 const baseClasses =
-  'w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200';
+  'w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200'
 
 const ChoicesMultiSelect = ({
   id,
@@ -26,12 +26,12 @@ const ChoicesMultiSelect = ({
   disabled = false,
   helperText,
 }: ChoicesMultiSelectProps) => {
-  const selectRef = useRef<HTMLSelectElement | null>(null);
-  const instanceRef = useRef<Choices | null>(null);
+  const selectRef = useRef<HTMLSelectElement | null>(null)
+  const instanceRef = useRef<Choices | null>(null)
 
   useEffect(() => {
     if (!selectRef.current) {
-      return undefined;
+      return undefined
     }
 
     const choices = new Choices(selectRef.current, {
@@ -41,43 +41,43 @@ const ChoicesMultiSelect = ({
       placeholderValue: 'All',
       searchEnabled: true,
       shouldSort: false,
-    });
+    })
 
-    const outer = choices.containerOuter.element;
+    const outer = choices.containerOuter.element
     baseClasses
       .split(' ')
       .filter(Boolean)
-      .forEach((cls) => outer.classList.add(cls));
-    outer.classList.add('choices');
+      .forEach((cls) => outer.classList.add(cls))
+    outer.classList.add('choices')
 
     const handleChange = () => {
-      const selected = choices.getValue(true);
+      const selected = choices.getValue(true)
       if (Array.isArray(selected)) {
-        onChange(selected.map(String));
+        onChange(selected.map(String))
       } else if (typeof selected === 'string') {
-        onChange([selected]);
+        onChange([selected])
       } else {
-        onChange([]);
+        onChange([])
       }
-    };
-
-    selectRef.current.addEventListener('change', handleChange);
-    instanceRef.current = choices;
-
-    return () => {
-      selectRef.current?.removeEventListener('change', handleChange);
-      choices.destroy();
-      instanceRef.current = null;
-    };
-  }, [onChange]);
-
-  useEffect(() => {
-    const instance = instanceRef.current;
-    if (!instance) {
-      return;
     }
 
-    instance.clearChoices();
+    selectRef.current.addEventListener('change', handleChange)
+    instanceRef.current = choices
+
+    return () => {
+      selectRef.current?.removeEventListener('change', handleChange)
+      choices.destroy()
+      instanceRef.current = null
+    }
+  }, [onChange])
+
+  useEffect(() => {
+    const instance = instanceRef.current
+    if (!instance) {
+      return
+    }
+
+    instance.clearChoices()
     instance.setChoices(
       options.map((option) => ({
         value: option,
@@ -87,19 +87,19 @@ const ChoicesMultiSelect = ({
       'value',
       'label',
       true
-    );
+    )
 
-    instance.removeActiveItems();
+    instance.removeActiveItems()
     value.forEach((selected) => {
-      instance.setChoiceByValue(selected);
-    });
+      instance.setChoiceByValue(selected)
+    })
 
     if (disabled) {
-      instance.disable();
+      instance.disable()
     } else {
-      instance.enable();
+      instance.enable()
     }
-  }, [options, value, formatter, disabled]);
+  }, [options, value, formatter, disabled])
 
   return (
     <label className="block text-sm">
@@ -115,7 +115,7 @@ const ChoicesMultiSelect = ({
       </select>
       {helperText ? <span className="mt-2 block text-xs text-slate-500">{helperText}</span> : null}
     </label>
-  );
-};
+  )
+}
 
-export default ChoicesMultiSelect;
+export default ChoicesMultiSelect

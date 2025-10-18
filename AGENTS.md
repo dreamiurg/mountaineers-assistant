@@ -18,7 +18,7 @@ Guidance for future contributors, automations, or agents working on **Mountainee
 - **Language:** TypeScript targeting modern Chrome (ES2021)
 - **UI:** Tailwind CSS with React powering preferences and insights dashboards (Storybook mirrors these surfaces)
 - **Storage:** `chrome.storage.local`
-- **Build tooling:** Vite for bundling, Tailwind CLI (via `tailwindcss` npm package), Prettier for formatting, ESLint for linting
+- **Build tooling:** Vite for bundling, Tailwind CLI (via `tailwindcss` npm package), Biome for formatting and linting
 - **Package manager:** npm
 
 ## Architecture Overview
@@ -78,12 +78,13 @@ Use the format `<prefix>: <summary in past tense>`, for example:
 
 ## Quality Gates
 
-- Run `npm run format` before committing to apply Prettier.
+- Run `npm run format` before committing to apply Biome formatting.
+- Run `npm run lint` to check code quality with Biome.
 - Run `npm run typecheck` to ensure the TypeScript sources compile without errors.
-- `pre-commit` hooks enforce Prettier, ESLint (with `chrome` globals), and gitleaks secret scanning.
+- `pre-commit` hooks enforce Biome formatting/linting and gitleaks secret scanning.
 - Use `uv run pre-commit run --all-files` before submitting if hooks are not configured locally.
-- ESLint config lives in `eslint.config.mjs`; update globals or environment settings there when introducing new APIs.
-- When committing, prefer descriptive, sentence-style subjects (e.g., “Introduced a Vite-powered build so the extension bundles to dist/”).
+- Biome config lives in `biome.json`; update globals or linter rules there when introducing new APIs.
+- When committing, prefer descriptive, sentence-style subjects (e.g., "Introduced a Vite-powered build so the extension bundles to dist/").
 
 ## Agent Checklist
 

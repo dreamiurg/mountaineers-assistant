@@ -58,8 +58,7 @@ uv run pre-commit install
 
 This sets up hooks that will automatically run on every `git commit`:
 
-- **Prettier** - Auto-formats code
-- **ESLint** - Lints JavaScript/TypeScript
+- **Biome** - Auto-formats code and lints JavaScript/TypeScript
 - **detect-secrets** - Prevents committing secrets
 - **TypeScript** - Validates types
 
@@ -103,6 +102,7 @@ This keeps `dist/` up to date. You still need to reload the extension in Chrome 
 - **TypeScript + React** - Type-safe UI development
 - **Tailwind CSS** - Utility-first styling
 - **Vite** - Fast bundling and dev server
+- **Biome** - Fast formatting and linting
 - **Storybook** - Isolated component development
 - **Playwright** - End-to-end testing
 - **Manifest V3** - Latest Chrome extension standard
@@ -271,8 +271,7 @@ Pre-commit hooks automatically run on every `git commit` (after installing per s
 
 **What runs automatically:**
 
-- **Prettier** - Auto-formats code (modifies files)
-- **ESLint** - Lints JavaScript/TypeScript
+- **Biome** - Auto-formats code and lints JavaScript/TypeScript (modifies files)
 - **detect-secrets** - Prevents committing secrets
 - **TypeScript** - Validates types
 
@@ -289,8 +288,8 @@ uv run pre-commit run --all-files
 ### Manual Commands
 
 ```bash
-npm run format      # Apply Prettier formatting
-npm run lint        # Check formatting (CI mode)
+npm run format      # Apply Biome formatting
+npm run lint        # Check code quality with Biome (CI mode)
 npm run typecheck   # Validate TypeScript
 ```
 

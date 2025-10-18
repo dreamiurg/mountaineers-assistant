@@ -1,8 +1,8 @@
-declare const __APP_VERSION__: string;
+declare const __APP_VERSION__: string
 
 export const Footer = () => {
   const linkClasses =
-    'text-sky-600 hover:text-sky-500 hover:underline transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 rounded';
+    'text-sky-600 hover:text-sky-500 hover:underline transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 rounded'
 
   return (
     <footer className="mt-8 border-t border-slate-200 pt-6 text-center text-sm text-slate-600">
@@ -43,7 +43,7 @@ export const Footer = () => {
       </p>
       <p className="mt-1 text-xs text-slate-400">v{__APP_VERSION__}</p>
     </footer>
-  );
-};
+  )
+}
 
-export default Footer;
+export default Footer

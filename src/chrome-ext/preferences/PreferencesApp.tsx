@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { usePreferencesController } from './hooks/usePreferencesController';
-import { Footer } from '../components/Footer';
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Footer } from '../components/Footer'
+import { usePreferencesController } from './hooks/usePreferencesController'
 
 export const PreferencesApp = () => {
   const {
@@ -17,65 +17,65 @@ export const PreferencesApp = () => {
     refreshCache,
     clearCache,
     savePreferences,
-  } = usePreferencesController();
+  } = usePreferencesController()
 
-  const refreshLabel = isRefreshing ? 'Refreshing…' : 'Refresh Cache View';
-  const clearLabel = isClearing ? 'Clearing…' : 'Clear Cached Data';
-  const saveLabel = isSaving ? 'Saving…' : 'Save Preferences';
+  const refreshLabel = isRefreshing ? 'Refreshing…' : 'Refresh Cache View'
+  const clearLabel = isClearing ? 'Clearing…' : 'Clear Cached Data'
+  const saveLabel = isSaving ? 'Saving…' : 'Save Preferences'
 
-  const [copyFeedback, setCopyFeedback] = useState<'idle' | 'success' | 'error'>('idle');
-  const copyResetRef = useRef<number | null>(null);
+  const [copyFeedback, setCopyFeedback] = useState<'idle' | 'success' | 'error'>('idle')
+  const copyResetRef = useRef<number | null>(null)
 
   useEffect(() => {
     return () => {
       if (copyResetRef.current !== null) {
-        window.clearTimeout(copyResetRef.current);
-        copyResetRef.current = null;
+        window.clearTimeout(copyResetRef.current)
+        copyResetRef.current = null
       }
-    };
-  }, []);
+    }
+  }, [])
 
   const scheduleCopyReset = useCallback(() => {
     if (copyResetRef.current !== null) {
-      window.clearTimeout(copyResetRef.current);
+      window.clearTimeout(copyResetRef.current)
     }
     copyResetRef.current = window.setTimeout(() => {
-      setCopyFeedback('idle');
-      copyResetRef.current = null;
-    }, 2000);
-  }, []);
+      setCopyFeedback('idle')
+      copyResetRef.current = null
+    }, 2000)
+  }, [])
 
   const handleCopyCache = useCallback(async () => {
     if (!navigator?.clipboard?.writeText) {
-      setCopyFeedback('error');
-      scheduleCopyReset();
-      return;
+      setCopyFeedback('error')
+      scheduleCopyReset()
+      return
     }
 
     try {
-      await navigator.clipboard.writeText(cacheContent ?? '');
-      setCopyFeedback('success');
+      await navigator.clipboard.writeText(cacheContent ?? '')
+      setCopyFeedback('success')
     } catch (error) {
-      console.error('Mountaineers Assistant preferences: failed to copy cache', error);
-      setCopyFeedback('error');
+      console.error('Mountaineers Assistant preferences: failed to copy cache', error)
+      setCopyFeedback('error')
     } finally {
-      scheduleCopyReset();
+      scheduleCopyReset()
     }
-  }, [cacheContent, scheduleCopyReset]);
+  }, [cacheContent, scheduleCopyReset])
 
   const copyMessage =
     copyFeedback === 'success'
       ? 'Copied to clipboard.'
       : copyFeedback === 'error'
         ? 'Copy failed. Try again.'
-        : '';
+        : ''
 
   const primaryButtonClasses =
-    'inline-flex items-center justify-center gap-2 rounded-xl bg-sky-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-sky-600/25 transition-colors hover:bg-sky-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 disabled:pointer-events-none disabled:opacity-60';
+    'inline-flex items-center justify-center gap-2 rounded-xl bg-sky-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-sky-600/25 transition-colors hover:bg-sky-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 disabled:pointer-events-none disabled:opacity-60'
   const dangerButtonClasses =
-    'inline-flex items-center justify-center gap-2 rounded-xl border border-rose-200/70 bg-rose-50/90 px-4 py-2 text-sm font-medium text-rose-600 shadow transition hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300 disabled:pointer-events-none disabled:opacity-60';
-  const controlLabelClasses = 'text-sm font-medium text-slate-800';
-  const helperTextClasses = 'text-xs text-slate-500';
+    'inline-flex items-center justify-center gap-2 rounded-xl border border-rose-200/70 bg-rose-50/90 px-4 py-2 text-sm font-medium text-rose-600 shadow transition hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300 disabled:pointer-events-none disabled:opacity-60'
+  const controlLabelClasses = 'text-sm font-medium text-slate-800'
+  const helperTextClasses = 'text-xs text-slate-500'
 
   return (
     <main className="relative min-h-screen text-slate-900">
@@ -219,7 +219,7 @@ export const PreferencesApp = () => {
         <Footer />
       </div>
     </main>
-  );
-};
+  )
+}
 
-export default PreferencesApp;
+export default PreferencesApp

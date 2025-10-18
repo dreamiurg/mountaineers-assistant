@@ -1,12 +1,12 @@
-import React from 'react';
-import type { RefreshSummary } from '../../shared/types';
+import React from 'react'
+import type { RefreshSummary } from '../../shared/types'
 
 interface FetchControlsProps {
-  onFetch: () => void;
-  isLoading: boolean;
-  statusMessage: string;
-  summary: RefreshSummary;
-  fetchLimit: number | null;
+  onFetch: () => void
+  isLoading: boolean
+  statusMessage: string
+  summary: RefreshSummary
+  fetchLimit: number | null
 }
 
 export const FetchControls: React.FC<FetchControlsProps> = ({
@@ -18,7 +18,7 @@ export const FetchControls: React.FC<FetchControlsProps> = ({
 }) => {
   const buttonText = fetchLimit
     ? `Fetch New Activities (limit: ${fetchLimit})`
-    : 'Fetch New Activities';
+    : 'Fetch New Activities'
 
   return (
     <div className="glass-card space-y-4 rounded-2xl p-6">
@@ -85,5 +85,5 @@ export const FetchControls: React.FC<FetchControlsProps> = ({
         </div>
       )}
     </div>
-  );
-};
+  )
+}
