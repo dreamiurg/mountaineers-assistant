@@ -671,24 +671,3 @@ function ensureAbsoluteUrl(value: string | null): string | null {
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
 }
-
-function _sanitizeDelta(delta: CollectorDelta | null | undefined): CollectorDelta | null {
-  if (!delta || typeof delta !== 'object') {
-    return null
-  }
-  const activities = Array.isArray(delta.activities)
-    ? delta.activities.map((activity) => ({ ...activity }))
-    : []
-  const people = Array.isArray(delta.people) ? delta.people.map((person) => ({ ...person })) : []
-  const rosterEntries = Array.isArray(delta.rosterEntries)
-    ? delta.rosterEntries.map((entry) => ({ ...entry }))
-    : []
-  if (!activities.length && !people.length && !rosterEntries.length) {
-    return null
-  }
-  return {
-    activities,
-    people,
-    rosterEntries,
-  }
-}

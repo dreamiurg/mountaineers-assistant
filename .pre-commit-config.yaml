@@ -16,24 +16,15 @@ repos:
           - "--branch"
           - "main"
 
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v4.0.0-alpha.8
+  - repo: local
     hooks:
-      - id: prettier
-        files: "\\.(js|ts|jsx|tsx|json|css|html|md)$"
-        additional_dependencies:
-          - prettier@3.6.2
-
-  - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v9.37.0
-    hooks:
-      - id: eslint
-        files: "\\.(js|jsx)$"
-        args:
-          - "--max-warnings=0"
-          - "--no-warn-ignored"
-          - "--ignore-pattern"
-          - "src/chrome-ext/vendor/**"
+      - id: biome-check
+        name: biome check
+        entry: npx biome check --write --unsafe .
+        language: system
+        types: [file]
+        files: "\\.(js|ts|jsx|tsx|json|css|html)$"
+        pass_filenames: false
 
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.28.0

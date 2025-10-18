@@ -110,7 +110,7 @@ export const createChromeMock = ({
         const summary = {
           activityCount: currentData?.activities?.length ?? 0,
           lastUpdated: currentData?.lastUpdated ?? new Date().toISOString(),
-          newActivities: payload.limit ? Math.min(payload.limit, 3) : 0,
+          newActivities: Math.min(Math.max(payload.limit ?? 0, 0), 3),
         } as const
 
         broadcastRuntimeMessage({
