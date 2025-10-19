@@ -1,5 +1,7 @@
 import type { Options as HighchartsOptions } from 'highcharts'
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { ErrorReportModal } from '../components/ErrorReportModal'
+import { ErrorToast } from '../components/ErrorToast'
 import { Footer } from '../components/Footer'
 import ChoicesMultiSelect from './components/ChoicesMultiSelect'
 import { useInsightsDashboard } from './hooks/useInsightsDashboard'
@@ -318,9 +320,10 @@ const InsightsApp = () => {
     fetchActivities,
     isLoading,
     fetchLimit,
-    refreshSummary,
     fullDateRange,
   } = useInsightsDashboard()
+
+  const [reportModalErrorId, setReportModalErrorId] = useState<string | null>(null)
 
   const filterDisabled = empty || !view
 
@@ -332,6 +335,13 @@ const InsightsApp = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
+      <ErrorToast onReportClick={setReportModalErrorId} />
+      {reportModalErrorId && (
+        <ErrorReportModal
+          errorId={reportModalErrorId}
+          onClose={() => setReportModalErrorId(null)}
+        />
+      )}
       <div className="mx-auto max-w-7xl space-y-4 px-4 py-8 sm:px-6">
         <header>
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">

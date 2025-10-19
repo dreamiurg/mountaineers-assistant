@@ -1,8 +1,12 @@
 import { StrictMode } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
+import { initDevTools } from './error-reporter/dev-tools'
 import PreferencesApp from './preferences/PreferencesApp'
 
 const MOUNT_NODE_ID = 'preferences-react-root'
+
+// Initialize developer tools
+initDevTools()
 
 function mountReactRoot(): void {
   const container = document.getElementById(MOUNT_NODE_ID)

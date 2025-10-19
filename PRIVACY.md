@@ -28,9 +28,38 @@ All activity data and preferences remain on your device in Chrome’s `chrome.st
 
 These permissions are scoped solely to support the features described above.
 
+## Error Reporting (Optional)
+
+When errors occur in the extension, you may choose to report them to help us improve the extension.
+
+**What we collect when you report an error:**
+- Error messages and technical details (stack traces)
+- Extension version, browser version, and operating system
+- Context about what operation was being performed
+- Sanitized diagnostic data (counts, timings, error types)
+
+**What we DO NOT collect:**
+- Activity titles or descriptions
+- Person names or member identifiers
+- Any personally identifiable information from your Mountaineers.org data
+
+**How it works:**
+- When an error occurs, you'll see a notification
+- You can choose to report the error or dismiss the notification
+- Before submitting, you'll see a preview of exactly what data will be included
+- Reports are submitted as public GitHub issues (you can add additional context)
+- Error data is stored locally for 7 days to allow later reporting
+
+**Your control:**
+- Reporting is always optional and requires your explicit action
+- You can review all diagnostic data before submitting
+- You can view or clear error logs from the Preferences page
+- Dismissing an error notification prevents it from appearing again
+
 ## Your Choices and Controls
 
 - **Clear the cache:** Use the preferences page to clear saved activity data at any time.
+- **Clear error logs:** Use the preferences page to clear error logs at any time.
 - **Remove the extension:** Uninstalling Mountaineers Assistant from Chrome deletes all data stored by the extension.
 
 The extension only runs when you open the preferences or insights screen, or when you request a data refresh.

@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { ErrorLogViewer } from '../components/ErrorLogViewer'
+import { ErrorReportModal } from '../components/ErrorReportModal'
+import { ErrorToast } from '../components/ErrorToast'
 import { Footer } from '../components/Footer'
 import { usePreferencesController } from './hooks/usePreferencesController'
 
 export const PreferencesApp = () => {
   const {
-    statusMessage,
     cacheContent,
     showAvatars,
     fetchLimitInput,
@@ -24,6 +26,7 @@ export const PreferencesApp = () => {
   const saveLabel = isSaving ? 'Saving…' : 'Save Preferences'
 
   const [copyFeedback, setCopyFeedback] = useState<'idle' | 'success' | 'error'>('idle')
+  const [reportModalErrorId, setReportModalErrorId] = useState<string | null>(null)
   const copyResetRef = useRef<number | null>(null)
 
   useEffect(() => {
@@ -79,6 +82,13 @@ export const PreferencesApp = () => {
 
   return (
     <main className="relative min-h-screen text-slate-900">
+      <ErrorToast onReportClick={setReportModalErrorId} />
+      {reportModalErrorId && (
+        <ErrorReportModal
+          errorId={reportModalErrorId}
+          onClose={() => setReportModalErrorId(null)}
+        />
+      )}
       <div className="relative mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-8 px-4 py-10 sm:px-6 lg:px-0">
         <header className="space-y-4">
           <div className="space-y-3">
@@ -214,6 +224,8 @@ export const PreferencesApp = () => {
               {cacheContent}
             </pre>
           </article>
+
+          <ErrorLogViewer onReportClick={setReportModalErrorId} />
         </section>
 
         <Footer />

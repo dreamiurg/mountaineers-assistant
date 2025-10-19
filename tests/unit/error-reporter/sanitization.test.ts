@@ -1,21 +1,32 @@
-import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
-import { sanitizeDiagnosticData, sanitizeErrorMessage } from '../../../src/chrome-ext/error-reporter/sanitization'
+import { describe, it } from 'node:test'
+import {
+  sanitizeDiagnosticData,
+  sanitizeErrorMessage,
+} from '../../../src/chrome-ext/error-reporter/sanitization'
 
 describe('sanitizeDiagnosticData', () => {
   it('should redact activity titles', () => {
     const input = {
       activities: [
-        { uid: 'act-123', title: 'Mt. Rainier Summit Climb', href: 'https://mountaineers.org/activities/act-123' }
-      ]
+        {
+          uid: 'act-123',
+          title: 'Mt. Rainier Summit Climb',
+          href: 'https://mountaineers.org/activities/act-123',
+        },
+      ],
     }
 
     const result = sanitizeDiagnosticData(input)
 
     assert.deepEqual(result, {
       activities: [
-        { uid: 'act-123', title: '[Activity Title Redacted]', href: 'https://mountaineers.org/activities/act-123' }
-      ]
+        {
+          uid: 'act-123',
+          title: '[Activity Title Redacted]',
+          href: 'https://mountaineers.org/activities/act-123',
+        },
+      ],
     })
   })
 
@@ -24,7 +35,7 @@ describe('sanitizeDiagnosticData', () => {
       type: 'refresh-progress',
       stage: 'collecting',
       activityUid: 'act-456',
-      activityTitle: 'Ice Climbing Workshop'
+      activityTitle: 'Ice Climbing Workshop',
     }
 
     const result = sanitizeDiagnosticData(input)
@@ -33,23 +44,27 @@ describe('sanitizeDiagnosticData', () => {
       type: 'refresh-progress',
       stage: 'collecting',
       activityUid: 'act-456',
-      activityTitle: '[Activity Title Redacted]'
+      activityTitle: '[Activity Title Redacted]',
     })
   })
 
   it('should redact person names', () => {
     const input = {
       people: [
-        { uid: 'john-doe', name: 'John Doe', href: 'https://mountaineers.org/members/john-doe' }
-      ]
+        { uid: 'john-doe', name: 'John Doe', href: 'https://mountaineers.org/members/john-doe' },
+      ],
     }
 
     const result = sanitizeDiagnosticData(input)
 
     assert.deepEqual(result, {
       people: [
-        { uid: 'person_001', name: '[Name Redacted]', href: 'https://mountaineers.org/members/[redacted]' }
-      ]
+        {
+          uid: 'person_001',
+          name: '[Name Redacted]',
+          href: 'https://mountaineers.org/members/[redacted]',
+        },
+      ],
     })
   })
 
@@ -57,8 +72,8 @@ describe('sanitizeDiagnosticData', () => {
     const input = {
       members: [
         { slug: 'john-doe', name: 'John Doe' },
-        { slug: 'jane-smith', name: 'Jane Smith' }
-      ]
+        { slug: 'jane-smith', name: 'Jane Smith' },
+      ],
     }
 
     const result = sanitizeDiagnosticData(input)
@@ -66,8 +81,8 @@ describe('sanitizeDiagnosticData', () => {
     assert.deepEqual(result, {
       members: [
         { slug: 'person_001', name: '[Name Redacted]' },
-        { slug: 'person_002', name: '[Name Redacted]' }
-      ]
+        { slug: 'person_002', name: '[Name Redacted]' },
+      ],
     })
   })
 
@@ -75,7 +90,7 @@ describe('sanitizeDiagnosticData', () => {
     const input = {
       userSlug: 'john-doe',
       memberSlug: 'jane-smith',
-      profileSlug: 'bob-jones'
+      profileSlug: 'bob-jones',
     }
 
     const result = sanitizeDiagnosticData(input)
@@ -83,7 +98,7 @@ describe('sanitizeDiagnosticData', () => {
     assert.deepEqual(result, {
       userSlug: 'person_001',
       memberSlug: 'person_002',
-      profileSlug: 'person_003'
+      profileSlug: 'person_003',
     })
   })
 
@@ -91,8 +106,8 @@ describe('sanitizeDiagnosticData', () => {
     const input = {
       activity: {
         uid: 'act-123',
-        url: 'https://mountaineers.org/members/john-doe/profile'
-      }
+        url: 'https://mountaineers.org/members/john-doe/profile',
+      },
     }
 
     const result = sanitizeDiagnosticData(input)
@@ -100,8 +115,8 @@ describe('sanitizeDiagnosticData', () => {
     assert.deepEqual(result, {
       activity: {
         uid: 'act-123',
-        url: 'https://mountaineers.org/members/[redacted]/profile'
-      }
+        url: 'https://mountaineers.org/members/[redacted]/profile',
+      },
     })
   })
 
@@ -109,8 +124,8 @@ describe('sanitizeDiagnosticData', () => {
     const input = {
       member: {
         name: 'John Doe',
-        link: 'https://mountaineers.org/members/john-doe'
-      }
+        link: 'https://mountaineers.org/members/john-doe',
+      },
     }
 
     const result = sanitizeDiagnosticData(input)
@@ -118,8 +133,8 @@ describe('sanitizeDiagnosticData', () => {
     assert.deepEqual(result, {
       member: {
         name: '[Name Redacted]',
-        link: 'https://mountaineers.org/members/[redacted]'
-      }
+        link: 'https://mountaineers.org/members/[redacted]',
+      },
     })
   })
 
@@ -127,7 +142,7 @@ describe('sanitizeDiagnosticData', () => {
     const input = {
       profileUrl: 'https://mountaineers.org/members/john-doe',
       memberLink: 'https://mountaineers.org/members/jane-smith',
-      avatarURL: 'https://mountaineers.org/members/bob-jones/avatar'
+      avatarURL: 'https://mountaineers.org/members/bob-jones/avatar',
     }
 
     const result = sanitizeDiagnosticData(input)
@@ -135,7 +150,7 @@ describe('sanitizeDiagnosticData', () => {
     assert.deepEqual(result, {
       profileUrl: 'https://mountaineers.org/members/[redacted]',
       memberLink: 'https://mountaineers.org/members/[redacted]',
-      avatarURL: 'https://mountaineers.org/members/[redacted]/avatar'
+      avatarURL: 'https://mountaineers.org/members/[redacted]/avatar',
     })
   })
 
@@ -149,7 +164,7 @@ describe('sanitizeDiagnosticData', () => {
       completed: 5,
       activityUid: 'act-789',
       activityTitle: 'Mountain Scrambling Course',
-      error: 'Failed to load activity for member john-doe'
+      error: 'Failed to load activity for member john-doe',
     }
 
     const result = sanitizeDiagnosticData(input)
@@ -163,7 +178,7 @@ describe('sanitizeDiagnosticData', () => {
       completed: 5,
       activityUid: 'act-789',
       activityTitle: '[Activity Title Redacted]',
-      error: 'Failed to load activity for member [redacted]'
+      error: 'Failed to load activity for member [redacted]',
     })
   })
 

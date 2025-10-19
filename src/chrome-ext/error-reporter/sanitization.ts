@@ -45,7 +45,7 @@ function sanitizeRecursive(data: unknown): unknown {
   }
 
   if (Array.isArray(data)) {
-    return data.map(item => sanitizeRecursive(item))
+    return data.map((item) => sanitizeRecursive(item))
   }
 
   if (typeof data === 'object') {
