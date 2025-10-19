@@ -29,7 +29,7 @@ const distDir = path.resolve(repoRoot, 'dist')
 const sampleDataPath = path.resolve(repoRoot, 'src', 'data', 'sample-activities.json')
 
 export const test = base.extend<ExtensionHarness>({
-  context: async ({}, use) => {
+  context: async (_options, use) => {
     const tempRoot = path.resolve(repoRoot, '.playwright-tmp')
     await fs.mkdir(tempRoot, { recursive: true })
     const userDataDir = await fs.mkdtemp(path.join(tempRoot, 'chromium-'))
@@ -64,7 +64,7 @@ export const test = base.extend<ExtensionHarness>({
       await use(context)
     } finally {
       await context.close()
-      await fs.rm(userDataDir, { recursive: true, force: true }).catch(() => {})
+      await fs.rm(userDataDir, { recursive: true, force: true }).catch(() => undefined)
     }
   },
   extensionId: [

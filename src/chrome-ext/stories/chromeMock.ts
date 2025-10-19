@@ -74,7 +74,7 @@ export const createChromeMock = ({
 
   const broadcastRuntimeMessage = (message: unknown) => {
     runtimeListeners.forEach((listener) =>
-      listener(message, {} as chrome.runtime.MessageSender, () => {})
+      listener(message, {} as chrome.runtime.MessageSender, () => undefined)
     )
   }
 
@@ -241,13 +241,13 @@ export const createChromeMock = ({
       callback([{ id: 1, url: tabsUrl } as chrome.tabs.Tab])
     },
     onRemoved: {
-      addListener: () => {},
-      removeListener: () => {},
+      addListener: () => undefined,
+      removeListener: () => undefined,
     },
   }
 
   const scripting = {
-    executeScript: async () => {},
+    executeScript: async () => undefined,
   }
 
   const chromeMock: Partial<typeof chrome> = {
@@ -270,7 +270,7 @@ export const createChromeMock = ({
     },
     triggerRuntimeMessage: (message: unknown) => {
       runtimeListeners.forEach((listener) =>
-        listener(message, {} as chrome.runtime.MessageSender, () => {})
+        listener(message, {} as chrome.runtime.MessageSender, () => undefined)
       )
     },
     destroy: () => {

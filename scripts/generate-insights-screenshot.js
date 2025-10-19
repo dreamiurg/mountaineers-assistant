@@ -27,6 +27,7 @@ function runBuild() {
 async function seedExtensionStorage(serviceWorker, payload) {
   await serviceWorker.evaluate(
     async ({ storageKey, settingsKey, cache, settings }) => {
+      // biome-ignore lint/correctness/noUndeclaredVariables: chrome is injected by the MV3 execution context
       await chrome.storage.local.set({
         [storageKey]: cache,
         [settingsKey]: settings,
