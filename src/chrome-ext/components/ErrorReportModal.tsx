@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { formatErrorPreview, generateGitHubIssueURL } from '../error-reporter/github'
+import { generateGitHubIssueURL } from '../error-reporter/github'
 import { loadErrorLog, markErrorReported } from '../error-reporter/storage'
 import type { ErrorLogEntry } from '../error-reporter/types'
 
@@ -51,8 +51,6 @@ export function ErrorReportModal({ errorId, onClose }: ErrorReportModalProps) {
   if (!error) {
     return null
   }
-
-  const _preview = formatErrorPreview(error)
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">

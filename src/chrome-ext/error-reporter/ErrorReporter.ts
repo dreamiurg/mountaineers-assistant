@@ -2,6 +2,32 @@ import { sanitizeDiagnosticData, sanitizeErrorMessage } from './sanitization'
 import { addError } from './storage'
 import type { CaptureErrorOptions, ErrorCategory, ErrorLogEntry } from './types'
 
+function safeStringify(value: unknown): string {
+  const seen = new WeakSet<object>()
+  try {
+    return JSON.stringify(value, (_key, val) => {
+      if (typeof val === 'bigint') {
+        return val.toString()
+      }
+
+      if (val && typeof val === 'object') {
+        if (seen.has(val as object)) {
+          return '[Circular]'
+        }
+        seen.add(val as object)
+      }
+
+      return val
+    })
+  } catch {
+    try {
+      return String(value)
+    } catch {
+      return Object.prototype.toString.call(value)
+    }
+  }
+}
+
 /**
  * Check if an error is an authentication error (normal user flow, not a bug)
  */
@@ -64,7 +90,7 @@ class ErrorReporter {
     } else if (typeof error === 'string') {
       message = error
     } else if (error && typeof error === 'object') {
-      message = JSON.stringify(error)
+      message = safeStringify(error)
     }
 
     // Sanitize error message and stack
@@ -223,14 +249,14 @@ class ErrorReporter {
     // Send message to all contexts (insights, preferences pages)
     // UI pages will listen for this and show toast
     try {
-      chrome?.runtime
-        ?.sendMessage({
+      void Promise.resolve(
+        chrome?.runtime?.sendMessage?.({
           type: 'error-logged',
           errorId,
         })
-        .catch(() => {
-          // Ignore errors if no UI is open
-        })
+      ).catch(() => {
+        // Ignore errors if no UI is open
+      })
     } catch {
       // Ignore if chrome.runtime not available
     }
