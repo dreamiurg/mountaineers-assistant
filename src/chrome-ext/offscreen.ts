@@ -1,3 +1,5 @@
+import { initDevTools } from './error-reporter/dev-tools'
+import { errorReporter, isAuthError } from './error-reporter/ErrorReporter'
 import type {
   ActivityRecord,
   CollectorDelta,
@@ -30,16 +32,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   // Handle collection asynchronously
-  handleCollectionRequest(payload.existingActivityUids ?? [], payload.fetchLimit ?? null)
-    .then(() => {
-      sendResponse({ success: true })
-    })
-    .catch((error) => {
-      console.error('Offscreen collector failed', error)
-      sendResponse({ success: false, error: error.message })
-    })
+  // Note: We don't use sendResponse here because the actual result is sent
+  // via chrome.runtime.sendMessage inside handleCollectionRequest
+  handleCollectionRequest(payload.existingActivityUids ?? [], payload.fetchLimit ?? null).catch(
+    (error) => {
+      console.error('Offscreen collector: unhandled error in collection request', error)
+    }
+  )
 
-  return true // Keep channel open for async response
+  return false // Don't keep channel open - we use chrome.runtime.sendMessage instead
 })
 
 async function handleCollectionRequest(
@@ -84,18 +85,24 @@ async function handleCollectionRequest(
       } satisfies CollectorSuccessPayload,
     })
   } catch (error: unknown) {
-    console.error('Mountaineers Assistant offscreen: collection failed', error)
-
     let errorMessage = error instanceof Error ? error.message : String(error)
 
-    // Detect authentication errors
-    if (
-      errorMessage.includes('Unable to locate') ||
-      errorMessage.includes('My Activities') ||
-      errorMessage.includes('401') ||
-      errorMessage.includes('Unauthorized')
-    ) {
+    if (isAuthError(error)) {
       errorMessage = 'Please log in to Mountaineers.org first.'
+      // Auth errors are expected user flow, log as info not error
+      console.info('Mountaineers Assistant offscreen: collection requires authentication', error)
+    } else {
+      // Actual errors should be logged as errors
+      console.error('Mountaineers Assistant offscreen: collection failed', error)
+      // Report collection errors (except auth errors which are expected)
+      errorReporter.captureError(error, {
+        context: 'offscreen',
+        diagnostics: {
+          operation: 'collection',
+          fetchLimit,
+          existingActivityCount: existingActivityUids.length,
+        },
+      })
     }
 
     sendProgressUpdate({
@@ -671,3 +678,24 @@ function ensureAbsoluteUrl(value: string | null): string | null {
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
 }
+
+// Global error handlers for offscreen context
+window.addEventListener('error', (event) => {
+  errorReporter.captureError(event.error, {
+    context: 'offscreen',
+    category: 'crash',
+  })
+})
+
+window.addEventListener('unhandledrejection', (event) => {
+  errorReporter.captureError(event.reason, {
+    context: 'offscreen',
+    category: 'crash',
+  })
+})
+
+// Initialize developer tools (only in dev mode)
+initDevTools()
+
+// Signal that offscreen document is ready
+console.info('Mountaineers Assistant offscreen: ready to receive messages')

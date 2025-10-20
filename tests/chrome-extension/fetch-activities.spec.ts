@@ -15,7 +15,7 @@ const extensionTest = test.extend<{
   context: BrowserContext
   extensionId: string
 }>({
-  context: async ({}, use) => {
+  context: async (_options, use) => {
     const tempRoot = path.resolve(repoRoot, '.playwright-tmp')
     await fs.mkdir(tempRoot, { recursive: true })
     const userDataDir = await fs.mkdtemp(path.join(tempRoot, 'chromium-fetch-test-'))
@@ -53,7 +53,7 @@ const extensionTest = test.extend<{
       await use(context)
     } finally {
       await context.close()
-      await fs.rm(userDataDir, { recursive: true, force: true }).catch(() => {})
+      await fs.rm(userDataDir, { recursive: true, force: true }).catch(() => undefined)
     }
   },
   extensionId: [

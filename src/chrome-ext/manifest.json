@@ -6,7 +6,8 @@
   "permissions": ["storage", "offscreen", "tabs"],
   "host_permissions": ["https://www.mountaineers.org/*"],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
   "action": {
     "default_title": "Mountaineers Assistant"

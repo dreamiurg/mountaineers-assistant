@@ -1,5 +1,11 @@
-import type { Options as HighchartsOptions } from 'highcharts'
-import { useEffect, useMemo, useRef } from 'react'
+import type {
+  Options as HighchartsOptions,
+  Point as HighchartsPoint,
+  TooltipFormatterContextObject as HighchartsTooltipFormatterContext,
+} from 'highcharts'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { ErrorReportModal } from '../components/ErrorReportModal'
+import { ErrorToast } from '../components/ErrorToast'
 import { Footer } from '../components/Footer'
 import ChoicesMultiSelect from './components/ChoicesMultiSelect'
 import { useInsightsDashboard } from './hooks/useInsightsDashboard'
@@ -93,22 +99,21 @@ const TimelineChart = ({ data }: { data: TimelineView }) => {
         borderColor: 'rgba(14, 116, 144, 0.2)',
         backgroundColor: '#ffffff',
         style: { fontFamily: 'Inter, sans-serif' },
-        formatter() {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const points = (this as any).points as Array<{
-            y: number
-            series: { name: string; color: string }
-          }>
-          const total = points.reduce((sum, point) => sum + (point.y || 0), 0)
+        formatter(this: HighchartsTooltipFormatterContext) {
+          const points = (this.points ?? []) as HighchartsPoint[]
+          const total = points.reduce((sum, point) => sum + (point.y ?? 0), 0)
           const parts = points
-            .filter((point) => point.y)
-            .map(
-              (point) =>
-                `<span style="color:${point.series.color}">●</span> ${point.series.name}: <b>${point.y}</b>`
+            .filter(
+              (point): point is HighchartsPoint & { y: number } => typeof point.y === 'number'
             )
+            .map((point) => {
+              const color = point.series?.color ?? '#0f172a'
+              const name = point.series?.name ?? 'Unknown'
+              return `<span style="color:${color}">●</span> ${name}: <b>${point.y}</b>`
+            })
           parts.push(`<span style="color:#0f172a">Total: <b>${total}</b></span>`)
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          return `<span style="font-size:12px">${(this as any).x}</span><br/>${parts.join('<br/>')}`
+          const xLabel = typeof this.x === 'string' || typeof this.x === 'number' ? this.x : ''
+          return `<span style="font-size:12px">${xLabel}</span><br/>${parts.join('<br/>')}`
         },
       },
       legend: {
@@ -318,9 +323,10 @@ const InsightsApp = () => {
     fetchActivities,
     isLoading,
     fetchLimit,
-    refreshSummary,
     fullDateRange,
   } = useInsightsDashboard()
+
+  const [reportModalErrorId, setReportModalErrorId] = useState<string | null>(null)
 
   const filterDisabled = empty || !view
 
@@ -332,6 +338,13 @@ const InsightsApp = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
+      <ErrorToast onReportClick={setReportModalErrorId} />
+      {reportModalErrorId && (
+        <ErrorReportModal
+          errorId={reportModalErrorId}
+          onClose={() => setReportModalErrorId(null)}
+        />
+      )}
       <div className="mx-auto max-w-7xl space-y-4 px-4 py-8 sm:px-6">
         <header>
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">

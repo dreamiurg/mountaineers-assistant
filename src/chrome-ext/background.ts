@@ -1,3 +1,5 @@
+import { initDevTools } from './error-reporter/dev-tools'
+import { errorReporter, isAuthError } from './error-reporter/ErrorReporter'
 import type {
   ActivityRecord,
   CollectorDelta,
@@ -38,21 +40,35 @@ let currentProgress: RefreshProgress | null = null
 let activeCacheContext: ActiveCacheContext | null = null
 
 async function ensureOffscreenDocument(): Promise<void> {
-  // Check if offscreen document already exists
-  const existingContexts = await chrome.runtime.getContexts({
-    contextTypes: [chrome.runtime.ContextType.OFFSCREEN_DOCUMENT],
-  })
+  try {
+    // Check if offscreen document already exists
+    const existingContexts = await chrome.runtime.getContexts({
+      contextTypes: [chrome.runtime.ContextType.OFFSCREEN_DOCUMENT],
+    })
 
-  if (existingContexts.length > 0) {
-    return // Already exists, reuse it
+    if (existingContexts.length > 0) {
+      return // Already exists, reuse it
+    }
+
+    // Create new offscreen document
+    await chrome.offscreen.createDocument({
+      url: 'offscreen.html',
+      reasons: [chrome.offscreen.Reason.DOM_SCRAPING],
+      justification: 'Fetch and parse Mountaineers.org activity data using DOM APIs',
+    })
+
+    // Wait a bit for offscreen document to initialize and register message listeners
+    // This prevents race condition where we send message before listener is ready
+    await new Promise((resolve) => setTimeout(resolve, 100))
+  } catch (error) {
+    // Report offscreen document creation errors
+    errorReporter.captureError(error, {
+      context: 'background',
+      category: 'crash',
+      diagnostics: { operation: 'ensureOffscreenDocument' },
+    })
+    throw error
   }
-
-  // Create new offscreen document
-  await chrome.offscreen.createDocument({
-    url: 'offscreen.html',
-    reasons: [chrome.offscreen.Reason.DOM_SCRAPING],
-    justification: 'Fetch and parse Mountaineers.org activity data using DOM APIs',
-  })
 }
 
 chrome.runtime.onMessage.addListener((rawMessage, sender, sendResponse) => {
@@ -106,10 +122,28 @@ chrome.runtime.onMessage.addListener((rawMessage, sender, sendResponse) => {
       sendResponse(result)
     })
     .catch((error: unknown) => {
-      console.error('Mountaineers Assistant refresh failed', error)
+      const errorMessage = error instanceof Error ? error.message : String(error)
+
+      if (isAuthError(error)) {
+        // Auth errors are expected user flow, log as info not error
+        console.info('Mountaineers Assistant: refresh requires authentication', error)
+      } else {
+        // Actual errors should be logged as errors
+        console.error('Mountaineers Assistant refresh failed', error)
+        // Report refresh errors to error reporter (except auth errors)
+        errorReporter.captureError(error, {
+          context: 'background',
+          category: 'crash',
+          diagnostics: {
+            operation: 'refresh',
+            progress: currentProgress,
+          },
+        })
+      }
+
       sendResponse({
         success: false,
-        error: error instanceof Error ? error.message : String(error),
+        error: errorMessage,
       })
     })
     .finally(() => {
@@ -483,3 +517,21 @@ function isCollectorResultMessage(value: unknown): value is CollectorResultMessa
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
 }
+
+// Global error handlers for background context
+self.addEventListener('error', (event) => {
+  errorReporter.captureError(event.error, {
+    context: 'background',
+    category: 'crash',
+  })
+})
+
+self.addEventListener('unhandledrejection', (event) => {
+  errorReporter.captureError(event.reason, {
+    context: 'background',
+    category: 'crash',
+  })
+})
+
+// Initialize developer tools (only in dev mode)
+initDevTools()

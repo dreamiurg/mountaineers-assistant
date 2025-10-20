@@ -34,7 +34,6 @@ module.exports = defineConfig({
     rollupOptions: {
       input: {
         background: resolve(chromeExtensionRoot, 'background.ts'),
-        collect: resolve(chromeExtensionRoot, 'collect.ts'),
         offscreen: resolve(chromeExtensionRoot, 'offscreen.html'),
         preferences: resolve(chromeExtensionRoot, 'preferences.html'),
         insights: resolve(chromeExtensionRoot, 'insights.html'),

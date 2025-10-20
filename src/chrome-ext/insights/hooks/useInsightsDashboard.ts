@@ -140,6 +140,7 @@ export const useInsightsDashboard = (): InsightsState => {
       readyResolveRef.current = resolve
     })
   )
+  const cacheWasUpdatedDuringRefreshRef = useRef(false)
 
   useEffect(() => {
     filtersRef.current = filters
@@ -467,18 +468,23 @@ export const useInsightsDashboard = (): InsightsState => {
   useEffect(() => {
     const storageListener = (changes: { [key: string]: chrome.storage.StorageChange }) => {
       if (changes[STORAGE_KEY]) {
-        // Only reload if we're not currently in a refresh operation
-        // During refresh, incremental updates happen but we don't want to reload
-        // until the refresh is complete
-        if (!isLoading) {
-          // Cache was updated, reload the page to show new data
-          // This is simpler and more reliable than trying to update Highcharts in-place
+        if (isLoading) {
+          // Cache was updated during refresh - mark for reload when refresh completes
+          cacheWasUpdatedDuringRefreshRef.current = true
+        } else {
+          // Cache was updated while not refreshing - reload immediately
           window.location.reload()
         }
       }
     }
 
     chrome.storage.onChanged.addListener(storageListener)
+
+    // If refresh just completed and cache was updated, reload now
+    if (!isLoading && cacheWasUpdatedDuringRefreshRef.current) {
+      cacheWasUpdatedDuringRefreshRef.current = false
+      window.location.reload()
+    }
 
     return () => {
       chrome.storage.onChanged.removeListener(storageListener)
