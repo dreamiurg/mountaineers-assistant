@@ -58,7 +58,7 @@ dist/                      # Bundled extension output produced by Vite (gitignor
 - Use Storybook (`bun run storybook`) for component development; it shares the same Vite/Tailwind pipeline as the extension.
 - Run `bun run typecheck` to validate TypeScript changes before packaging.
 - Run `bun run storybook:build` before shipping Storybook-facing component changes.
-- Run release automation via `just release-bump <version>`, `just release-submit`, and `just release-publish <version>` (requires `just`, `gh`, and `zip`).
+- Releases are automated via release-please; push conventional commits to main to trigger release PRs.
 - Load the unpacked extension from `dist/` during development; rebuild before reloading in Chrome.
 - Maintain the sanitized fixtures at `src/data/sample-activities.json`; keep their shape aligned with production payloads.
 - Keep `manifest.json` version aligned with the extension version in `package.json`.

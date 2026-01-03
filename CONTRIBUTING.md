@@ -299,100 +299,40 @@ bun run typecheck   # Validate TypeScript
 
 ## Release Process
 
-We manage releases with [`just`](https://just.systems/man/en/) recipes and shell scripts.
+Releases are automated using [release-please](https://github.com/googleapis/release-please).
 
-**Prerequisites:** Install `just` locally along with `gh` (GitHub CLI), `bun`, `jq`, and `zip`.
+### How It Works
 
-```bash
-# Install just (macOS)
-brew install just
+1. **Write conventional commits** - Use prefixes like `feat:`, `fix:`, `docs:`, etc.
+2. **Push to main** - Release-please automatically creates/updates a Release PR
+3. **Merge the Release PR** - This triggers the release workflow which:
+   - Creates a git tag
+   - Updates `CHANGELOG.md`
+   - Bumps versions in `package.json` and `manifest.json`
+   - Builds and packages the extension
+   - Creates a GitHub Release with the ZIP attached
 
-# Install GitHub CLI (if not already installed)
-brew install gh
-```
+### Commit Message Format
 
-### Phase 1: Prepare the Release Branch
+Release-please uses [Conventional Commits](https://www.conventionalcommits.org/) to determine version bumps:
 
-**From the main branch**, create a release branch and bump version:
+| Prefix | Version Bump | Example |
+|--------|-------------|---------|
+| `feat:` | Minor (0.x.0) | `feat: add dark mode toggle` |
+| `fix:` | Patch (0.0.x) | `fix: resolve cache persistence issue` |
+| `feat!:` or `BREAKING CHANGE:` | Major (x.0.0) | `feat!: redesign preferences UI` |
+| `docs:`, `chore:`, `refactor:` | No release | `docs: update README` |
 
-```bash
-just release-bump 0.2.4
-# or just release-bump patch|minor|major to auto-increment from the current version
-```
+### Manual Chrome Web Store Upload
 
-This script:
-
-- Ensures you are on `main` with a clean working tree
-- Runs `bun run typecheck` from `main`
-- Creates or switches to `release/v0.2.4` (or the computed version)
-- Updates version metadata in `package.json` and `manifest.json`
-- Regenerates `CHANGELOG.md` with the latest commit titles
-
-**Note:** Changes are staged but not committed - review them first.
-
-### Phase 2: Commit and Open the Draft PR
-
-**From the release branch**, commit and create PR:
-
-```bash
-just release-submit
-```
-
-This script:
-
-- Commits the staged release files
-- Pushes the release branch
-- Opens a draft PR populated with the changelog entry
-
-**Next:** Review the PR, ensure CI passes, then merge on GitHub.
-
-### Phase 3: Publish Release (Automatic)
-
-**After PR is merged**, the release is published automatically by GitHub Actions.
-
-The [Release workflow](.github/workflows/release.yml) automatically:
-
-1. Detects the merged release PR (`release/v*` branch)
-2. Extracts version from branch name
-3. Creates and pushes git tag
-4. Builds production bundle
-5. Packages extension as ZIP
-6. Creates GitHub release with ZIP attachment and changelog notes
-
-**Manual fallback** (if GitHub Actions fails):
-
-```bash
-git checkout main
-git pull
-just release-publish 0.2.4
-```
-
-This verifies `main` matches the merged release, builds the extension, creates `mountaineers-assistant-0.2.4.zip`, tags the release, and creates the GitHub release with the ZIP attached.
-
-**Next:** Phase 4 - Manual upload to Chrome Web Store.
-
-### Phase 4: Publish to Chrome Web Store (Manual)
-
-**This step requires Chrome Web Store developer credentials.**
-
-After GitHub Release is created (Phase 3), manually upload to Chrome Web Store:
+After a GitHub Release is created, manually upload to Chrome Web Store:
 
 1. **Download the ZIP** from the [GitHub Release](https://github.com/dreamiurg/mountaineers-assistant/releases)
-2. **Open Chrome Web Store Developer Dashboard**
-   - Go to [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole)
-   - Login with credentials (requires publisher account access)
-3. **Upload new version**
-   - Select "Mountaineers Assistant" extension
-   - Click "Upload new version"
-   - Select the downloaded ZIP file
-4. **Submit for review**
-   - Review changes and ensure all fields are correct
-   - Click "Submit for review"
-5. **Wait for approval**
-   - Google reviews typically take a few hours to a few days
-   - You'll receive email notification when published
+2. **Open [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole)**
+3. **Upload new version** - Select the extension and upload the ZIP
+4. **Submit for review** - Google typically reviews within a few hours to days
 
-**Important:** Only maintainers with Chrome Web Store publisher access can complete this phase.
+**Note:** Only maintainers with Chrome Web Store publisher access can complete this step.
 
 ### Version Numbering
 
