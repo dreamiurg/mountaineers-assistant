@@ -16,20 +16,24 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ### Prerequisites
 
-**Node.js 18+**
+**Bun 1.0+** (recommended) or Node.js 18+
 
-Install with Homebrew if needed:
+Install bun:
 
 ```bash
-brew install node@18
-node --version  # Should be 18.x
-npm --version
+# macOS/Linux
+curl -fsSL https://bun.sh/install | bash
+
+# Or with Homebrew
+brew install oven-sh/bun/bun
+
+bun --version  # Should be 1.0+
 ```
 
 ### Install Dependencies
 
 ```bash
-npm install
+bun install
 ```
 
 ### Install Pre-commit Hooks
@@ -71,7 +75,7 @@ uv run pre-commit run --all-files
 ### Build the Extension
 
 ```bash
-npm run build
+bun run build
 ```
 
 This compiles TypeScript, processes CSS with Tailwind, and bundles everything into `dist/`.
@@ -90,7 +94,7 @@ This compiles TypeScript, processes CSS with Tailwind, and bundles everything in
 For continuous development with auto-rebuild:
 
 ```bash
-npx vite build --watch
+bun x vite build --watch
 ```
 
 This keeps `dist/` up to date. You still need to reload the extension in Chrome after each change.
@@ -183,9 +187,9 @@ mountaineers-assistant/
 3. **Test your changes**
 
    ```bash
-   npm run typecheck    # TypeScript validation
-   npm run lint         # Code formatting check
-   npm test             # All tests (unit + chrome extension)
+   bun run typecheck    # TypeScript validation
+   bun run lint         # Code formatting check
+   bun test             # All tests (unit + chrome extension)
    ```
 
    **Test Organization:**
@@ -197,10 +201,10 @@ mountaineers-assistant/
    **Run specific test suites:**
 
    ```bash
-   npm run test:unit                         # Unit tests only
-   npm run test:chrome-extension             # Chrome extension tests only
-   npm run test:chrome-extension:update-snapshots  # Update visual snapshots
-   npx playwright test --grep-invert visual  # Behavioral tests only (skip snapshots)
+   bun run test:unit                         # Unit tests only
+   bun run test:chrome-extension             # Chrome extension tests only
+   bun run test:chrome-extension:update-snapshots  # Update visual snapshots
+   bun x playwright test --grep-invert visual  # Behavioral tests only (skip snapshots)
    ```
 
 4. **Commit your changes**
@@ -218,7 +222,7 @@ mountaineers-assistant/
 For UI work, use Storybook for isolated component development:
 
 ```bash
-npm run storybook
+bun run storybook
 ```
 
 This opens a local server where you can develop and test components without loading the full extension.
@@ -230,9 +234,9 @@ This opens a local server where you can develop and test components without load
 Located in `tests/unit/`, use Node.js test runner:
 
 ```bash
-npm test
+bun test
 # or run specific test
-npx tsx --test tests/unit/your-test.test.ts
+bun x tsx --test tests/unit/your-test.test.ts
 ```
 
 ### Chrome Extension Tests
@@ -241,13 +245,13 @@ Located in `tests/chrome-extension/`, use Playwright:
 
 ```bash
 # First time setup
-npx playwright install
+bun x playwright install
 
 # Run chrome extension tests
-npm run test:chrome-extension
+bun run test:chrome-extension
 
 # Update snapshots after UI changes
-npm run test:chrome-extension:update-snapshots
+bun run test:chrome-extension:update-snapshots
 ```
 
 **What chrome extension tests do:**
@@ -288,16 +292,16 @@ uv run pre-commit run --all-files
 ### Manual Commands
 
 ```bash
-npm run format      # Apply Biome formatting
-npm run lint        # Check code quality with Biome (CI mode)
-npm run typecheck   # Validate TypeScript
+bun run format      # Apply Biome formatting
+bun run lint        # Check code quality with Biome (CI mode)
+bun run typecheck   # Validate TypeScript
 ```
 
 ## Release Process
 
 We manage releases with [`just`](https://just.systems/man/en/) recipes and shell scripts.
 
-**Prerequisites:** Install `just` locally along with `gh` (GitHub CLI), `npm`, `jq`, and `zip`.
+**Prerequisites:** Install `just` locally along with `gh` (GitHub CLI), `bun`, `jq`, and `zip`.
 
 ```bash
 # Install just (macOS)
@@ -319,9 +323,9 @@ just release-bump 0.2.4
 This script:
 
 - Ensures you are on `main` with a clean working tree
-- Runs `npm run typecheck` from `main`
+- Runs `bun run typecheck` from `main`
 - Creates or switches to `release/v0.2.4` (or the computed version)
-- Updates version metadata in `package.json`, `package-lock.json`, and `manifest.json`
+- Updates version metadata in `package.json` and `manifest.json`
 - Regenerates `CHANGELOG.md` with the latest commit titles
 
 **Note:** Changes are staged but not committed - review them first.

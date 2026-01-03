@@ -17,8 +17,8 @@ const outputDir = path.join(repoRoot, 'artifacts')
 const outputPath = path.join(outputDir, 'insights-1280x800.png')
 
 function runBuild() {
-  console.log('Building extension bundle (npm run build)…')
-  execSync('npm run build', {
+  console.log('Building extension bundle (bun run build)…')
+  execSync('bun run build', {
     stdio: 'inherit',
     cwd: repoRoot,
   })

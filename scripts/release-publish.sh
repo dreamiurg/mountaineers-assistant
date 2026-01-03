@@ -26,7 +26,7 @@ if [[ ! $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+([-.+][0-9A-Za-z.-]+)?$ ]]; then
   exit 1
 fi
 
-need git gh jq npm zip
+need git gh jq bun zip
 
 if [[ $(git rev-parse --abbrev-ref HEAD) != "main" ]]; then
   echo "Publish from the main branch after the release PR merges" >&2
@@ -66,8 +66,8 @@ if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; the
   exit 1
 fi
 
-npm run typecheck
-npm run build
+bun run typecheck
+bun run build
 
 DIST=dist
 if [[ ! -d $DIST ]]; then

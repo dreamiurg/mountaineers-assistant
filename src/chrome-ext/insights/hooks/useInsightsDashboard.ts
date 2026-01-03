@@ -330,7 +330,8 @@ export const useInsightsDashboard = (): InsightsState => {
         const stored = await chrome.storage.local.get(SETTINGS_KEY)
         if (!isMounted) return
 
-        const limit = stored?.[SETTINGS_KEY]?.fetchLimit
+        const settings = stored?.[SETTINGS_KEY] as { fetchLimit?: number } | undefined
+        const limit = settings?.fetchLimit
         const parsed = typeof limit === 'number' && limit > 0 ? limit : null
         setFetchLimit(parsed)
 

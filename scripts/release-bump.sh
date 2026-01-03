@@ -21,7 +21,7 @@ need() {
 [[ $# -eq 1 ]] || usage
 ARG=$1
 
-need git jq npm npx
+need git jq bun
 
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 if [[ $CURRENT_BRANCH != "main" ]]; then
@@ -84,20 +84,13 @@ else
   git checkout -b "$BRANCH"
 fi
 
-npm run typecheck
+bun run typecheck
 
 tmp=$(mktemp)
 jq --arg version "$VERSION" '.version = $version' package.json >"$tmp"
 mv "$tmp" package.json
 
-tmp=$(mktemp)
-jq --arg version "$VERSION" '
-  .version = $version
-  | (if (.packages? and (.packages | has("")) and (.packages[""] | has("version")))
-       then (.packages[""].version = $version)
-       else . end)
-' package-lock.json >"$tmp"
-mv "$tmp" package-lock.json
+# Note: bun.lock is binary and auto-updated by bun install
 
 MANIFEST=src/chrome-ext/manifest.json
 tmp=$(mktemp)
@@ -108,7 +101,7 @@ mv "$tmp" "$MANIFEST"
 DATE=$(date +%Y-%m-%d)
 "$REPO_ROOT/scripts/changelog.sh" update --version "$VERSION" --date "$DATE"
 
-npx prettier --write package.json package-lock.json "$MANIFEST" CHANGELOG.md >/dev/null
+bun x biome format --write package.json "$MANIFEST" CHANGELOG.md >/dev/null
 
 echo
 echo "Release branch: $BRANCH"
