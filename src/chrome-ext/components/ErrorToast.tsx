@@ -84,7 +84,7 @@ export function ErrorToast({ onReportClick }: ErrorToastProps) {
     >
       <div className="bg-red-50 border border-red-200 rounded-lg shadow-lg p-4 max-w-md">
         <div className="flex items-start gap-3">
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             <svg
               className="w-5 h-5 text-red-600"
               fill="none"
