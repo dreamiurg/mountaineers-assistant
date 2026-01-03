@@ -16,20 +16,24 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ### Prerequisites
 
-**Node.js 18+**
+**Bun 1.0+** (recommended) or Node.js 18+
 
-Install with Homebrew if needed:
+Install bun:
 
 ```bash
-brew install node@18
-node --version  # Should be 18.x
-npm --version
+# macOS/Linux
+curl -fsSL https://bun.sh/install | bash
+
+# Or with Homebrew
+brew install oven-sh/bun/bun
+
+bun --version  # Should be 1.0+
 ```
 
 ### Install Dependencies
 
 ```bash
-npm install
+bun install
 ```
 
 ### Install Pre-commit Hooks
@@ -71,7 +75,7 @@ uv run pre-commit run --all-files
 ### Build the Extension
 
 ```bash
-npm run build
+bun run build
 ```
 
 This compiles TypeScript, processes CSS with Tailwind, and bundles everything into `dist/`.
@@ -90,7 +94,7 @@ This compiles TypeScript, processes CSS with Tailwind, and bundles everything in
 For continuous development with auto-rebuild:
 
 ```bash
-npx vite build --watch
+bun x vite build --watch
 ```
 
 This keeps `dist/` up to date. You still need to reload the extension in Chrome after each change.
@@ -183,9 +187,9 @@ mountaineers-assistant/
 3. **Test your changes**
 
    ```bash
-   npm run typecheck    # TypeScript validation
-   npm run lint         # Code formatting check
-   npm test             # All tests (unit + chrome extension)
+   bun run typecheck    # TypeScript validation
+   bun run lint         # Code formatting check
+   bun test             # All tests (unit + chrome extension)
    ```
 
    **Test Organization:**
@@ -197,10 +201,10 @@ mountaineers-assistant/
    **Run specific test suites:**
 
    ```bash
-   npm run test:unit                         # Unit tests only
-   npm run test:chrome-extension             # Chrome extension tests only
-   npm run test:chrome-extension:update-snapshots  # Update visual snapshots
-   npx playwright test --grep-invert visual  # Behavioral tests only (skip snapshots)
+   bun run test:unit                         # Unit tests only
+   bun run test:chrome-extension             # Chrome extension tests only
+   bun run test:chrome-extension:update-snapshots  # Update visual snapshots
+   bun x playwright test --grep-invert visual  # Behavioral tests only (skip snapshots)
    ```
 
 4. **Commit your changes**
@@ -218,7 +222,7 @@ mountaineers-assistant/
 For UI work, use Storybook for isolated component development:
 
 ```bash
-npm run storybook
+bun run storybook
 ```
 
 This opens a local server where you can develop and test components without loading the full extension.
@@ -230,9 +234,9 @@ This opens a local server where you can develop and test components without load
 Located in `tests/unit/`, use Node.js test runner:
 
 ```bash
-npm test
+bun test
 # or run specific test
-npx tsx --test tests/unit/your-test.test.ts
+bun x tsx --test tests/unit/your-test.test.ts
 ```
 
 ### Chrome Extension Tests
@@ -241,13 +245,13 @@ Located in `tests/chrome-extension/`, use Playwright:
 
 ```bash
 # First time setup
-npx playwright install
+bun x playwright install
 
 # Run chrome extension tests
-npm run test:chrome-extension
+bun run test:chrome-extension
 
 # Update snapshots after UI changes
-npm run test:chrome-extension:update-snapshots
+bun run test:chrome-extension:update-snapshots
 ```
 
 **What chrome extension tests do:**
@@ -288,107 +292,47 @@ uv run pre-commit run --all-files
 ### Manual Commands
 
 ```bash
-npm run format      # Apply Biome formatting
-npm run lint        # Check code quality with Biome (CI mode)
-npm run typecheck   # Validate TypeScript
+bun run format      # Apply Biome formatting
+bun run lint        # Check code quality with Biome (CI mode)
+bun run typecheck   # Validate TypeScript
 ```
 
 ## Release Process
 
-We manage releases with [`just`](https://just.systems/man/en/) recipes and shell scripts.
+Releases are automated using [release-please](https://github.com/googleapis/release-please).
 
-**Prerequisites:** Install `just` locally along with `gh` (GitHub CLI), `npm`, `jq`, and `zip`.
+### How It Works
 
-```bash
-# Install just (macOS)
-brew install just
+1. **Write conventional commits** - Use prefixes like `feat:`, `fix:`, `docs:`, etc.
+2. **Push to main** - Release-please automatically creates/updates a Release PR
+3. **Merge the Release PR** - This triggers the release workflow which:
+   - Creates a git tag
+   - Updates `CHANGELOG.md`
+   - Bumps versions in `package.json` and `manifest.json`
+   - Builds and packages the extension
+   - Creates a GitHub Release with the ZIP attached
 
-# Install GitHub CLI (if not already installed)
-brew install gh
-```
+### Commit Message Format
 
-### Phase 1: Prepare the Release Branch
+Release-please uses [Conventional Commits](https://www.conventionalcommits.org/) to determine version bumps:
 
-**From the main branch**, create a release branch and bump version:
+| Prefix | Version Bump | Example |
+|--------|-------------|---------|
+| `feat:` | Minor (0.x.0) | `feat: add dark mode toggle` |
+| `fix:` | Patch (0.0.x) | `fix: resolve cache persistence issue` |
+| `feat!:` or `BREAKING CHANGE:` | Major (x.0.0) | `feat!: redesign preferences UI` |
+| `docs:`, `chore:`, `refactor:` | No release | `docs: update README` |
 
-```bash
-just release-bump 0.2.4
-# or just release-bump patch|minor|major to auto-increment from the current version
-```
+### Manual Chrome Web Store Upload
 
-This script:
-
-- Ensures you are on `main` with a clean working tree
-- Runs `npm run typecheck` from `main`
-- Creates or switches to `release/v0.2.4` (or the computed version)
-- Updates version metadata in `package.json`, `package-lock.json`, and `manifest.json`
-- Regenerates `CHANGELOG.md` with the latest commit titles
-
-**Note:** Changes are staged but not committed - review them first.
-
-### Phase 2: Commit and Open the Draft PR
-
-**From the release branch**, commit and create PR:
-
-```bash
-just release-submit
-```
-
-This script:
-
-- Commits the staged release files
-- Pushes the release branch
-- Opens a draft PR populated with the changelog entry
-
-**Next:** Review the PR, ensure CI passes, then merge on GitHub.
-
-### Phase 3: Publish Release (Automatic)
-
-**After PR is merged**, the release is published automatically by GitHub Actions.
-
-The [Release workflow](.github/workflows/release.yml) automatically:
-
-1. Detects the merged release PR (`release/v*` branch)
-2. Extracts version from branch name
-3. Creates and pushes git tag
-4. Builds production bundle
-5. Packages extension as ZIP
-6. Creates GitHub release with ZIP attachment and changelog notes
-
-**Manual fallback** (if GitHub Actions fails):
-
-```bash
-git checkout main
-git pull
-just release-publish 0.2.4
-```
-
-This verifies `main` matches the merged release, builds the extension, creates `mountaineers-assistant-0.2.4.zip`, tags the release, and creates the GitHub release with the ZIP attached.
-
-**Next:** Phase 4 - Manual upload to Chrome Web Store.
-
-### Phase 4: Publish to Chrome Web Store (Manual)
-
-**This step requires Chrome Web Store developer credentials.**
-
-After GitHub Release is created (Phase 3), manually upload to Chrome Web Store:
+After a GitHub Release is created, manually upload to Chrome Web Store:
 
 1. **Download the ZIP** from the [GitHub Release](https://github.com/dreamiurg/mountaineers-assistant/releases)
-2. **Open Chrome Web Store Developer Dashboard**
-   - Go to [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole)
-   - Login with credentials (requires publisher account access)
-3. **Upload new version**
-   - Select "Mountaineers Assistant" extension
-   - Click "Upload new version"
-   - Select the downloaded ZIP file
-4. **Submit for review**
-   - Review changes and ensure all fields are correct
-   - Click "Submit for review"
-5. **Wait for approval**
-   - Google reviews typically take a few hours to a few days
-   - You'll receive email notification when published
+2. **Open [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole)**
+3. **Upload new version** - Select the extension and upload the ZIP
+4. **Submit for review** - Google typically reviews within a few hours to days
 
-**Important:** Only maintainers with Chrome Web Store publisher access can complete this phase.
+**Note:** Only maintainers with Chrome Web Store publisher access can complete this step.
 
 ### Version Numbering
 

@@ -1,8 +1,4 @@
-import type {
-  Options as HighchartsOptions,
-  Point as HighchartsPoint,
-  TooltipFormatterContextObject as HighchartsTooltipFormatterContext,
-} from 'highcharts'
+import type { Options as HighchartsOptions, Point as HighchartsPoint } from 'highcharts'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ErrorReportModal } from '../components/ErrorReportModal'
 import { ErrorToast } from '../components/ErrorToast'
@@ -18,6 +14,12 @@ import {
   initials,
   titleCase,
 } from './utils'
+
+/** Shared tooltip formatter context - includes points array when tooltip.shared is true */
+interface TooltipFormatterContext {
+  x?: string | number
+  points?: HighchartsPoint[]
+}
 
 const LoadingCard = ({ message }: { message: string }) => (
   <div className="glass-card flex items-center gap-4 rounded-2xl px-5 py-6 text-slate-500">
@@ -99,7 +101,7 @@ const TimelineChart = ({ data }: { data: TimelineView }) => {
         borderColor: 'rgba(14, 116, 144, 0.2)',
         backgroundColor: '#ffffff',
         style: { fontFamily: 'Inter, sans-serif' },
-        formatter(this: HighchartsTooltipFormatterContext) {
+        formatter(this: TooltipFormatterContext) {
           const points = (this.points ?? []) as HighchartsPoint[]
           const total = points.reduce((sum, point) => sum + (point.y ?? 0), 0)
           const parts = points

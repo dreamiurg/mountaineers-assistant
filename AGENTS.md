@@ -18,8 +18,8 @@ Guidance for future contributors, automations, or agents working on **Mountainee
 - **Language:** TypeScript targeting modern Chrome (ES2021)
 - **UI:** Tailwind CSS with React powering preferences and insights dashboards (Storybook mirrors these surfaces)
 - **Storage:** `chrome.storage.local`
-- **Build tooling:** Vite for bundling, Tailwind CLI (via `tailwindcss` npm package), Biome for formatting and linting
-- **Package manager:** npm
+- **Build tooling:** Vite for bundling, Tailwind CLI (via `tailwindcss` package), Biome for formatting and linting
+- **Package manager:** bun
 
 ## Architecture Overview
 
@@ -52,13 +52,13 @@ dist/                      # Bundled extension output produced by Vite (gitignor
 
 ## Developer Workflow
 
-- Install dependencies with `npm install` (Node 18+).
-- Build the extension bundle with `npm run build` (runs Tailwind CLI then Vite into `dist/`).
-- When iterating, re-run `npm run build:css` for Tailwind edits and start Vite with `npm run dev`.
-- Use Storybook (`npm run storybook`) for component development; it shares the same Vite/Tailwind pipeline as the extension.
-- Run `npm run typecheck` to validate TypeScript changes before packaging.
-- Run `npm run storybook:build` before shipping Storybook-facing component changes.
-- Run release automation via `just release-bump <version>`, `just release-submit`, and `just release-publish <version>` (requires `just`, `gh`, and `zip`).
+- Install dependencies with `bun install` (bun 1.0+ or Node 18+).
+- Build the extension bundle with `bun run build` (runs Tailwind CLI then Vite into `dist/`).
+- When iterating, re-run `bun run build:css` for Tailwind edits and start Vite with `bun run dev`.
+- Use Storybook (`bun run storybook`) for component development; it shares the same Vite/Tailwind pipeline as the extension.
+- Run `bun run typecheck` to validate TypeScript changes before packaging.
+- Run `bun run storybook:build` before shipping Storybook-facing component changes.
+- Releases are automated via release-please; push conventional commits to main to trigger release PRs.
 - Load the unpacked extension from `dist/` during development; rebuild before reloading in Chrome.
 - Maintain the sanitized fixtures at `src/data/sample-activities.json`; keep their shape aligned with production payloads.
 - Keep `manifest.json` version aligned with the extension version in `package.json`.
@@ -78,9 +78,9 @@ Use the format `<prefix>: <summary in past tense>`, for example:
 
 ## Quality Gates
 
-- Run `npm run format` before committing to apply Biome formatting.
-- Run `npm run lint` to check code quality with Biome.
-- Run `npm run typecheck` to ensure the TypeScript sources compile without errors.
+- Run `bun run format` before committing to apply Biome formatting.
+- Run `bun run lint` to check code quality with Biome.
+- Run `bun run typecheck` to ensure the TypeScript sources compile without errors.
 - `pre-commit` hooks enforce Biome formatting/linting and gitleaks secret scanning.
 - Use `uv run pre-commit run --all-files` before submitting if hooks are not configured locally.
 - Biome config lives in `biome.json`; update globals or linter rules there when introducing new APIs.
@@ -92,5 +92,5 @@ Use the format `<prefix>: <summary in past tense>`, for example:
 - Follow the architectural outline above when extending the extension.
 - Document breaking changes in `README.md`.
 - Update Tailwind build step if stylesheets or entry points move.
-- Use `npm run test:chrome-extension:update-snapshots` to regenerate Playwright-backed extension snapshots (they seed the extension with `src/data/sample-activities.json` and block external network calls).
+- Use `bun run test:chrome-extension:update-snapshots` to regenerate Playwright-backed extension snapshots (they seed the extension with `src/data/sample-activities.json` and block external network calls).
 - Keep instructions in this file synchronized with actual tooling to avoid confusing future automations.
