@@ -2,6 +2,7 @@ const { resolve } = require('node:path')
 const { defineConfig } = require('vite')
 const { viteStaticCopy } = require('vite-plugin-static-copy')
 const reactPlugin = require('@vitejs/plugin-react')
+const tailwindcss = require('@tailwindcss/vite')
 const packageJson = require('./package.json')
 
 const chromeExtensionRoot = resolve(__dirname, 'src/chrome-ext')
@@ -13,6 +14,7 @@ module.exports = defineConfig({
     __APP_VERSION__: JSON.stringify(packageJson.version),
   },
   plugins: [
+    tailwindcss.default(),
     reactPlugin(),
     viteStaticCopy({
       targets: [

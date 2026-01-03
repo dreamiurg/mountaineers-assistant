@@ -29,7 +29,8 @@ const distDir = path.resolve(repoRoot, 'dist')
 const sampleDataPath = path.resolve(repoRoot, 'src', 'data', 'sample-activities.json')
 
 export const test = base.extend<ExtensionHarness>({
-  context: async (_options, use) => {
+  // biome-ignore lint/correctness/noEmptyPattern: Playwright fixture requires object destructuring
+  context: async ({}, use) => {
     const tempRoot = path.resolve(repoRoot, '.playwright-tmp')
     await fs.mkdir(tempRoot, { recursive: true })
     const userDataDir = await fs.mkdtemp(path.join(tempRoot, 'chromium-'))
