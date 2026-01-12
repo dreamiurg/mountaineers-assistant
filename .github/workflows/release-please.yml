@@ -58,4 +58,4 @@ jobs:
           TAG="${{ needs.release-please.outputs.tag_name }}"
 
           # Upload asset to the release created by release-please
-          gh release upload "$TAG" "mountaineers-assistant-${VERSION}.zip"
+          gh release upload "$TAG" "mountaineers-assistant-${VERSION}.zip" --clobber
