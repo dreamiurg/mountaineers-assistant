@@ -1,0 +1,21 @@
+{
+  "browser": {
+    "browserName": "chromium",
+    "userDataDir": "/Users/dreamiurg/src/dreamiurg/mountaineers-assistant/.playwright-mcp-profile",
+    "launchOptions": {
+      "headless": false,
+      "args": [
+        "--disable-extensions-except=/Users/dreamiurg/src/dreamiurg/mountaineers-assistant/dist",
+        "--load-extension=/Users/dreamiurg/src/dreamiurg/mountaineers-assistant/dist",
+        "--disable-sync",
+        "--disable-features=DialMediaRouteProvider"
+      ]
+    },
+    "contextOptions": {
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      }
+    }
+  }
+}

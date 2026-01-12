@@ -1,0 +1,114 @@
+[tools]
+bun = "latest"
+node = "22"
+
+[env]
+_.path = ["./node_modules/.bin"]
+
+# =============================================================================
+# Build Tasks
+# =============================================================================
+
+[tasks.build]
+description = "Build the Chrome extension for production"
+run = "bun run build"
+
+[tasks."build:css"]
+description = "Build Tailwind CSS"
+run = "tailwindcss -i ./src/chrome-ext/styles/tailwind.input.css -o ./src/chrome-ext/tailwind.css --minify"
+
+[tasks."build:watch"]
+description = "Build and watch for changes"
+run = "vite build --watch"
+
+[tasks.dev]
+description = "Start development server"
+run = "vite"
+
+[tasks.preview]
+description = "Preview production build"
+run = "vite preview"
+
+[tasks.clean]
+description = "Clean build artifacts"
+run = "rm -rf dist .playwright-mcp"
+
+# =============================================================================
+# Code Quality Tasks
+# =============================================================================
+
+[tasks.lint]
+description = "Lint code with Biome"
+run = "biome check ."
+
+[tasks."lint:fix"]
+description = "Lint and auto-fix code with Biome"
+run = "biome check --write ."
+
+[tasks.format]
+description = "Format code with Biome"
+run = "biome format --write ."
+
+[tasks.typecheck]
+description = "Type-check with TypeScript"
+run = "tsc --noEmit"
+
+[tasks.check]
+description = "Run all code quality checks (lint + typecheck)"
+depends = ["lint", "typecheck"]
+
+# =============================================================================
+# Test Tasks
+# =============================================================================
+
+[tasks.test]
+description = "Run all tests (unit + e2e)"
+run = "bun run test"
+
+[tasks."test:unit"]
+description = "Run unit tests"
+run = "bun x tsx --test tests/unit/*.test.ts"
+
+[tasks."test:e2e"]
+description = "Run end-to-end tests with Playwright"
+run = "playwright test --project=chromium-extension"
+
+[tasks."test:e2e:ui"]
+description = "Run e2e tests with Playwright UI"
+run = "playwright test --project=chromium-extension --ui"
+
+[tasks."test:e2e:update"]
+description = "Update e2e test snapshots"
+run = "playwright test --project=chromium-extension --update-snapshots"
+
+[tasks."test:dashboards"]
+description = "Run dashboard snapshot tests"
+run = "node scripts/snapshot-dashboards.js"
+
+# =============================================================================
+# Storybook Tasks
+# =============================================================================
+
+[tasks.storybook]
+description = "Start Storybook development server"
+run = "storybook dev -p 6006"
+
+[tasks."storybook:build"]
+description = "Build Storybook for production"
+run = "storybook build"
+
+# =============================================================================
+# Utility Tasks
+# =============================================================================
+
+[tasks.install]
+description = "Install dependencies"
+run = "bun install"
+
+[tasks.screenshot]
+description = "Generate insights page screenshot"
+run = "node scripts/generate-insights-screenshot.js"
+
+[tasks.ci]
+description = "Run CI checks (lint, typecheck, test)"
+depends = ["lint", "typecheck", "test"]
