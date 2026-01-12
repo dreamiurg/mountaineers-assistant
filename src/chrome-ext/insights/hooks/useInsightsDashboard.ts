@@ -31,6 +31,18 @@ const INITIAL_FILTERS: DashboardFilters = {
   partner: [],
 }
 
+const getInitialFiltersFromUrl = (): Partial<DashboardFilters> => {
+  const params = new URLSearchParams(window.location.search)
+  const filters: Partial<DashboardFilters> = {}
+
+  const partner = params.get('partner')
+  if (partner) {
+    filters.partner = [partner]
+  }
+
+  return filters
+}
+
 const cloneFilterOptions = (options: PreparedData['filterOptions'] | null) => {
   if (!options) return null
   if (typeof structuredClone === 'function') {
@@ -256,7 +268,9 @@ export const useInsightsDashboard = (): InsightsState => {
           return
         }
 
-        setFilters({ ...INITIAL_FILTERS })
+        // Apply URL parameters as initial filters if present
+        const urlFilters = getInitialFiltersFromUrl()
+        setFilters({ ...INITIAL_FILTERS, ...urlFilters })
         resolveReady({ filterOptions: prepared.filterOptions })
         setStatusMessage(
           `Cached ${formatNumber(prepared.activities.length)} activities ready for exploration.`
