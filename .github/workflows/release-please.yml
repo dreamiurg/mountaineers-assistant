@@ -21,7 +21,6 @@ jobs:
         id: release
         with:
           release-type: node
-          skip-github-release: true
 
   build-and-publish:
     needs: release-please
@@ -51,15 +50,12 @@ jobs:
           zip -r "../mountaineers-assistant-${VERSION}.zip" .
           cd ..
 
-      - name: Create GitHub Release
+      - name: Upload extension to release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           VERSION="${{ needs.release-please.outputs.version }}"
           TAG="${{ needs.release-please.outputs.tag_name }}"
 
-          # Create release with asset in one step
-          gh release create "$TAG" \
-            "mountaineers-assistant-${VERSION}.zip" \
-            --title "$TAG" \
-            --notes "See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details."
+          # Upload asset to the release created by release-please
+          gh release upload "$TAG" "mountaineers-assistant-${VERSION}.zip"
