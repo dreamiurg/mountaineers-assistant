@@ -57,5 +57,12 @@ jobs:
           VERSION="${{ needs.release-please.outputs.version }}"
           TAG="${{ needs.release-please.outputs.tag_name }}"
 
-          # Upload asset to the release created by release-please
+          # Upload asset to the draft release created by release-please
           gh release upload "$TAG" "mountaineers-assistant-${VERSION}.zip" --clobber
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ needs.release-please.outputs.tag_name }}"
+          gh release edit "$TAG" --draft=false
