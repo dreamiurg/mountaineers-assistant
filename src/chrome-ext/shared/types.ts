@@ -8,6 +8,8 @@ export interface ActivityRecord {
   result: string | null
   rawResult?: unknown
   activity_type: string | null
+  difficulty_rating: string | null
+  leader_rating: string | null
 }
 
 export interface PersonRecord {

@@ -279,6 +279,8 @@ function normalizeActivity(record: unknown): ActivityRecord | null {
     result: stringOrNull(record.result),
     rawResult: record.result,
     activity_type: stringOrNull(record.activity_type),
+    difficulty_rating: null,
+    leader_rating: null,
   }
 }
 
@@ -302,6 +304,8 @@ async function loadRosters(
 
   for (const activity of activities) {
     let resolvedType = activity.activity_type ?? null
+    let resolvedDifficulty = activity.difficulty_rating ?? null
+    let resolvedLeaderRating = activity.leader_rating ?? null
     const activityTitle = activity.title ?? null
 
     const detailsPromise = loadActivityDetails(activity)
@@ -320,6 +324,12 @@ async function loadRosters(
     if (detailsResult.status === 'fulfilled') {
       if (detailsResult.value.activityType) {
         resolvedType = detailsResult.value.activityType
+      }
+      if (detailsResult.value.difficultyRating) {
+        resolvedDifficulty = detailsResult.value.difficultyRating
+      }
+      if (detailsResult.value.leaderRating) {
+        resolvedLeaderRating = detailsResult.value.leaderRating
       }
     } else {
       console.warn(
@@ -369,7 +379,12 @@ async function loadRosters(
       console.warn(`Failed to collect roster for ${activity.uid}`, rosterResult.reason)
     }
 
-    const enrichedActivity: ActivityRecord = { ...activity, activity_type: resolvedType }
+    const enrichedActivity: ActivityRecord = {
+      ...activity,
+      activity_type: resolvedType,
+      difficulty_rating: resolvedDifficulty,
+      leader_rating: resolvedLeaderRating,
+    }
     enrichedActivities.push(enrichedActivity)
     processed += 1
     const rosterDelta =
@@ -409,11 +424,13 @@ function settlePromise<T>(promise: Promise<T>): Promise<PromiseSettledResult<T>>
     .catch<PromiseSettledResult<T>>((reason) => ({ status: 'rejected', reason }))
 }
 
-async function loadActivityDetails(
-  activity: ActivityRecord
-): Promise<{ activityType: string | null }> {
+async function loadActivityDetails(activity: ActivityRecord): Promise<{
+  activityType: string | null
+  difficultyRating: string | null
+  leaderRating: string | null
+}> {
   if (!activity?.href) {
-    return { activityType: null }
+    return { activityType: null, difficultyRating: null, leaderRating: null }
   }
   try {
     const response = await fetch(activity.href, { credentials: 'include' })
@@ -421,36 +438,57 @@ async function loadActivityDetails(
       console.warn(
         `Mountaineers Assistant: activity page unavailable (${response.status}) for ${activity.uid}`
       )
-      return { activityType: null }
+      return { activityType: null, difficultyRating: null, leaderRating: null }
     }
     const html = await response.text()
-    return { activityType: extractActivityType(html) }
+    return extractActivityDetails(html)
   } catch (error) {
     console.warn(`Mountaineers Assistant: failed to load activity page for ${activity.uid}`, error)
-    return { activityType: null }
+    return { activityType: null, difficultyRating: null, leaderRating: null }
   }
 }
 
-function extractActivityType(html: string): string | null {
+function extractActivityDetails(html: string): {
+  activityType: string | null
+  difficultyRating: string | null
+  leaderRating: string | null
+} {
   const parser = new DOMParser()
   const doc = parser.parseFromString(html, 'text/html')
   const detailItems = Array.from(doc.querySelectorAll('.program-core .details li'))
+
+  let activityType: string | null = null
+  let difficultyRating: string | null = null
+  let leaderRating: string | null = null
+
   for (const item of detailItems) {
     const label = item.querySelector('label')
-    const labelText = normalizeWhitespace(label?.textContent ?? '')
-    if (labelText && labelText.replace(/:$/, '').toLowerCase() === 'activity type') {
-      const clone = item.cloneNode(true) as HTMLElement
-      const cloneLabel = clone.querySelector('label')
-      if (cloneLabel) {
-        cloneLabel.remove()
-      }
-      const value = normalizeWhitespace(clone.textContent ?? '')
-      if (value) {
-        return value
-      }
+    const normalizedLabel = normalizeWhitespace(label?.textContent ?? '')
+    if (!normalizedLabel) continue
+
+    const labelText = normalizedLabel.replace(/:$/, '').toLowerCase()
+    if (!labelText) continue
+
+    const clone = item.cloneNode(true) as HTMLElement
+    const cloneLabel = clone.querySelector('label')
+    if (cloneLabel) {
+      cloneLabel.remove()
+    }
+
+    const value = normalizeWhitespace(clone.textContent ?? '')
+
+    if (!value) continue
+
+    if (labelText === 'activity type') {
+      activityType = value
+    } else if (labelText === 'difficulty') {
+      difficultyRating = value
+    } else if (labelText === 'leader rating') {
+      leaderRating = value
     }
   }
-  return null
+
+  return { activityType, difficultyRating, leaderRating }
 }
 
 async function loadActivityRoster(

@@ -227,12 +227,26 @@ async function handleRefreshRequest({
 function waitForOffscreenResult(): Promise<CollectorResultMessage> {
   return new Promise((resolve, reject) => {
     let settled = false
+    const ACTIVITY_TIMEOUT_MS = 30_000 // 30 seconds per activity, reset on progress
 
-    const timeout = setTimeout(() => {
-      finalize(() => reject(new Error('Timed out while refreshing activities.')))
-    }, 60_000)
+    let timeoutId = scheduleTimeout()
+
+    function scheduleTimeout(): ReturnType<typeof setTimeout> {
+      return setTimeout(() => {
+        finalize(() => reject(new Error('Timed out while refreshing activities.')))
+      }, ACTIVITY_TIMEOUT_MS)
+    }
+
+    function resetTimeout(): void {
+      clearTimeout(timeoutId)
+      timeoutId = scheduleTimeout()
+    }
 
     function handleMessage(message: unknown): void {
+      if (isCollectorProgressMessage(message)) {
+        resetTimeout()
+        return
+      }
       if (!isCollectorResultMessage(message)) {
         return
       }
@@ -249,7 +263,7 @@ function waitForOffscreenResult(): Promise<CollectorResultMessage> {
     }
 
     function cleanup(): void {
-      clearTimeout(timeout)
+      clearTimeout(timeoutId)
       chrome.runtime.onMessage.removeListener(handleMessage)
     }
 
