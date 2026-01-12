@@ -26,6 +26,10 @@ module.exports = defineConfig({
           src: 'vendor/**/*',
           dest: 'vendor',
         },
+        {
+          src: 'content-script.css',
+          dest: '.',
+        },
       ],
     }),
   ],
@@ -36,6 +40,7 @@ module.exports = defineConfig({
     rollupOptions: {
       input: {
         background: resolve(chromeExtensionRoot, 'background.ts'),
+        'content-script': resolve(chromeExtensionRoot, 'content-script.ts'),
         offscreen: resolve(chromeExtensionRoot, 'offscreen.html'),
         preferences: resolve(chromeExtensionRoot, 'preferences.html'),
         insights: resolve(chromeExtensionRoot, 'insights.html'),

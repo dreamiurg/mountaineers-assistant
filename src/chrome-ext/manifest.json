@@ -16,6 +16,14 @@
     "page": "preferences.html",
     "open_in_tab": true
   },
+  "content_scripts": [
+    {
+      "matches": ["https://www.mountaineers.org/members/*"],
+      "js": ["content-script.js"],
+      "css": ["content-script.css"],
+      "run_at": "document_idle"
+    }
+  ],
   "web_accessible_resources": [
     {
       "resources": [

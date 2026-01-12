@@ -23,6 +23,7 @@ const REFRESH_RESULT_MESSAGE = 'refresh-result'
 const REFRESH_PROGRESS_MESSAGE = 'refresh-progress'
 const REFRESH_STATUS_REQUEST_MESSAGE = 'get-refresh-status'
 const REFRESH_STATUS_CHANGE_MESSAGE = 'refresh-status-changed'
+const GET_SHARED_ACTIVITIES_MESSAGE = 'get-shared-activities'
 
 type HandleRefreshResult = {
   success: true
@@ -82,6 +83,21 @@ chrome.runtime.onMessage.addListener((rawMessage, sender, sendResponse) => {
       inProgress: Boolean(activeRefresh),
       progress: currentProgress,
     })
+    return false
+  }
+
+  if (rawMessage.type === GET_SHARED_ACTIVITIES_MESSAGE) {
+    const memberUid = typeof rawMessage.memberUid === 'string' ? rawMessage.memberUid : null
+    if (memberUid) {
+      getSharedActivities(memberUid)
+        .then((activities) => sendResponse({ activities }))
+        .catch((error) => {
+          console.error('Mountaineers Assistant: failed to get shared activities', error)
+          sendResponse({ activities: [] })
+        })
+      return true
+    }
+    sendResponse({ activities: [] })
     return false
   }
 
@@ -530,6 +546,69 @@ function isCollectorResultMessage(value: unknown): value is CollectorResultMessa
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
+}
+
+interface SharedActivity {
+  uid: string
+  title: string
+  date: string
+  href: string
+}
+
+async function getSharedActivities(memberUid: string): Promise<SharedActivity[]> {
+  const stored = (await chrome.storage.local.get('mountaineersAssistantData')) as Record<
+    string,
+    unknown
+  >
+  const cache = stored.mountaineersAssistantData as ExtensionCache | undefined
+
+  if (!cache || !cache.currentUserUid) {
+    return []
+  }
+
+  // Don't show section on own profile
+  if (memberUid === cache.currentUserUid) {
+    return []
+  }
+
+  // Find all activities where both current user and target member participated
+  const currentUserActivities = new Set(
+    cache.rosterEntries
+      .filter((entry) => entry.person_uid === cache.currentUserUid)
+      .map((entry) => entry.activity_uid)
+  )
+
+  const memberActivities = new Set(
+    cache.rosterEntries
+      .filter((entry) => entry.person_uid === memberUid)
+      .map((entry) => entry.activity_uid)
+  )
+
+  const sharedActivityUids = [...currentUserActivities].filter((uid) => memberActivities.has(uid))
+
+  // Get activity details
+  const activityMap = new Map(cache.activities.map((a) => [a.uid, a]))
+
+  const sharedActivities: SharedActivity[] = sharedActivityUids
+    .map((uid) => {
+      const activity = activityMap.get(uid)
+      if (!activity) return null
+      return {
+        uid: activity.uid,
+        title: activity.title || 'Untitled Activity',
+        date: activity.start_date || '',
+        href: activity.href,
+      }
+    })
+    .filter((a): a is SharedActivity => a !== null)
+    .sort((a, b) => {
+      // Sort by date, most recent first
+      const dateA = a.date ? new Date(a.date).getTime() : 0
+      const dateB = b.date ? new Date(b.date).getTime() : 0
+      return dateB - dateA
+    })
+
+  return sharedActivities
 }
 
 // Global error handlers for background context

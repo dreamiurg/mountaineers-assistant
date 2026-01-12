@@ -1,0 +1,177 @@
+/* Mountaineers Assistant - Shared Activities Section */
+/* Styles designed to match mountaineers.org profile page with callout styling */
+
+.ma-shared-section {
+  margin: 1.5rem 0 2rem 0;
+  padding: 1rem 1.25rem;
+  font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 1px solid #bae6fd;
+  border-left: 4px solid #0284c7;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Section Header - matches COMMITTEES, COURSE BADGES style */
+.ma-section-header {
+  color: #d97706; /* amber-600 - matches their orange headers */
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 0.25rem 0;
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+/* Subheader with context */
+.ma-section-subheader {
+  color: #6b7280;
+  font-size: 0.75rem;
+  font-style: italic;
+  margin: 0 0 0.75rem 0;
+}
+
+/* Activity List */
+.ma-activity-list {
+  list-style: none !important;
+  list-style-type: none !important;
+  margin: 0;
+  padding: 0;
+}
+
+.ma-activity-item {
+  list-style: none !important;
+  list-style-type: none !important;
+  margin: 0;
+  padding: 0;
+}
+
+.ma-activity-item::before {
+  content: none !important;
+  display: none !important;
+}
+
+.ma-activity-item::marker {
+  content: none !important;
+  display: none !important;
+}
+
+/* Activity Link - matches mountaineers.org link style */
+.ma-shared-section .ma-activity-link,
+.ma-shared-section a.ma-activity-link {
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 0.5rem !important;
+  padding: 0.375rem 0 !important;
+  padding-left: 0 !important;
+  margin-left: 0 !important;
+  text-decoration: none !important;
+  color: #0077b3 !important; /* matches mountaineers.org link color */
+  font-size: 0.9375rem !important;
+  line-height: 1.4 !important;
+  transition: color 0.15s ease !important;
+  background: none !important;
+  background-image: none !important;
+  text-indent: 0 !important;
+  list-style: none !important;
+}
+
+/* Override site CSS that adds triangles to links - aggressive override */
+.ma-shared-section .ma-activity-link::before,
+.ma-shared-section .ma-activity-link::after,
+.ma-shared-section a.ma-activity-link::before,
+.ma-shared-section a.ma-activity-link::after,
+.ma-shared-section a::before,
+.ma-shared-section a::after {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.ma-shared-section .ma-activity-link:hover,
+.ma-shared-section a.ma-activity-link:hover {
+  color: #005580 !important;
+  text-decoration: underline !important;
+}
+
+/* Activity Title */
+.ma-activity-title {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Activity Date */
+.ma-activity-date {
+  color: #9ca3af;
+  font-size: 0.8125rem;
+  flex-shrink: 0;
+  margin-left: 0.5rem;
+}
+
+.ma-activity-date::before {
+  content: "— ";
+}
+
+/* View All / More link */
+.ma-view-all {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+}
+
+.ma-view-all-link {
+  color: #0284c7 !important;
+  font-size: 0.8125rem;
+  font-style: italic;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.ma-view-all-link:hover {
+  color: #0369a1 !important;
+  text-decoration: underline;
+}
+
+.ma-view-all-link::before,
+.ma-view-all-link::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Attribution footer */
+.ma-attribution {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #bae6fd;
+}
+
+.ma-attribution-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.ma-attribution-text {
+  color: #64748b;
+  font-size: 0.75rem;
+}
+
+.ma-attribution-link {
+  color: #0284c7;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+.ma-attribution-link:hover {
+  color: #0369a1;
+  text-decoration: underline;
+}
