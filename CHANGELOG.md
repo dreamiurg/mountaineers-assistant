@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.4](https://github.com/dreamiurg/mountaineers-assistant/compare/v0.4.3...v0.4.4) (2026-01-12)
+
+
+### Bug Fixes
+
+* add --clobber flag to release upload for idempotency ([#52](https://github.com/dreamiurg/mountaineers-assistant/issues/52)) ([0d56908](https://github.com/dreamiurg/mountaineers-assistant/commit/0d569085a73e8c51c623b8ac5c3d9ca97ae7612d))
+* upload assets to existing release instead of creating new one ([#51](https://github.com/dreamiurg/mountaineers-assistant/issues/51)) ([b7a8af0](https://github.com/dreamiurg/mountaineers-assistant/commit/b7a8af0f320c35293f82af3237d67356fcec385a))
+
 ## [0.4.3](https://github.com/dreamiurg/mountaineers-assistant/compare/v0.4.2...v0.4.3) (2026-01-12)
 
 
