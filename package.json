@@ -1,6 +1,6 @@
 {
   "name": "mountaineers-assistant",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "Chrome extension that surfaces Mountaineers activity insights directly in the browser.",
   "main": "src/chrome-ext/background.js",
   "directories": {
@@ -27,7 +27,12 @@
     "type": "git",
     "url": "git+https://github.com/dreamiurg/mountaineers-assistant.git"
   },
-  "keywords": ["chrome-extension", "mountaineers", "hiking", "activities"],
+  "keywords": [
+    "chrome-extension",
+    "mountaineers",
+    "hiking",
+    "activities"
+  ],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
