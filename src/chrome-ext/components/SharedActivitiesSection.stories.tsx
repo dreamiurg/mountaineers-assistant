@@ -1,5 +1,9 @@
-import type { Meta, StoryObj } from '@storybook/react-webpack5'
-import { SharedActivitiesSection, type SharedActivity } from './SharedActivitiesSection'
+import type { Meta, StoryObj } from '@storybook/react'
+import {
+  SharedActivitiesSection,
+  type SharedActivitiesSectionProps,
+  type SharedActivity,
+} from './SharedActivitiesSection'
 import '../content-script.css'
 import './SharedActivitiesSection.stories.css'
 
@@ -119,7 +123,7 @@ export const InProfileContext: Story = {
   args: {
     activities: sampleActivities,
   },
-  render: (args) => (
+  render: (args: SharedActivitiesSectionProps) => (
     <ProfilePageWrapper>
       <SharedActivitiesSection {...args} />
     </ProfilePageWrapper>
@@ -141,7 +145,7 @@ export const SingleActivity: Story = {
   args: {
     activities: [sampleActivities[0]],
   },
-  render: (args) => (
+  render: (args: SharedActivitiesSectionProps) => (
     <ProfilePageWrapper>
       <SharedActivitiesSection {...args} />
     </ProfilePageWrapper>
@@ -195,7 +199,7 @@ export const ManyActivities: Story = {
     ],
     maxActivities: 5,
   },
-  render: (args) => (
+  render: (args: SharedActivitiesSectionProps) => (
     <ProfilePageWrapper>
       <SharedActivitiesSection {...args} />
     </ProfilePageWrapper>
@@ -217,7 +221,7 @@ export const NoActivities: Story = {
   args: {
     activities: [],
   },
-  render: (args) => (
+  render: (args: SharedActivitiesSectionProps) => (
     <ProfilePageWrapper>
       <SharedActivitiesSection {...args} />
       <div
@@ -250,7 +254,7 @@ export const Standalone: Story = {
     activities: sampleActivities,
   },
   decorators: [
-    (Story) => (
+    (Story: React.ComponentType) => (
       <div style={{ padding: '20px', background: 'white', maxWidth: '500px' }}>
         <Story />
       </div>
