@@ -1,5 +1,14 @@
 # Mountaineers Assistant Privacy Policy
 
+## TL;DR
+
+- Your data **stays on your device**. Nothing is sent anywhere.
+- We only read your Mountaineers.org activity pages (stuff **you can already see**).
+- **No accounts, no tracking, no analytics, no third parties.**
+- Error reporting is **optional** and you see exactly what gets shared before submitting.
+
+---
+
 Mountaineers Assistant is a Chrome extension that helps members review their Mountaineers.org activity history without leaving the site. This privacy policy explains what information the extension accesses, how that information is handled, and the choices available to you.
 
 ## Data We Access

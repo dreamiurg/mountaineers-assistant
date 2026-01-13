@@ -38,3 +38,5 @@ Thumbs.db
 
 # Git worktrees
 .worktrees/
+screenshots/
+scripts/capture-cws-screenshots.js

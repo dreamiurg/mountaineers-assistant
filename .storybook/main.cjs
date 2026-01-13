@@ -1,4 +1,6 @@
 const path = require('node:path')
+const webpack = require('webpack')
+const packageJson = require('../package.json')
 
 /** @type {import('@storybook/react-webpack5').StorybookConfig} */
 const config = {
@@ -33,6 +35,15 @@ const config = {
       },
     })
     config.resolve.extensions = [...(config.resolve.extensions || []), '.ts', '.tsx']
+
+    // Define __APP_VERSION__ for the Footer component
+    config.plugins = config.plugins || []
+    config.plugins.push(
+      new webpack.DefinePlugin({
+        __APP_VERSION__: JSON.stringify(packageJson.version),
+      })
+    )
+
     return config
   },
 }
