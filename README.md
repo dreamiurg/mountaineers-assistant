@@ -71,4 +71,6 @@ Your data **never leaves your browser**. No servers, no analytics, no third part
 
 ---
 
+Built in Seattle by a [fellow Mountaineer](https://www.mountaineers.org/members/dmytro-gayvoronskyy).
+
 Questions? [Open an issue](https://github.com/dreamiurg/mountaineers-assistant/issues) · Want to help? [Contributing guide](CONTRIBUTING.md)
