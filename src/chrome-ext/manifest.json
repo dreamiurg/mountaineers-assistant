@@ -1,10 +1,16 @@
 {
   "manifest_version": 3,
   "name": "Mountaineers Assistant",
-  "version": "0.4.6",
+  "version": "0.4.7",
   "description": "Enhance your Mountaineers browsing experience with personalized activity insights.",
-  "permissions": ["storage", "offscreen", "tabs"],
-  "host_permissions": ["https://www.mountaineers.org/*"],
+  "permissions": [
+    "storage",
+    "offscreen",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://www.mountaineers.org/*"
+  ],
   "background": {
     "service_worker": "background.js",
     "type": "module"
@@ -18,9 +24,15 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://www.mountaineers.org/members/*"],
-      "js": ["content-script.js"],
-      "css": ["content-script.css"],
+      "matches": [
+        "https://www.mountaineers.org/members/*"
+      ],
+      "js": [
+        "content-script.js"
+      ],
+      "css": [
+        "content-script.css"
+      ],
       "run_at": "document_idle"
     }
   ],
@@ -35,7 +47,9 @@
         "vendor/choices.min.js",
         "vendor/choices.min.css"
       ],
-      "matches": ["https://www.mountaineers.org/*"]
+      "matches": [
+        "https://www.mountaineers.org/*"
+      ]
     }
   ]
 }
