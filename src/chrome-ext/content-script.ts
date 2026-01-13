@@ -175,10 +175,14 @@ function createSharedActivitiesSection(
 function formatDate(dateString: string): string {
   try {
     const date = new Date(dateString)
+    if (Number.isNaN(date.getTime())) {
+      return 'Invalid Date'
+    }
     return date.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
+      timeZone: 'UTC',
     })
   } catch {
     return dateString
