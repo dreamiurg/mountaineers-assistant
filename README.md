@@ -1,96 +1,74 @@
 # Mountaineers Assistant
 
-A Chrome extension that enhances your Mountaineers.org experience with personalized activity insights and analytics.
+**Ever wonder who you've climbed with the most? Or how many activities you've done this year?**
 
-## Features
+Mountaineers.org doesn't make it easy to explore your own activity history. This extension fixes that.
 
-- **Activity History Sync** - Fetch and cache your Mountaineers activity data using your existing login session
-- **Interactive Dashboard** - Explore visualizations of your climbing history with filters for:
-  - Activity type (Alpine Scramble, Rock Climbing, etc.)
-  - Category (Climbs, Courses, etc.)
-  - Your role (Leader, Participant, etc.)
-  - Activity partners
+![Insights dashboard](tests/chrome-extension/insights-dashboard-visual.spec.ts-snapshots/insights-default-chromium-extension-darwin.png)
 
-![Insights dashboard screenshot](tests/chrome-extension/insights-dashboard-visual.spec.ts-snapshots/insights-default-chromium-extension-darwin.png)
+## What it does
 
-## Installation
+- Syncs your Mountaineers.org activity history (using your existing login)
+- Shows you charts, stats, and trends you can't see on the site
+- Helps you find patterns: who you climb with, what types of trips you do, your participation over time
+- All your data stays on your device. No accounts, no tracking.
 
-### From Chrome Web Store (Recommended)
+## Install
 
-[Install from Chrome Web Store](https://chromewebstore.google.com/detail/mountaineers-assistant/dinamjoegfooacbhmhgbjeidfgcmbonl)
+[**Get it from Chrome Web Store →**](https://chromewebstore.google.com/detail/mountaineers-assistant/dinamjoegfooacbhmhgbjeidfgcmbonl)
 
-### Manual Installation (Latest Development Build)
+Or grab the latest build from [Releases](https://github.com/dreamiurg/mountaineers-assistant/releases).
 
-1. Download the latest release ZIP from [GitHub Releases](https://github.com/dreamiurg/mountaineers-assistant/releases)
-2. Extract the ZIP file
-3. Open Chrome and navigate to `chrome://extensions`
-4. Enable **Developer mode** (toggle in top right)
-5. Click **Load unpacked**
-6. Select the extracted folder
+## How it works
 
-## How to Use
+```mermaid
+flowchart LR
+    A[You] -->|logged in| B[Mountaineers.org]
+    B -->|your activity pages| C[Extension]
+    C -->|parsed data| D[(Local Cache)]
+    D --> E[Dashboard]
+```
 
-### First Time Setup
+1. Log in to Mountaineers.org
+2. Click the extension icon
+3. Hit "Fetch New Activities"
+4. Explore your data
 
-1. **Log in to Mountaineers.org** in your browser
-2. **Click the extension icon** in your Chrome toolbar
-3. The **Insights dashboard** will open
-4. **Click "Fetch New Activities"** to sync your data
+The extension reads the same activity pages you see when logged in, parses the data, and stores everything locally in your browser.
 
-The extension uses your existing Mountaineers.org session - no separate login required.
+### Under the hood
 
-### Fetching New Activities
+```mermaid
+flowchart TB
+    subgraph Browser["Your Browser"]
+        subgraph Ext["Extension"]
+            BG[Background Script]
+            OFF[Offscreen Document]
+            UI[Dashboard UI]
+        end
+        STORE[(Chrome Storage)]
+    end
 
-- Click **"Fetch New Activities"** from the Insights dashboard.
-- The extension will sync your activity history (typically takes 30-60 seconds but may take longer if you participated in a lot of activities in the past). Progress updates show in real-time.
-- Data is cached locally for fast access.
+    WEB[Mountaineers.org]
 
-### Exploring Your Data
+    UI -->|"fetch request"| BG
+    BG -->|"spawns"| OFF
+    OFF -->|"fetches pages"| WEB
+    WEB -->|"HTML"| OFF
+    OFF -->|"parsed activities"| BG
+    BG -->|"saves"| STORE
+    STORE -->|"loads"| UI
+```
 
-The Insights dashboard provides:
+- **Background Script** — coordinates everything, handles extension lifecycle
+- **Offscreen Document** — fetches and parses Mountaineers.org pages (runs in background so UI stays responsive)
+- **Dashboard UI** — React app that visualizes your data with charts and filters
+- **Chrome Storage** — local cache so you don't have to re-fetch every time
 
-- **Activity statistics** - Total activities, success rate, date ranges
-- **Visual charts** - Activity distribution by type and category
-- **Activity list** - Searchable, filterable list of all your activities
-- **Partner analysis** - See who you've climbed with most
+## Privacy
 
-Use the filters at the top to focus on specific activity types, time periods, or partners.
+Your data **never leaves your browser**. No servers, no analytics, no third parties. [Full privacy policy →](PRIVACY.md)
 
-### Settings
+---
 
-Click **Preferences** to configure:
-
-- **Fetch limit** - Limit how many recent activities to sync (useful for faster syncs)
-
-## Privacy & Data
-
-**Your data never leaves your browser.**
-
-- All activity data is stored locally in Chrome's storage
-- No external servers or analytics
-- Only communicates with Mountaineers.org to fetch your data
-- Uses your existing session cookies (same as browsing the site)
-
-For technical details, see our [Privacy Policy](PRIVACY.md).
-
-## Permissions
-
-The extension requires these permissions:
-
-- **storage** - Save your cached activity data locally
-- **offscreen** - Run data collection in the background
-- **tabs** - Open the insights dashboard when you click the extension icon
-- **mountaineers.org** - Access your activity data using your login session
-
-## Support
-
-- **Found a bug?** [Report an issue](https://github.com/dreamiurg/mountaineers-assistant/issues)
-- **Feature request?** [Open a discussion](https://github.com/dreamiurg/mountaineers-assistant/discussions)
-
-## Contributing
-
-Want to contribute? See [CONTRIBUTING.md](CONTRIBUTING.md) for developer setup and guidelines.
-
-## Changelog
-
-See [CHANGELOG.md](CHANGELOG.md) for a list of changes in each release.
+Questions? [Open an issue](https://github.com/dreamiurg/mountaineers-assistant/issues) · Want to help? [Contributing guide](CONTRIBUTING.md)
