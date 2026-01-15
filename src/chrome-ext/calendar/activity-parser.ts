@@ -91,30 +91,38 @@ export function parseActivityPage(): ActivityPageData | null {
  * Determine if registration is currently open based on page elements
  */
 function determineRegistrationStatus(): boolean {
-  // Look for "Register" or "Join Waitlist" buttons
-  const registerButton = document.querySelector(
-    'button:contains("Register"), a:contains("Register"), button:contains("Join Waitlist"), a:contains("Join Waitlist")'
-  )
-  if (registerButton) {
-    return true
-  }
-
   // Look for "Registration Opens" text which indicates it's not open yet
-  const registrationOpensText = document.body.textContent?.toLowerCase()
-  if (registrationOpensText?.includes('registration opens')) {
+  const bodyText = document.body.textContent?.toLowerCase() ?? ''
+  if (bodyText.includes('registration opens')) {
     return false
   }
 
+  // Look for "Register" or "Join Waitlist" buttons
+  if (findButtonByText(['Register', 'Join Waitlist'])) {
+    return true
+  }
+
   // Look for "View Roster" which indicates user might be registered
-  const viewRosterButton = document.querySelector(
-    'button:contains("View Roster"), a:contains("View Roster")'
-  )
-  if (viewRosterButton) {
+  if (findButtonByText(['View Roster'])) {
     return true
   }
 
   // Default to true if we can't determine
   return true
+}
+
+/**
+ * Find button or link element containing specific text
+ */
+function findButtonByText(textOptions: string[]): HTMLElement | null {
+  const elements = document.querySelectorAll('button, a')
+  for (const element of elements) {
+    const text = element.textContent?.trim() ?? ''
+    if (textOptions.some((option) => text.includes(option))) {
+      return element as HTMLElement
+    }
+  }
+  return null
 }
 
 /**
