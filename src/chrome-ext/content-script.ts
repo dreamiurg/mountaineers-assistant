@@ -208,16 +208,25 @@ function createSharedActivitiesSection(
     section.appendChild(viewAll)
   }
 
-  // Attribution footer
+  // Attribution footer with extension icon
   const attribution = document.createElement('div')
   attribution.className = 'ma-attribution'
   const dashboardUrl = chrome.runtime.getURL('insights.html')
-  attribution.innerHTML = `
-    <span class="ma-attribution-icon">⛰️</span>
-    <span class="ma-attribution-text">
-      Powered by <a href="${dashboardUrl}" target="_blank" rel="noopener noreferrer" class="ma-attribution-link">Mountaineers Assistant</a>
-    </span>
-  `
+  const iconUrl = chrome.runtime.getURL('icons/icon16.png')
+
+  const icon = document.createElement('img')
+  icon.src = iconUrl
+  icon.className = 'ma-attribution-icon'
+  icon.alt = 'Mountaineers Assistant'
+  icon.width = 16
+  icon.height = 16
+
+  const text = document.createElement('span')
+  text.className = 'ma-attribution-text'
+  text.innerHTML = `Powered by <a href="${dashboardUrl}" target="_blank" rel="noopener noreferrer" class="ma-attribution-link">Mountaineers Assistant</a>`
+
+  attribution.appendChild(icon)
+  attribution.appendChild(text)
   section.appendChild(attribution)
 
   return section

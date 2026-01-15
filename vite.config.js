@@ -30,6 +30,10 @@ module.exports = defineConfig({
           src: 'content-script.css',
           dest: '.',
         },
+        {
+          src: 'icons/**/*',
+          dest: 'icons',
+        },
       ],
     }),
   ],

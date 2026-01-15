@@ -1,9 +1,15 @@
 {
   "hooks": {
-    "postToolUse": [
+    "PostToolUse": [
       {
         "matcher": "Edit|Write|MultiEdit|NotebookEdit",
-        "command": "bun run format"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun run format",
+            "timeout": 60
+          }
+        ]
       }
     ]
   }
