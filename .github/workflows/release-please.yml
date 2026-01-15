@@ -67,3 +67,12 @@ jobs:
         run: |
           TAG="${{ needs.release-please.outputs.tag_name }}"
           gh release edit "$TAG" --draft=false
+
+      - name: Publish to Chrome Web Store
+        uses: mnao305/chrome-extension-upload@v5.0.0
+        with:
+          file-path: mountaineers-assistant-${{ needs.release-please.outputs.version }}.zip
+          extension-id: ${{ secrets.CWS_EXTENSION_ID }}
+          client-id: ${{ secrets.CWS_CLIENT_ID }}
+          client-secret: ${{ secrets.CWS_CLIENT_SECRET }}
+          refresh-token: ${{ secrets.CWS_REFRESH_TOKEN }}
