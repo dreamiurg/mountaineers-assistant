@@ -8,6 +8,62 @@ import { downloadICS, generateICS, generateICSFilename } from './ics-generator'
 import type { CalendarButtonConfig, CalendarService } from './types'
 
 /**
+ * Create inline calendar links (more subtle than split button)
+ */
+export function createInlineCalendarLinks(config: CalendarButtonConfig): HTMLElement {
+  const container = document.createElement('span')
+  container.className = 'ma-calendar-inline-links'
+
+  // Add extension icon
+  const iconUrl = chrome.runtime.getURL('icons/icon16.png')
+  const icon = document.createElement('img')
+  icon.src = iconUrl
+  icon.className = 'ma-calendar-icon'
+  icon.alt = 'Mountaineers Assistant'
+  icon.width = 16
+  icon.height = 16
+  container.appendChild(icon)
+
+  // Add "Add to Calendar:" prefix
+  const prefix = document.createElement('span')
+  prefix.className = 'ma-calendar-prefix'
+  prefix.textContent = 'Add to Calendar: '
+  container.appendChild(prefix)
+
+  // Calendar service links
+  const links: Array<{ label: string; service: CalendarService }> = [
+    { label: 'Google Calendar', service: 'google' },
+    { label: 'Outlook', service: 'outlook' },
+    { label: 'Download Event File', service: 'ics' },
+  ]
+
+  links.forEach((link, index) => {
+    const anchor = document.createElement('a')
+    anchor.className = 'ma-calendar-link'
+    anchor.textContent = link.label
+    anchor.href = '#'
+    anchor.title = link.label
+
+    anchor.addEventListener('click', (e) => {
+      e.preventDefault()
+      handleCalendarService(link.service, config)
+    })
+
+    container.appendChild(anchor)
+
+    // Add separator between links (but not after the last one)
+    if (index < links.length - 1) {
+      const separator = document.createElement('span')
+      separator.className = 'ma-calendar-separator'
+      separator.textContent = ' | '
+      container.appendChild(separator)
+    }
+  })
+
+  return container
+}
+
+/**
  * Create split button element with dropdown
  */
 export function createSplitButton(config: CalendarButtonConfig): HTMLElement {

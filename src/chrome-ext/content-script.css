@@ -155,8 +155,10 @@
 }
 
 .ma-attribution-icon {
-  font-size: 1rem;
-  line-height: 1;
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+  margin-right: 0.25rem;
 }
 
 .ma-attribution-text {
@@ -176,10 +178,16 @@
   text-decoration: underline;
 }
 
+/* Calendar Export Button Wrapper - in Registration Status Section */
+.ma-calendar-button-wrapper {
+  margin: 1rem 0;
+}
+
 /* Calendar Export Button - Split Button */
 .ma-calendar-button-container {
-  display: inline-flex;
-  margin: 0.5rem 0;
+  display: flex;
+  width: 100%;
+  margin: 0;
   position: relative;
   font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
@@ -191,12 +199,14 @@
   border: 1px solid #16a34a;
   border-right: none;
   border-radius: 0.375rem 0 0 0.375rem;
-  padding: 0.5rem 1rem;
+  padding: 0.625rem 1rem;
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;
+  flex: 1;
+  text-align: center;
 }
 
 .ma-calendar-primary:hover {
@@ -216,13 +226,14 @@
   border: 1px solid #16a34a;
   border-left: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 0 0.375rem 0.375rem 0;
-  padding: 0.5rem 0.625rem;
+  padding: 0.625rem 0.75rem;
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.15s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .ma-calendar-dropdown-toggle:hover {
@@ -291,4 +302,44 @@
   margin: 1rem 0;
   padding: 1rem 0;
   border-top: 1px solid #e5e7eb;
+}
+
+/* Inline Calendar Links - matches Mountaineers.org "iCal Google" style */
+.ma-calendar-inline-wrapper {
+  display: inline;
+}
+
+.ma-calendar-inline-links {
+  display: inline;
+  font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 0.9375rem;
+}
+
+.ma-calendar-icon {
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+  margin-right: 0.25rem;
+}
+
+.ma-calendar-prefix {
+  color: #374151;
+  font-weight: normal;
+}
+
+.ma-calendar-link {
+  color: #0077b3 !important;
+  text-decoration: none !important;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.ma-calendar-link:hover {
+  color: #005580 !important;
+  text-decoration: underline !important;
+}
+
+.ma-calendar-separator {
+  color: #6b7280;
+  margin: 0 0.25rem;
 }

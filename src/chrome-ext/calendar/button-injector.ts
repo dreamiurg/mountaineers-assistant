@@ -2,20 +2,13 @@
  * Inject calendar export button into activity pages
  */
 
-import { createSplitButton } from './split-button'
+import { createInlineCalendarLinks } from './split-button'
 import type { ActivityPageData, CalendarButtonConfig, CalendarEventData } from './types'
 
 /**
  * Inject calendar button into activity page
  */
 export function injectCalendarButton(activityData: ActivityPageData): void {
-  // Find insertion point near action buttons
-  const insertionPoint = findInsertionPoint()
-  if (!insertionPoint) {
-    console.warn('Mountaineers Assistant: Could not find insertion point for calendar button')
-    return
-  }
-
   // Build calendar button configuration
   const config = buildButtonConfig(activityData)
   if (!config) {
@@ -23,46 +16,84 @@ export function injectCalendarButton(activityData: ActivityPageData): void {
     return
   }
 
-  // Create and inject button
-  const button = createSplitButton(config)
-  insertionPoint.appendChild(button)
+  // Find insertion point based on registration status
+  const insertionPoint = findInsertionPoint(activityData)
+  if (!insertionPoint) {
+    console.warn('Mountaineers Assistant: Could not find insertion point for calendar button')
+    return
+  }
 
-  console.info('Mountaineers Assistant: Calendar button injected')
+  // Create and inject inline calendar links
+  const calendarLinks = createInlineCalendarLinks(config)
+  insertionPoint.appendChild(calendarLinks)
+
+  console.info('Mountaineers Assistant: Calendar links injected')
 }
 
 /**
- * Find insertion point for calendar button
- * Looks for action button containers near registration/roster buttons
+ * Find insertion point for calendar links
+ * Places links inline with the date or registration open information
  */
-function findInsertionPoint(): HTMLElement | null {
-  // Try to find existing action button container
-  const selectors = [
-    '.activity-actions', // Common action button container
-    '.program-core .actions', // Program core actions
-    '.register-actions', // Registration button area
-    'div:has(> button:contains("Register"))', // Div containing register button
-    'div:has(> a:contains("Register"))', // Div containing register link
-    'div:has(> button:contains("View Roster"))', // Div containing roster button
-  ]
+function findInsertionPoint(activityData: ActivityPageData): HTMLElement | null {
+  // Strategy: Find the line that shows the activity date or registration open date
+  // and insert our calendar links right after it
 
-  for (const selector of selectors) {
-    try {
-      const element = document.querySelector(selector)
-      if (element instanceof HTMLElement) {
-        return element
+  // If registration is not open yet, look for "Registration Open:" line
+  if (!activityData.isRegistrationOpen && activityData.registrationOpensAt) {
+    const regOpenElements = Array.from(
+      document.querySelectorAll('p, div, li, dt, dd, span, .detail-item, .info-item')
+    )
+
+    for (const el of regOpenElements) {
+      const text = el.textContent?.trim() || ''
+      if (text.match(/Registration Open:/i)) {
+        // Found the registration open line
+        const wrapper = document.createElement('span')
+        wrapper.className = 'ma-calendar-inline-wrapper'
+        wrapper.textContent = ' '
+        el.appendChild(wrapper)
+        return wrapper
       }
-    } catch {
-      // :has() might not be supported in all browsers, continue
     }
   }
 
-  // Fallback: create wrapper after .program-core .details
-  const programCore = document.querySelector('.program-core')
-  if (programCore) {
-    const wrapper = document.createElement('div')
-    wrapper.className = 'ma-calendar-actions'
-    programCore.appendChild(wrapper)
-    return wrapper
+  // Otherwise, look for the activity date line (usually at the top of the activity details)
+  // Look for date patterns like "Wed, Sep 16, 2026" or similar
+  const dateElements = Array.from(
+    document.querySelectorAll('p, div, li, dt, dd, span, .detail-item, .info-item, .date')
+  )
+
+  for (const el of dateElements) {
+    const text = el.textContent?.trim() || ''
+    // Match common date patterns
+    if (text.match(/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun),?\s+\w+\s+\d{1,2},?\s+\d{4}/)) {
+      // Found a date line
+      const wrapper = document.createElement('span')
+      wrapper.className = 'ma-calendar-inline-wrapper'
+      wrapper.textContent = ' '
+      el.appendChild(wrapper)
+      return wrapper
+    }
+  }
+
+  // Fallback: look for any element with the date text
+  if (activityData.startDate) {
+    const dateStr = activityData.startDate.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    })
+
+    for (const el of dateElements) {
+      if (el.textContent?.includes(dateStr)) {
+        const wrapper = document.createElement('span')
+        wrapper.className = 'ma-calendar-inline-wrapper'
+        wrapper.textContent = ' '
+        el.appendChild(wrapper)
+        return wrapper
+      }
+    }
   }
 
   return null
