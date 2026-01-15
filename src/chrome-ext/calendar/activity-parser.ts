@@ -140,27 +140,39 @@ function normalizeWhitespace(value: string | null): string | null {
 /**
  * Parse date string into Date object
  * Handles various date formats from Mountaineers.org
+ *
+ * IMPORTANT: Mountaineers.org displays times in Pacific Time without timezone markers.
+ * This function interprets date strings as Pacific Time to ensure calendar exports
+ * show correct times for users in all timezones.
  */
 function parseDate(value: string): Date | null {
   if (!value) {
     return null
   }
 
-  // Try parsing as ISO string first
-  const isoDate = new Date(value)
-  if (!Number.isNaN(isoDate.getTime())) {
-    return isoDate
-  }
-
-  // Try common Mountaineers.org format: "Sat, Jan 20, 2024, 9:00 AM"
-  // Remove day of week if present
+  // Remove day of week if present: "Sat, Jan 20, 2024, 9:00 AM" -> "Jan 20, 2024, 9:00 AM"
   const withoutDayOfWeek = value.replace(/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun),?\s*/i, '')
 
-  const parsed = new Date(withoutDayOfWeek)
-  if (!Number.isNaN(parsed.getTime())) {
-    return parsed
+  // Parse to extract date/time components
+  // This initially uses the browser's local timezone, but we'll reinterpret as Pacific
+  const tempDate = new Date(withoutDayOfWeek)
+  if (Number.isNaN(tempDate.getTime())) {
+    console.warn('Mountaineers Assistant: Could not parse date:', value)
+    return null
   }
 
-  console.warn('Mountaineers Assistant: Could not parse date:', value)
-  return null
+  // Extract the components that were parsed
+  const year = tempDate.getFullYear()
+  const month = tempDate.getMonth()
+  const day = tempDate.getDate()
+  const hours = tempDate.getHours()
+  const minutes = tempDate.getMinutes()
+
+  // Treat these components as Pacific Time and convert to UTC
+  // Pacific Standard Time = UTC-8, Pacific Daylight Time = UTC-7
+  // For now, using PST offset. TODO: Add proper DST handling based on date
+  const PACIFIC_OFFSET_HOURS = 8 // PST offset from UTC
+
+  // Create UTC date by adding Pacific offset to the parsed hours
+  return new Date(Date.UTC(year, month, day, hours + PACIFIC_OFFSET_HOURS, minutes))
 }
