@@ -1,3 +1,6 @@
+import { parseActivityPage } from './calendar/activity-parser'
+import { injectCalendarButton } from './calendar/button-injector'
+
 interface SharedActivity {
   uid: string
   title: string
@@ -7,7 +10,45 @@ interface SharedActivity {
 
 const MAX_ACTIVITIES_TO_SHOW = 5
 
+enum PageType {
+  MemberProfile,
+  Activity,
+  Unknown,
+}
+
 async function init(): Promise<void> {
+  const pageType = detectPageType()
+
+  switch (pageType) {
+    case PageType.MemberProfile:
+      await initMemberProfileFeatures()
+      break
+    case PageType.Activity:
+      initActivityPageFeatures()
+      break
+    case PageType.Unknown:
+      // Not a page we handle
+      break
+  }
+}
+
+function detectPageType(): PageType {
+  const pathname = window.location.pathname
+
+  // Check for member profile page
+  if (pathname.match(/^\/members\/[^/?#]+/)) {
+    return PageType.MemberProfile
+  }
+
+  // Check for activity page
+  if (pathname.match(/^\/activities\/[^/?#]+/) || pathname.includes('/climb/')) {
+    return PageType.Activity
+  }
+
+  return PageType.Unknown
+}
+
+async function initMemberProfileFeatures(): Promise<void> {
   const memberUid = extractMemberUidFromUrl()
   if (!memberUid) {
     return
@@ -24,6 +65,16 @@ async function init(): Promise<void> {
 
   const activities: SharedActivity[] = response.activities
   injectSharedActivitiesSection(activities, memberUid)
+}
+
+function initActivityPageFeatures(): void {
+  const activityData = parseActivityPage()
+  if (!activityData) {
+    console.warn('Mountaineers Assistant: Could not parse activity page')
+    return
+  }
+
+  injectCalendarButton(activityData)
 }
 
 function extractMemberUidFromUrl(): string | null {
@@ -175,10 +226,14 @@ function createSharedActivitiesSection(
 function formatDate(dateString: string): string {
   try {
     const date = new Date(dateString)
+    if (Number.isNaN(date.getTime())) {
+      return 'Invalid Date'
+    }
     return date.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
+      timeZone: 'UTC',
     })
   } catch {
     return dateString
