@@ -28,12 +28,7 @@
     "type": "git",
     "url": "git+https://github.com/dreamiurg/mountaineers-assistant.git"
   },
-  "keywords": [
-    "chrome-extension",
-    "mountaineers",
-    "hiking",
-    "activities"
-  ],
+  "keywords": ["chrome-extension", "mountaineers", "hiking", "activities"],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
