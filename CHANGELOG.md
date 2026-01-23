@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.8](https://github.com/dreamiurg/mountaineers-assistant/compare/v0.4.7...v0.4.8) (2026-01-23)
+
+
+### Features
+
+* add test coverage measurement to CI ([#70](https://github.com/dreamiurg/mountaineers-assistant/issues/70)) ([2bd6dab](https://github.com/dreamiurg/mountaineers-assistant/commit/2bd6dab9d7fe89f707e6439573587c8262eaf774))
+* calendar export with smart registration reminders ([#66](https://github.com/dreamiurg/mountaineers-assistant/issues/66)) ([192ea52](https://github.com/dreamiurg/mountaineers-assistant/commit/192ea528d234aeb7efe1229d9c3e0c3c4e6361c1))
+* improve calendar export UX with inline links and extension branding ([#67](https://github.com/dreamiurg/mountaineers-assistant/issues/67)) ([7131a96](https://github.com/dreamiurg/mountaineers-assistant/commit/7131a96cb592fd18fcfe8687ad9016416048e98f))
+
 ## [0.4.7](https://github.com/dreamiurg/mountaineers-assistant/compare/v0.4.6...v0.4.7) (2026-01-13)
 
 
