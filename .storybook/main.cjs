@@ -5,7 +5,7 @@ const packageJson = require('../package.json')
 /** @type {import('@storybook/react-webpack5').StorybookConfig} */
 const config = {
   stories: ['../src/**/*.stories.@(ts|tsx)'],
-  addons: ['@storybook/addon-essentials', '@storybook/addon-interactions'],
+  addons: ['@storybook/addon-docs'],
   framework: {
     name: '@storybook/react-webpack5',
     options: {},
