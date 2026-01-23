@@ -1,4 +1,4 @@
-import type { Preview } from '@storybook/react'
+import type { Preview } from '@storybook/react-webpack5'
 
 import '../src/chrome-ext/tailwind.css'
 import '../src/chrome-ext/insights.css'
@@ -6,11 +6,10 @@ import '../src/chrome-ext/insights.css'
 const preview: Preview = {
   parameters: {
     backgrounds: {
-      default: 'App Surface',
-      values: [
-        { name: 'App Surface', value: '#f8fafc' },
-        { name: 'Dark', value: '#020617' },
-      ],
+      options: {
+        app_surface: { name: 'App Surface', value: '#f8fafc' },
+        dark: { name: 'Dark', value: '#020617' },
+      },
     },
     layout: 'fullscreen',
     controls: {
@@ -18,6 +17,12 @@ const preview: Preview = {
         color: /(background|color)$/i,
         date: /Date$/i,
       },
+    },
+  },
+
+  initialGlobals: {
+    backgrounds: {
+      value: 'app_surface',
     },
   },
 }
