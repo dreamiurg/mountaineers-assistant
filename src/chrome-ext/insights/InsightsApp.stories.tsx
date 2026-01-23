@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react-webpack5'
 import Highcharts from 'highcharts'
 import sampleData from '../../data/sample-activities.json'
 import type { ExtensionCache, ExtensionSettings } from '../shared/types'
