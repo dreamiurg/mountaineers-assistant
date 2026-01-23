@@ -7,6 +7,7 @@ storybook-static/
 
 # Local artifacts & reports
 artifacts/
+coverage/
 mountaineers-assistant-*.zip
 playwright-report/
 test-results/
@@ -40,3 +41,9 @@ Thumbs.db
 .worktrees/
 screenshots/
 scripts/capture-cws-screenshots.js
+
+# Gas Town (added by gt)
+.runtime/
+.claude/
+.beads/
+.logs/
