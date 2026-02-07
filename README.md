@@ -71,6 +71,16 @@ Your data **never leaves your browser**. No servers, no analytics, no third part
 
 ---
 
+## Other Mountaineering & Outdoors Tools
+
+I climb, scramble, and hike a lot, and I keep building tools around it. If this one's useful to you, the others might be too:
+
+- **[mountaineers-mcp](https://github.com/dreamiurg/mountaineers-mcp)** -- MCP server that lets AI assistants search and browse mountaineers.org. Activities, courses, trip reports, your account data. Works with Claude Desktop, Claude Code, and Codex CLI.
+- **[peakbagger-cli](https://github.com/dreamiurg/peakbagger-cli)** -- Command-line access to PeakBagger.com. Search peaks, check elevation and prominence, browse ascent stats. Outputs JSON for piping into other tools.
+- **[claude-mountaineering-skills](https://github.com/dreamiurg/claude-mountaineering-skills)** -- Claude Code plugin that generates route beta reports by pulling conditions, forecasts, and trip reports from multiple mountaineering sites.
+
+---
+
 Built in Seattle by a [fellow Mountaineer](https://www.mountaineers.org/members/dmytro-gayvoronskyy).
 
 Questions? [Open an issue](https://github.com/dreamiurg/mountaineers-assistant/issues) · Want to help? [Contributing guide](CONTRIBUTING.md)
