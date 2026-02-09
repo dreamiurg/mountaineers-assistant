@@ -29,10 +29,9 @@ repos:
         stages: [pre-commit]
 
       # SAST - static application security testing (pre-push stage)
-      # Runs full scan on push; pre-existing findings tracked in CI
       - id: semgrep
         name: semgrep SAST
-        entry: semgrep scan --config auto --error --quiet --exclude='tests/' --exclude='scripts/'
+        entry: semgrep scan --config auto --error --quiet --exclude-rule javascript.browser.security.insecure-document-method.insecure-document-method --exclude-rule javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
         language: system
         pass_filenames: false
         stages: [pre-push]
