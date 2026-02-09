@@ -1,4 +1,6 @@
 # Mountaineers Assistant
+[![CI](https://github.com/dreamiurg/mountaineers-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/dreamiurg/mountaineers-assistant/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/dreamiurg/mountaineers-assistant/graph/badge.svg)](https://codecov.io/gh/dreamiurg/mountaineers-assistant)
 
 **Ever wonder who you've climbed with the most? Or how many activities you've done this year?**
 
@@ -65,9 +67,31 @@ flowchart TB
 - **Dashboard UI** — React app that visualizes your data with charts and filters
 - **Chrome Storage** — local cache so you don't have to re-fetch every time
 
+## Development
+
+```bash
+bun install              # Install dependencies
+bun run dev              # Start dev server
+bun run check            # Typecheck + lint
+bun run test:unit        # Unit tests
+bun run test:coverage    # Unit tests with coverage enforcement
+bun run complexity       # Cyclomatic complexity check
+bun run ci               # Full local CI (check + test + complexity + build)
+```
+
 ## Privacy
 
 Your data **never leaves your browser**. No servers, no analytics, no third parties. [Full privacy policy →](PRIVACY.md)
+
+---
+
+## Other Mountaineering & Outdoors Tools
+
+I climb, scramble, and hike a lot, and I keep building tools around it. If this one's useful to you, the others might be too:
+
+- **[mountaineers-mcp](https://github.com/dreamiurg/mountaineers-mcp)** -- MCP server that lets AI assistants search and browse mountaineers.org. Activities, courses, trip reports, your account data. Works with Claude Desktop, Claude Code, and Codex CLI.
+- **[peakbagger-cli](https://github.com/dreamiurg/peakbagger-cli)** -- Command-line access to PeakBagger.com. Search peaks, check elevation and prominence, browse ascent stats. Outputs JSON for piping into other tools.
+- **[claude-mountaineering-skills](https://github.com/dreamiurg/claude-mountaineering-skills)** -- Claude Code plugin that generates route beta reports by pulling conditions, forecasts, and trip reports from multiple mountaineering sites.
 
 ---
 
