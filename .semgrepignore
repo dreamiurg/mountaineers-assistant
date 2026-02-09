@@ -1,0 +1,11 @@
+# Test and script directories (not production code)
+tests/
+scripts/
+
+# Build artifacts
+dist/
+node_modules/
+.venv/
+
+# Vendor code
+src/chrome-ext/vendor/

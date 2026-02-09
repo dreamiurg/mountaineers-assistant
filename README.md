@@ -1,4 +1,6 @@
 # Mountaineers Assistant
+[![CI](https://github.com/dreamiurg/mountaineers-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/dreamiurg/mountaineers-assistant/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/dreamiurg/mountaineers-assistant/graph/badge.svg)](https://codecov.io/gh/dreamiurg/mountaineers-assistant)
 
 **Ever wonder who you've climbed with the most? Or how many activities you've done this year?**
 
@@ -64,6 +66,18 @@ flowchart TB
 - **Offscreen Document** — fetches and parses Mountaineers.org pages (runs in background so UI stays responsive)
 - **Dashboard UI** — React app that visualizes your data with charts and filters
 - **Chrome Storage** — local cache so you don't have to re-fetch every time
+
+## Development
+
+```bash
+bun install              # Install dependencies
+bun run dev              # Start dev server
+bun run check            # Typecheck + lint
+bun run test:unit        # Unit tests
+bun run test:coverage    # Unit tests with coverage enforcement
+bun run complexity       # Cyclomatic complexity check
+bun run ci               # Full local CI (check + test + complexity + build)
+```
 
 ## Privacy
 

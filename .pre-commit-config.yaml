@@ -4,29 +4,49 @@ repos:
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
-      - id: check-added-large-files
-        args:
-          - "--maxkb=1024"
-      - id: check-merge-conflict
-      - id: check-json
       - id: check-yaml
-      - id: detect-private-key
+      - id: check-json
+      - id: check-merge-conflict
       - id: no-commit-to-branch
-        args:
-          - "--branch"
-          - "main"
+        args: [--branch, main]
+      - id: check-added-large-files
+        args: [--maxkb=500]
+      - id: detect-private-key
 
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.0
+    hooks:
+      - id: gitleaks
+
+  # Biome: format + lint (pre-commit stage)
   - repo: local
     hooks:
       - id: biome-check
         name: biome check
-        entry: npx biome check --write --unsafe .
+        entry: npx biome check --write --no-errors-on-unmatched
         language: system
-        types: [file]
-        files: "\\.(js|ts|jsx|tsx|json|css|html)$"
-        pass_filenames: false
+        types_or: [javascript, jsx, ts, tsx, json]
+        stages: [pre-commit]
 
-  - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.28.0
-    hooks:
-      - id: gitleaks
+      # SAST - static application security testing (pre-push stage)
+      - id: semgrep
+        name: semgrep SAST
+        entry: semgrep scan --config auto --error --quiet --exclude-rule javascript.browser.security.insecure-document-method.insecure-document-method --exclude-rule javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+
+      # Pre-push hooks: typecheck + tests
+      - id: typecheck
+        name: typescript typecheck
+        entry: npx tsc --noEmit
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+
+      - id: test
+        name: unit tests
+        entry: bun x tsx --test tests/unit/*.test.ts
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
