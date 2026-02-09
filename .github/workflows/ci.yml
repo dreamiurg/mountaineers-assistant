@@ -56,7 +56,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Install Semgrep
-        run: pip install semgrep
+        run: pip install semgrep==1.151.0
       - name: Run Semgrep
         run: >-
           semgrep scan --config auto --error
