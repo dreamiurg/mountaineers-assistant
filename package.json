@@ -73,10 +73,9 @@
   },
   "overrides": {
     "lodash": "^4.18.1",
-    "picomatch": "^4.0.4",
-    "serialize-javascript": "^7.0.5",
+    "picomatch@<2.3.2": "^2.3.2",
+    "picomatch@>=4 <4.0.4": "^4.0.4",
     "flatted": "^3.4.2",
-    "minimatch@<3.1.3": "^3.1.5",
-    "rollup": "^4.60.2"
+    "minimatch@<3.1.3": "^3.1.5"
   }
 }

@@ -17,7 +17,6 @@
     "includes": [
       "**",
       "!**/node_modules/",
-      "!**/package-lock.json",
       "!src/chrome-ext/tailwind.css",
       "!src/chrome-ext/vendor/",
       "!tests/cassettes/",
