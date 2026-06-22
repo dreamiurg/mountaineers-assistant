@@ -15,7 +15,7 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
@@ -26,7 +26,7 @@ jobs:
     name: Typecheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
@@ -37,7 +37,7 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
@@ -45,7 +45,7 @@ jobs:
       - run: npx c8 --reporter=text --reporter=lcov --check-coverage --lines=70 --functions=70 --branches=70 --statements=70 bun x tsx --test tests/unit/*.test.ts
       - name: Upload coverage
         if: always()
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         with:
           files: ./coverage/lcov.info
           fail_ci_if_error: true
@@ -54,7 +54,7 @@ jobs:
     name: SAST
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install Semgrep
         run: pip install semgrep==1.151.0
       - name: Run Semgrep
@@ -68,7 +68,7 @@ jobs:
     name: Complexity
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install lizard
         run: pip install lizard==1.17.13
       - name: Check complexity
@@ -79,7 +79,7 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
