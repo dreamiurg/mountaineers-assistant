@@ -54,15 +54,15 @@
     "@types/node": "^25.6.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^5.2.0",
+    "@vitejs/plugin-react": "^6.0.1",
     "babel-loader": "^10.1.1",
-    "c8": "^10.1.3",
+    "c8": "^11.0.0",
     "playwright": "^1.59.1",
     "storybook": "^10.3.5",
     "tailwindcss": "^4.2.4",
-    "typescript": "^5.9.3",
-    "vite": "^7.3.2",
-    "vite-plugin-static-copy": "^3.4.0"
+    "typescript": "^6.0.3",
+    "vite": "^8.0.9",
+    "vite-plugin-static-copy": "^4.1.0"
   },
   "private": true,
   "dependencies": {

@@ -23,16 +23,18 @@ module.exports = defineConfig({
           dest: '.',
         },
         {
-          src: 'vendor/**/*',
+          src: 'vendor/*',
           dest: 'vendor',
+          rename: { stripBase: true },
         },
         {
           src: 'content-script.css',
           dest: '.',
         },
         {
-          src: 'icons/**/*',
+          src: 'icons/*',
           dest: 'icons',
+          rename: { stripBase: true },
         },
       ],
     }),
@@ -41,7 +43,7 @@ module.exports = defineConfig({
   build: {
     outDir: resolve(__dirname, 'dist'),
     emptyOutDir: true,
-    rollupOptions: {
+    rolldownOptions: {
       input: {
         background: resolve(chromeExtensionRoot, 'background.ts'),
         'content-script': resolve(chromeExtensionRoot, 'content-script.ts'),
