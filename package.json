@@ -67,7 +67,7 @@
   "private": true,
   "dependencies": {
     "choices.js": "^11.2.2",
-    "highcharts": "^12.6.0",
+    "highcharts": "^13.0.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5"
   },
