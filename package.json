@@ -40,7 +40,7 @@
   },
   "homepage": "https://github.com/dreamiurg/mountaineers-assistant#readme",
   "devDependencies": {
-    "@babel/core": "^7.29.0",
+    "@babel/core": "^8.0.1",
     "@babel/preset-react": "^7.28.5",
     "@babel/preset-typescript": "^7.28.5",
     "@biomejs/biome": "^2.4.12",
