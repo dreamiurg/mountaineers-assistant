@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.10](https://github.com/dreamiurg/mountaineers-assistant/compare/v0.4.9...v0.4.10) (2026-06-30)
+
+
+### Bug Fixes
+
+* update extension dependency rollup ([#100](https://github.com/dreamiurg/mountaineers-assistant/issues/100)) ([69b6c5b](https://github.com/dreamiurg/mountaineers-assistant/commit/69b6c5bd15d9da766c99c43bc950b43c3f70a960))
+
 ## [0.4.9](https://github.com/dreamiurg/mountaineers-assistant/compare/v0.4.8...v0.4.9) (2026-06-27)
 
 
