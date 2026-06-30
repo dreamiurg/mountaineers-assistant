@@ -40,9 +40,9 @@
   },
   "homepage": "https://github.com/dreamiurg/mountaineers-assistant#readme",
   "devDependencies": {
-    "@babel/core": "^7.29.0",
+    "@babel/core": "^8.0.1",
     "@babel/preset-react": "^7.28.5",
-    "@babel/preset-typescript": "^7.28.5",
+    "@babel/preset-typescript": "^8.0.1",
     "@biomejs/biome": "^2.4.12",
     "@playwright/test": "^1.59.1",
     "@storybook/addon-docs": "^10.3.5",
@@ -50,8 +50,8 @@
     "@storybook/react-webpack5": "^10.3.5",
     "@tailwindcss/cli": "^4.2.4",
     "@tailwindcss/vite": "^4.2.4",
-    "@types/chrome": "^0.1.40",
-    "@types/node": "^25.6.0",
+    "@types/chrome": "^0.2.0",
+    "@types/node": "^26.0.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
@@ -67,7 +67,7 @@
   "private": true,
   "dependencies": {
     "choices.js": "^11.2.2",
-    "highcharts": "^12.6.0",
+    "highcharts": "^13.0.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5"
   },
