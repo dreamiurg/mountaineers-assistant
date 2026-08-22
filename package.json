@@ -60,7 +60,7 @@
     "playwright": "^1.59.1",
     "storybook": "^10.3.5",
     "tailwindcss": "^4.2.4",
-    "typescript": "^6.0.3",
+    "typescript": "^7.0.2",
     "vite": "^8.0.9",
     "vite-plugin-static-copy": "^4.1.0"
   },
