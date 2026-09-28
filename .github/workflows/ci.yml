@@ -45,7 +45,7 @@ jobs:
       - run: npx c8 --reporter=text --reporter=lcov --check-coverage --lines=70 --functions=70 --branches=70 --statements=70 bun x tsx --test tests/unit/*.test.ts
       - name: Upload coverage
         if: always()
-        uses: codecov/codecov-action@0b35c9ecc4f0529d0eb674914510c22f85b196b4 # v7
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
         with:
           files: ./coverage/lcov.info
           fail_ci_if_error: true
